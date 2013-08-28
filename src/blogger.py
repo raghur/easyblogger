@@ -17,6 +17,7 @@
 import httplib2
 import sys
 
+import logging
 from apiclient.discovery import build
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
@@ -29,12 +30,16 @@ import json
 # The scope URL for read/write access to a user's blogger data
 scope = 'https://www.googleapis.com/auth/blogger'
 
+logging.basicConfig()
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
 
 def OAuth_Authenticate(client_id, client_secret):
     """@todo: Docstring for OAuth_Authenticate
 
-    :arg1: @todo
-    :returns: @todo
+    :client_id: Client ID - Get it from google API console
+    :client_secret: Client secret - same as above
+    :returns: service object
 
     """
     # Create a flow object. This object holds the client_id, client_secret, and
@@ -78,6 +83,14 @@ def OAuth_Authenticate(client_id, client_secret):
     service = build('blogger', 'v3', http=http)
     return service
 
+def getBlog(service, blogId, posts = 0):
+    request = service.blogs().get(blogId=blogId, maxPosts=posts)
+    return request.execute()
+
+def getPosts(service, blogId, labels = "", maxResults = 1 ):
+    request = service.posts().list(blogId = blogId, labels = labels, maxResults = maxResults)
+    return request.execute()
+    
 def main():
     # For this example, the client id and client secret are command-line arguments.
     client_id = sys.argv[1]
@@ -90,11 +103,11 @@ def main():
        # have to execute the request in a paging loop. First, build the
        # request object. The arguments provided are:
        #   primary blogger for user
-       request = service.blogs().get(blogId=blog_id, maxPosts=0)
-       response = request.execute()
+       #blog = getBlog(service, blog_id)
+       #print json.dumps(blog, sort_keys=True, indent=4, separators=(',', ': '))
 
-
-       print json.dumps(response, sort_keys=True, indent=4, separators=(',', ': '))
+       posts = getPosts(service, blog_id, labels ="vim")
+       print json.dumps(posts, sort_keys=True, indent=4, separators=(',', ': '))
 
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
