@@ -20,7 +20,7 @@ Blogger integration is planned through `gdata-python-client` using gdata apis.
 
 * Install dependencies
 ~~~bash
-sudo easy\_install httplib2 python-gflags google-api-python-client
+sudo easy_install httplib2 python-gflags google-api-python-client
 ~~~
 
 * Authorize the tool API access to your blog
@@ -43,9 +43,7 @@ sudo chown <youruser>:<youruser> credentials.dat
 ~~~
 
 * Try out a call
-
 Sample call
-
 ~~~bash
 python blogger.py 132424086208.apps.googleusercontent.com DKEk2rvDKGDAigx9q9jpkyqI 7642453
 
