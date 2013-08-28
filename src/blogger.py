@@ -72,6 +72,7 @@ def OAuth_Authenticate(client_id, client_secret):
     # Create an httplib2.Http object to handle our HTTP requests, and authorize it
     # using the credentials.authorize() function.
     http = httplib2.Http()
+    http.disable_ssl_certificate_validation = True
     http = credentials.authorize(http)
   
     # The apiclient.discovery.build() function returns an instance of an API service
