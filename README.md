@@ -14,4 +14,12 @@ I tried. Didn't work. `googlecl` is just too rough and isn't easy to script. For
 Blogger integration is planned through `gdata-python-client` using gdata apis.
 
 
+# Blogger.py
+
+Sample call
+
+~~~bash
+python blogger.py 132424086208.apps.googleusercon tent.com DKEk2rvDKGDAigx9q9jpkyqI 7642453
+
+~~~
 
