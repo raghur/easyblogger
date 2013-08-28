@@ -19,7 +19,10 @@ Blogger integration is planned through `gdata-python-client` using gdata apis.
 Sample call
 
 ~~~bash
-python blogger.py 132424086208.apps.googleusercon tent.com DKEk2rvDKGDAigx9q9jpkyqI 7642453
+python blogger.py 132424086208.apps.googleusercontent.com DKEk2rvDKGDAigx9q9jpkyqI 7642453
 
+# param 1: API key
+# param 2: API secret
+# param 3: Blog Id - look at your blog's atom pub url - its the number in the url.
 ~~~
 
