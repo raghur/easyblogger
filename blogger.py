@@ -24,6 +24,7 @@ from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import run, run_flow
 import argparse
 from oauth2client import tools
+import json
 
 # For this example, the client id and client secret are command-line arguments.
 client_id = sys.argv[1]
@@ -82,10 +83,11 @@ def main():
     # have to execute the request in a paging loop. First, build the
     # request object. The arguments provided are:
     #   primary blogger for user
-    request = service.blogs().get(blogId=blog_id, maxPosts=2)
+    request = service.blogs().get(blogId=blog_id, maxPosts=0)
     response = request.execute()
 
-    print response
+
+    print json.dumps(response, sort_keys=True, indent=4, separators=(',', ': '))
     
   except AccessTokenRefreshError:
     # The AccessTokenRefreshError exception is raised if the credentials
