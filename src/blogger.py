@@ -91,9 +91,11 @@ def getBlog(service, blogId = None, blogUrl = None, posts = 0):
         request = service.blogs().get(blogId=blogId, maxPosts=posts)
     return request.execute()
 
-def getPosts(service, blogId, postId = None,  labels = "", maxResults = 1 ):
+def getPosts(service, blogId, postId = None, query=None,  labels = "", maxResults = 1 ):
     if postId:
-        request = service.get(blogId, postId)
+        request = service.posts().get(blogId, postId)
+    elif query:
+        request = service.posts().search(blogId = blogId, q = query )
     else:
         request = service.posts().list(blogId = blogId, labels = labels, maxResults = maxResults)
     return request.execute()
@@ -138,16 +140,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i","--clientid", help = "Your API Client id", default="132424086208.apps.googleusercontent.com")
     parser.add_argument("-s","--secret", help = "Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
-    group = parser.add_mutually_exclusive_group()
+    group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("--blogid", help = "Your blog id", default="7642453")
     group.add_argument("--url", help = "Your blog url")
 
     subparsers = parser.add_subparsers(help = "sub-command help", dest="command")
-    get_parser = subparsers.add_parser("get", help= "list posts")
 
+    get_parser = subparsers.add_parser("get", help= "list posts")
     group = get_parser.add_mutually_exclusive_group()
     group.add_argument("-p","--postId", help = "the post id")
     group.add_argument("-l","--labels", help = "comma separated list of labels")
+    group.add_argument("-q","--query", help = "search term")
     get_parser.add_argument("-c","--count", type=int, help = "count", default=10)
 
     post_parser = subparsers.add_parser("post", help= "create a new post")
@@ -156,10 +159,10 @@ def main():
     post_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
-    delete_parser.add_argument("-p","--postId", help = "the post to delete")
+    delete_parser.add_argument("postId", help = "the post to delete")
 
     update_parser = subparsers.add_parser("update", help= "update a post")
-    update_parser.add_argument("-p","--postId", help = "the post to delete")
+    update_parser.add_argument("postId", help = "the post to update")
     update_parser.add_argument("-t", "--title", help = "Post title")
     update_parser.add_argument("-c","--content", help = "Post content")
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
@@ -195,6 +198,8 @@ def main():
        if args.command == "get":
            if args.postId:
                posts = getPosts(service, blog_id, postId = args.postId)
+           elif args.query:
+               posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
            else:
                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
            print printJson(posts)
