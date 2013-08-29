@@ -94,24 +94,22 @@ def getBlog(service, blogId = None, blogUrl = None, posts = 0):
 def getPosts(service, blogId, postId = None,  labels = "", maxResults = 1 ):
     if postId:
         request = service.get(blogId, postId)
-        return request.execute()
     else:
         request = service.posts().list(blogId = blogId, labels = labels, maxResults = maxResults)
-        return request.execute()
+    return request.execute()
 
-def slugify(s):
-    from text_unidecode import unidecode
-    import re
-    slug = unidecode(s)
-    slug = slug.encode('ascii', 'ignore').lower()
-    slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
-    slug = re.sub(r'[-]+', '-', slug)
-    return slug
+#def slugify(s):
+    #from text_unidecode import unidecode
+    #import re
+    #slug = unidecode(s)
+    #slug = slug.encode('ascii', 'ignore').lower()
+    #slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
+    #slug = re.sub(r'[-]+', '-', slug)
+    #return slug
 
 def post(service, blogId, title, content, labels, isDraft = True ):
-    url = slugify(title) + ".html"
+    #url = slugify(title) + ".html"
     blogPost = { "labels": labels.split(","), "content": content, "title":title }
-    print blogPost
     req = service.posts().insert(blogId = blogId, body= blogPost)
     return req.execute()
 
@@ -126,14 +124,18 @@ def main():
     group.add_argument("--blogid", help = "Your blog id", default="7642453")
     group.add_argument("--url", help = "Your blog url")
 
-    group = parser.add_mutually_exclusive_group()
+    subparsers = parser.add_subparsers(help = "sub-command help", dest="command")
+    get_parser = subparsers.add_parser("get", help= "list posts")
+
+    group = get_parser.add_mutually_exclusive_group()
     group.add_argument("-p","--postId", help = "the post id")
     group.add_argument("-l","--labels", help = "comma separated list of labels")
+    get_parser.add_argument("-c","--count", type=int, help = "count", default=10)
 
-    subparsers = parser.add_subparsers(help = "sub-command help", dest="command")
     post_parser = subparsers.add_parser("post", help= "create a new post")
-    post_parser.add_argument("--title", help = "Post title")
-    post_parser.add_argument("--content", help = "Post content")
+    post_parser.add_argument("-t", "--title", help = "Post title")
+    post_parser.add_argument("-c","--content", help = "Post content")
+    post_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
     args = parser.parse_args()
 
@@ -158,12 +160,12 @@ def main():
            newPost = post(service, blog_id, args.title, args.content, args.labels)
            print printJson(newPost)
 
-       #if args.postId:
-           #posts = getPosts(service, blog_id, postId = args.postId)
-       #else:
-           #posts = getPosts(service, blog_id, labels =args.labels)
-
-       #print printJson(posts)
+       if args.command == "get":
+           if args.postId:
+               posts = getPosts(service, blog_id, postId = args.postId)
+           else:
+               posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
+           print printJson(posts)
 
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
