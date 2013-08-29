@@ -113,6 +113,24 @@ def post(service, blogId, title, content, labels, isDraft = True ):
     req = service.posts().insert(blogId = blogId, body= blogPost)
     return req.execute()
 
+def deletePost(service, blogId, postId):
+    req = service.posts().delete(blogId = blogId, postId = postId)
+    return req.execute()
+
+def updatePost(service, blogId, postId, title = None, content = None, labels = None, isDraft = True ):
+    # Permalink cannot be updated...
+    #from datetime import date
+    #today = date.today()
+    #url = "/{}/{}/{}".format(today.year, today.month, slugify(title) + ".html")
+    blogPost = {}
+    if title:
+        blogPost['title'] = title
+    if content: 
+        blogPost['content'] = content
+    if labels:
+        blogPost['labels'] = labels.split(",")
+    req = service.posts().patch(blogId = blogId, postId = postId, body= blogPost)
+    return req.execute()
 
 def main():
     import argparse
@@ -137,6 +155,15 @@ def main():
     post_parser.add_argument("-c","--content", help = "Post content")
     post_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
+    delete_parser = subparsers.add_parser("delete", help= "delete a post")
+    delete_parser.add_argument("-p","--postId", help = "the post to delete")
+
+    update_parser = subparsers.add_parser("update", help= "update a post")
+    update_parser.add_argument("-p","--postId", help = "the post to delete")
+    update_parser.add_argument("-t", "--title", help = "Post title")
+    update_parser.add_argument("-c","--content", help = "Post content")
+    update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
+
     args = parser.parse_args()
 
 
@@ -156,9 +183,14 @@ def main():
        posts = {}
 
        if args.command == "post":
-           print args
            newPost = post(service, blog_id, args.title, args.content, args.labels)
-           print printJson(newPost)
+           print newPost['id']
+
+       if args.command == 'delete':
+            deletePost(service, blog_id, args.postId)
+
+       if args.command == 'update':
+            updatePost(service, blog_id, args.postId, args.title, args.content, args.labels)
 
        if args.command == "get":
            if args.postId:
