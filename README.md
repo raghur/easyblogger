@@ -108,5 +108,10 @@ src/blogger.py   --blogid 6136696198547817747 update -t 'A new title' -l "new,la
 pandoc -f markdown -  | src/blogger.py   --blogid 6136696198547817747 update -t 'Hello from Pandoc' --file - 3295765957555899963 
 ~~~
 
+### Deleting posts
 
+To delete posts, you need to specify the post id
 
+~~~bash
+src/blogger.py   --blogid 6136696198547817747 delete 234546720561632959 
+~~~
