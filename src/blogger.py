@@ -218,9 +218,16 @@ def main():
                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
            fields = args.fields.split(",")
            printJson(posts)
-           for item in posts["items"]:
-               line = [item[k] for k in fields]
+           
+           if 'items' in posts:
+               for item in posts['items']:
+                   line = [item[k] for k in fields]
+                   print ",".join(line)
+           else:
+               line = [posts[k] for k in fields]
                print ",".join(line)
+
+
 
 
     except AccessTokenRefreshError:
