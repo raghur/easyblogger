@@ -93,6 +93,20 @@ this is a nice long post
 3295765957555899963
 ~~~
 
+### Update posts
+
+Update works with a patch request - only specify what you need changed
+Blogger API does not allow the blog permalink to be updated - so in case you want to change that you'll need to delete and create another post (though you will probably lose comments etc - so only viable if you've just published it)
+
+~~~bash
+src/blogger.py   --blogid 6136696198547817747 update -t 'A new title' -l "new,labels" 3295765957555899963
+
+# you can also update the contents by passing in the --file argument
+
+# pipe it in too - use --file -; like so
+
+pandoc -f markdown -  | src/blogger.py   --blogid 6136696198547817747 update -t 'Hello from Pandoc' --file - 3295765957555899963 
+~~~
 
 
 

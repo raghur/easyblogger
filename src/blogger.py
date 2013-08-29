@@ -173,7 +173,7 @@ def main():
     #update_input = update_parser.add_mutually_exclusive_group(required = True)
     #update_input.add_argument("-c","--content",help = "Post content")
     #update_input.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
-    update_parser.add_argument("--file",nargs='?', type=argparse.FileType('r'), help = "Post content; pass - to read stdin")
+    update_parser.add_argument("-f", "--file",nargs='?', type=argparse.FileType('r'), help = "Post content; pass - to read stdin")
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
