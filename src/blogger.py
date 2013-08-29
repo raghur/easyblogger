@@ -27,12 +27,7 @@ import argparse
 from oauth2client import tools
 import json
 
-# The scope URL for read/write access to a user's blogger data
-scope = 'https://www.googleapis.com/auth/blogger'
 
-logging.basicConfig()
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
 
 def OAuth_Authenticate(client_id, client_secret):
     """@todo: Docstring for OAuth_Authenticate
@@ -42,6 +37,9 @@ def OAuth_Authenticate(client_id, client_secret):
     :returns: service object
 
     """
+    # The scope URL for read/write access to a user's blogger data
+    scope = 'https://www.googleapis.com/auth/blogger'
+
     # Create a flow object. This object holds the client_id, client_secret, and
     # scope. It assists with OAuth 2.0 steps to get user authorization and
     # credentials.
@@ -93,7 +91,7 @@ def getBlog(service, blogId = None, blogUrl = None, posts = 0):
 
 def getPosts(service, blogId, postId = None, query=None,  labels = "", maxResults = 1 ):
     if postId:
-        request = service.posts().get(blogId, postId)
+        request = service.posts().get(blogId = blogId, postId = postId)
     elif query:
         request = service.posts().search(blogId = blogId, q = query )
     else:
@@ -169,13 +167,9 @@ def main():
 
     args = parser.parse_args()
 
-
-    
-    client_id = args.clientid
-    client_secret = args.secret
     blog_id = args.blogid
     try:
-       service = OAuth_Authenticate(client_id, client_secret)
+       service = OAuth_Authenticate(args.clientid, args.secret)
        #blog = getBlog(service, blog_id)
        #print printJson(blog)
 
@@ -220,4 +214,7 @@ def printJson(data):
     logger.debug(json.dumps(data, sort_keys=True, indent=4, separators=(',', ': ')))
 
 if __name__ == '__main__':
+    logging.basicConfig()
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
     main()
