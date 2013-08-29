@@ -109,7 +109,9 @@ def getPosts(service, blogId, postId = None, query=None,  labels = "", maxResult
 
 def post(service, blogId, title, content, labels, isDraft = True ):
     #url = slugify(title) + ".html"
-    blogPost = { "labels": labels.split(","), "content": content, "title":title }
+    blogPost = {  "content": content, "title":title }
+    if labels:
+        blogPost["labels"] = labels.split(",")
     req = service.posts().insert(blogId = blogId, body= blogPost)
     return req.execute()
 
@@ -138,7 +140,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-i","--clientid", help = "Your API Client id", default="132424086208.apps.googleusercontent.com")
     parser.add_argument("-s","--secret", help = "Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
-    group = parser.add_mutually_exclusive_group(required=True)
+    parser.add_argument("-v","--verbose",  help = "verbosity(log level) 10 = DEBUG, 40 = CRITICAL", action="count", default=0)
+    group = parser.add_mutually_exclusive_group()
     group.add_argument("--blogid", help = "Your blog id", default="7642453")
     group.add_argument("--url", help = "Your blog url")
 
@@ -154,8 +157,11 @@ def main():
 
     post_parser = subparsers.add_parser("post", help= "create a new post")
     post_parser.add_argument("-t", "--title", help = "Post title")
-    post_parser.add_argument("-c","--content", help = "Post content")
     post_parser.add_argument("-l","--labels", help = "comma separated list of labels")
+    #post_input = post_parser.add_mutually_exclusive_group(required = True)
+    #post_input.add_argument("-c","--content", help = "Post content")
+    #post_input.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
+    post_parser.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
 
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
     delete_parser.add_argument("postId", help = "the post to delete")
@@ -163,10 +169,20 @@ def main():
     update_parser = subparsers.add_parser("update", help= "update a post")
     update_parser.add_argument("postId", help = "the post to update")
     update_parser.add_argument("-t", "--title", help = "Post title")
-    update_parser.add_argument("-c","--content", help = "Post content")
+
+    #update_input = update_parser.add_mutually_exclusive_group(required = True)
+    #update_input.add_argument("-c","--content",help = "Post content")
+    #update_input.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
+    update_parser.add_argument("--file",nargs='?', type=argparse.FileType('r'), help = "Post content; pass - to read stdin")
+
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
     args = parser.parse_args()
+    
+    verbosity = 50- args.verbose*10
+    if args.verbose > 0:
+        print("Setting log level to %s" % logging.getLevelName(verbosity))
+    logger.setLevel(verbosity)
 
     blog_id = args.blogid
     try:
@@ -181,14 +197,17 @@ def main():
        posts = {}
 
        if args.command == "post":
-           newPost = post(service, blog_id, args.title, args.content, args.labels)
+           newPost = post(service, blog_id, args.title, args.file.read(), args.labels)
            print newPost['id']
 
        if args.command == 'delete':
             deletePost(service, blog_id, args.postId)
 
        if args.command == 'update':
-            updatePost(service, blog_id, args.postId, args.title, args.content, args.labels)
+           content = None
+           if args.file:
+               content = args.file.read()
+           updatePost(service, blog_id, args.postId, args.title, content, args.labels)
 
        if args.command == "get":
            if args.postId:
@@ -209,6 +228,7 @@ def main():
         # have been revoked by the user or they have expired.
         print ('The credentials have been revoked or expired, please re-run'
             'the application to re-authorize')
+        return -1
     return 0
 
 def printJson(data):
@@ -222,5 +242,4 @@ def printJson(data):
 if __name__ == '__main__':
     logging.basicConfig()
     logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)
     main()
