@@ -202,13 +202,14 @@ def main():
                posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
            else:
                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
-           print printJson(posts)
+           printJson(posts)
 
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
         print ('The credentials have been revoked or expired, please re-run'
             'the application to re-authorize')
+    return 0
 
 def printJson(data):
     """@todo: Docstring for printJson
