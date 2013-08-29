@@ -221,10 +221,10 @@ def main():
            
            if 'items' in posts:
                for item in posts['items']:
-                   line = [item[k] for k in fields]
+                   line = [str(item[k]) for k in fields]
                    print ",".join(line)
            else:
-               line = [posts[k] for k in fields]
+               line = [str(posts[k]) for k in fields]
                print ",".join(line)
 
 
