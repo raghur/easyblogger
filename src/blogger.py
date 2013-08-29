@@ -149,6 +149,7 @@ def main():
     group.add_argument("-p","--postId", help = "the post id")
     group.add_argument("-l","--labels", help = "comma separated list of labels")
     group.add_argument("-q","--query", help = "search term")
+    get_parser.add_argument("-f","--fields", help = "fields to output", default="id,title,url")
     get_parser.add_argument("-c","--count", type=int, help = "count", default=10)
 
     post_parser = subparsers.add_parser("post", help= "create a new post")
@@ -196,7 +197,12 @@ def main():
                posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
            else:
                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
+           fields = args.fields.split(",")
            printJson(posts)
+           for item in posts["items"]:
+               line = [item[k] for k in fields]
+               print ",".join(line)
+
 
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
