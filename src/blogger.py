@@ -32,7 +32,7 @@ scope = 'https://www.googleapis.com/auth/blogger'
 
 logging.basicConfig()
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def OAuth_Authenticate(client_id, client_secret):
     """@todo: Docstring for OAuth_Authenticate
@@ -84,8 +84,11 @@ def OAuth_Authenticate(client_id, client_secret):
     service = build('blogger', 'v3', http=http)
     return service
 
-def getBlog(service, blogId, posts = 0):
-    request = service.blogs().get(blogId=blogId, maxPosts=posts)
+def getBlog(service, blogId = None, blogUrl = None, posts = 0):
+    if blogUrl:
+        request = service.blogs().getByUrl(url = blogUrl)
+    else:
+        request = service.blogs().get(blogId=blogId, maxPosts=posts)
     return request.execute()
 
 def getPosts(service, blogId, labels = "", maxResults = 1 ):
@@ -93,11 +96,20 @@ def getPosts(service, blogId, labels = "", maxResults = 1 ):
     return request.execute()
     
 def main():
-    # For this example, the client id and client secret are command-line arguments.
-    client_id = sys.argv[1]
-    client_secret = sys.argv[2]
-    blog_id = sys.argv[3]
+    import argparse
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i","--clientid", help = "Your API Client id", default="132424086208.apps.googleusercontent.com")
+    parser.add_argument("-s","--secret", help = "Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--blogid", help = "Your blog id", default="7642453")
+    group.add_argument("--url", help = "Your blog url")
+    args = parser.parse_args()
+
+    
+    client_id = args.clientid
+    client_secret = args.secret
+    blog_id = args.blogid
     try:
        service = OAuth_Authenticate(client_id, client_secret)
        # The blogger API's events().list method returns paginated results, so we
@@ -105,16 +117,28 @@ def main():
        # request object. The arguments provided are:
        #   primary blogger for user
        #blog = getBlog(service, blog_id)
-       #print json.dumps(blog, sort_keys=True, indent=4, separators=(',', ': '))
+       #print printJson(blog)
 
+       if args.url:
+           blog = getBlog(service, blogUrl = args.url)
+           printJson(blog)
+           blog_id =  blog['id']
        posts = getPosts(service, blog_id, labels ="vim")
-       print json.dumps(posts, sort_keys=True, indent=4, separators=(',', ': '))
+       print printJson(posts)
 
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
         print ('The credentials have been revoked or expired, please re-run'
             'the application to re-authorize')
+
+def printJson(data):
+    """@todo: Docstring for printJson
+
+    :data: @todo
+    :returns: @todo
+    """
+    logger.debug(json.dumps(data, sort_keys=True, indent=4, separators=(',', ': ')))
 
 if __name__ == '__main__':
     main()
