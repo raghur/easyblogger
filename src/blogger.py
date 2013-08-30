@@ -26,6 +26,7 @@ from oauth2client.tools import run, run_flow
 import argparse
 from oauth2client import tools
 import json
+import os
 
 
 
@@ -141,14 +142,18 @@ def _getContentFromArgs(args):
        content = args.file.read()
    else:
        content = args.content
+   if args.markdown:
+       import pypandoc
+       content = pypandoc.convert(content, 'html', format="md")
+   logger.debug("content is :", content)
    return content
 
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i","--clientid", help = "Your API Client id", default="132424086208.apps.googleusercontent.com")
-    parser.add_argument("-s","--secret", help = "Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
+    parser = argparse.ArgumentParser(fromfile_prefix_chars = '@')
+    parser.add_argument("-i","--clientid", help = "Your API Client id" )
+    parser.add_argument("-s","--secret", help = "Your API Client secret")
     parser.add_argument("-v","--verbose",  help = "verbosity(log level) 10 = DEBUG, 40 = CRITICAL", action="count", default=0)
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--blogid", help = "Your blog id", default="7642453")
@@ -170,19 +175,24 @@ def main():
     post_input = post_parser.add_mutually_exclusive_group(required = True)
     post_input.add_argument("-c","--content", help = "Post content")
     post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
+    post_parser.add_argument("-md", "--markdown", help = "Content as markdown", action="store_true", default=False)
 
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
-    delete_parser.add_argument("postId", nargs="+", help = "the post to delete")
+    delete_parser.add_argument("postIds", nargs="+", help = "the post to delete")
 
     update_parser = subparsers.add_parser("update", help= "update a post")
-    update_parser.add_argument("postIds", help = "the post to update")
+    update_parser.add_argument("postId", help = "the post to update")
     update_parser.add_argument("-t", "--title", help = "Post title")
 
     update_input = update_parser.add_mutually_exclusive_group(required = True)
     update_input.add_argument("-c","--content",help = "Post content")
     update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
+    update_parser.add_argument("-md", "--markdown", help = "Content as markdown", action="store_true", default=False)
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
+
+    sys.argv = sys.argv[0:1] + ["@" + os.path.expanduser("~/.vim-blogger")] + sys.argv[1:]
+    logger.debug("Final args:", sys.argv)
 
     args = parser.parse_args()
     
