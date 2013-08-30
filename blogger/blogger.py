@@ -19,6 +19,7 @@ import sys
 
 import logging
 from apiclient.discovery import build
+from apiclient.errors import HttpError
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
@@ -93,13 +94,20 @@ def getBlog(service, blogId = None, blogUrl = None, posts = 0):
     return request.execute()
 
 def getPosts(service, blogId, postId = None, query=None,  labels = "", maxResults = 1 ):
-    if postId:
-        request = service.posts().get(blogId = blogId, postId = postId)
-    elif query:
-        request = service.posts().search(blogId = blogId, q = query )
-    else:
-        request = service.posts().list(blogId = blogId, labels = labels, maxResults = maxResults)
-    return request.execute()
+    try:
+        if postId:
+            request = service.posts().get(blogId = blogId, postId = postId)
+            post = request.execute()
+            return {"items": [post]}
+        elif query:
+            request = service.posts().search(blogId = blogId, q = query )
+        else:
+            request = service.posts().list(blogId = blogId, labels = labels, maxResults = maxResults)
+        return request.execute()
+    except HttpError as he:
+        if he.resp.status == 404:
+            return {"items": []}
+        raise
 
 #def slugify(s):
     #from text_unidecode import unidecode
@@ -235,19 +243,8 @@ def main(sysargv):
                posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
            else:
                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
-           fields = args.fields.split(",")
            printJson(posts)
-           
-           if 'items' in posts:
-               for item in posts['items']:
-                   line = [str(item[k]) for k in fields]
-                   print ",".join(line)
-           else:
-               line = [str(posts[k]) for k in fields]
-               print ",".join(line)
-
-
-
+           printPosts(posts, args.fields)
 
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
@@ -256,6 +253,15 @@ def main(sysargv):
             'the application to re-authorize')
         return -1
     return 0
+
+
+
+def printPosts(posts, fields):
+   if isinstance(fields, basestring):
+       fields = fields.split(",")
+   for item in posts['items']:
+       line = [str(item[k]) for k in fields]
+       print ",".join(line)
 
 def printJson(data):
     """@todo: Docstring for printJson
