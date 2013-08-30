@@ -184,7 +184,7 @@ def main():
     update_parser.add_argument("postId", help = "the post to update")
     update_parser.add_argument("-t", "--title", help = "Post title")
 
-    update_input = update_parser.add_mutually_exclusive_group(required = True)
+    update_input = update_parser.add_mutually_exclusive_group()
     update_input.add_argument("-c","--content",help = "Post content")
     update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
     update_parser.add_argument("-md", "--markdown", help = "Content as markdown", action="store_true", default=False)
@@ -219,7 +219,7 @@ def main():
 
        if args.command == 'delete':
            for postId in args.postIds:
-               deletePost(service, blog_id, args.postId)
+               deletePost(service, blog_id, postId)
 
        if args.command == 'update':
            updatePost(service, blog_id, args.postId, args.title, _getContentFromArgs(args), args.labels)
