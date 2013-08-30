@@ -134,6 +134,15 @@ def updatePost(service, blogId, postId, title = None, content = None, labels = N
     req = service.posts().patch(blogId = blogId, postId = postId, body= blogPost)
     return req.execute()
 
+
+def _getContentFromArgs(args):
+   content = None
+   if args.file:
+       content = args.file.read()
+   else:
+       content = args.content
+   return content
+
 def main():
     import argparse
 
@@ -158,10 +167,9 @@ def main():
     post_parser = subparsers.add_parser("post", help= "create a new post")
     post_parser.add_argument("-t", "--title", help = "Post title")
     post_parser.add_argument("-l","--labels", help = "comma separated list of labels")
-    #post_input = post_parser.add_mutually_exclusive_group(required = True)
-    #post_input.add_argument("-c","--content", help = "Post content")
-    #post_input.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
-    post_parser.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
+    post_input = post_parser.add_mutually_exclusive_group(required = True)
+    post_input.add_argument("-c","--content", help = "Post content")
+    post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
 
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
     delete_parser.add_argument("postId", help = "the post to delete")
@@ -170,10 +178,9 @@ def main():
     update_parser.add_argument("postId", help = "the post to update")
     update_parser.add_argument("-t", "--title", help = "Post title")
 
-    #update_input = update_parser.add_mutually_exclusive_group(required = True)
-    #update_input.add_argument("-c","--content",help = "Post content")
-    #update_input.add_argument("file",nargs='?', type=argparse.FileType('r'), default=sys.stdin,help = "Post content - input file")
-    update_parser.add_argument("-f", "--file",nargs='?', type=argparse.FileType('r'), help = "Post content; pass - to read stdin")
+    update_input = update_parser.add_mutually_exclusive_group(required = True)
+    update_input.add_argument("-c","--content",help = "Post content")
+    update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
@@ -197,17 +204,14 @@ def main():
        posts = {}
 
        if args.command == "post":
-           newPost = post(service, blog_id, args.title, args.file.read(), args.labels)
+           newPost = post(service, blog_id, args.title, _getContentFromArgs(args), args.labels)
            print newPost['id']
 
        if args.command == 'delete':
             deletePost(service, blog_id, args.postId)
 
        if args.command == 'update':
-           content = None
-           if args.file:
-               content = args.file.read()
-           updatePost(service, blog_id, args.postId, args.title, content, args.labels)
+           updatePost(service, blog_id, args.postId, args.title, _getContentFromArgs(args), args.labels)
 
        if args.command == "get":
            if args.postId:
