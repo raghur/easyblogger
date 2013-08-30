@@ -193,7 +193,9 @@ def main(sysargv):
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
-    sysargv =  ["@" + os.path.expanduser("~/.vim-blogger")] + sysargv
+    config = os.path.expanduser("~/.vim-blogger")
+    if (os.path.exists(config)):
+        sysargv =  ["@" + config] + sysargv
     logger.debug("Final args:", sysargv)
 
     args = parser.parse_args(sysargv)
@@ -264,5 +266,5 @@ def printJson(data):
     logger.debug(json.dumps(data, sort_keys=True, indent=4, separators=(',', ': ')))
 
 if __name__ == '__main__':
-    print sys.argv
+    #print sys.argv
     main(sys.argv[1:])
