@@ -28,6 +28,8 @@ from oauth2client import tools
 import json
 import os
 
+logger = logging.getLogger()
+logging.basicConfig()
 
 
 def OAuth_Authenticate(client_id, client_secret):
@@ -148,15 +150,15 @@ def _getContentFromArgs(args):
    logger.debug("content is :", content)
    return content
 
-def main():
+def main(sysargv):
     import argparse
 
-    parser = argparse.ArgumentParser(fromfile_prefix_chars = '@')
+    parser = argparse.ArgumentParser(prog= 'blogger', fromfile_prefix_chars = '@')
     parser.add_argument("-i","--clientid", help = "Your API Client id" )
     parser.add_argument("-s","--secret", help = "Your API Client secret")
-    parser.add_argument("-v","--verbose",  help = "verbosity(log level) 10 = DEBUG, 40 = CRITICAL", action="count", default=0)
+    parser.add_argument("-v","--verbose",  help = "verbosity(log level) -vvvv = DEBUG, -v = CRITICAL", action="count", default=0)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--blogid", help = "Your blog id", default="7642453")
+    group.add_argument("--blogid", help = "Your blog id")
     group.add_argument("--url", help = "Your blog url")
 
     subparsers = parser.add_subparsers(help = "sub-command help", dest="command")
@@ -191,10 +193,10 @@ def main():
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
-    sys.argv = sys.argv[0:1] + ["@" + os.path.expanduser("~/.vim-blogger")] + sys.argv[1:]
-    logger.debug("Final args:", sys.argv)
+    sysargv =  ["@" + os.path.expanduser("~/.vim-blogger")] + sysargv
+    logger.debug("Final args:", sysargv)
 
-    args = parser.parse_args()
+    args = parser.parse_args(sysargv)
     
     verbosity = 50- args.verbose*10
     if args.verbose > 0:
@@ -262,6 +264,5 @@ def printJson(data):
     logger.debug(json.dumps(data, sort_keys=True, indent=4, separators=(',', ': ')))
 
 if __name__ == '__main__':
-    logging.basicConfig()
-    logger = logging.getLogger()
-    main()
+    print sys.argv
+    main(sys.argv[1:])
