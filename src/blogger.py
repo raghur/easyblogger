@@ -172,10 +172,10 @@ def main():
     post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
 
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
-    delete_parser.add_argument("postId", help = "the post to delete")
+    delete_parser.add_argument("postId", nargs="+", help = "the post to delete")
 
     update_parser = subparsers.add_parser("update", help= "update a post")
-    update_parser.add_argument("postId", help = "the post to update")
+    update_parser.add_argument("postIds", help = "the post to update")
     update_parser.add_argument("-t", "--title", help = "Post title")
 
     update_input = update_parser.add_mutually_exclusive_group(required = True)
@@ -208,7 +208,8 @@ def main():
            print newPost['id']
 
        if args.command == 'delete':
-            deletePost(service, blog_id, args.postId)
+           for postId in args.postIds:
+               deletePost(service, blog_id, args.postId)
 
        if args.command == 'update':
            updatePost(service, blog_id, args.postId, args.title, _getContentFromArgs(args), args.labels)
