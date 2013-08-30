@@ -50,7 +50,7 @@ def OAuth_Authenticate(client_id, client_secret):
     # credentials file is provided. If the file does not exist, it is
     # created. This object can only hold credentials for a single user, so
     # as-written, this script can only handle a single user.
-    storage = Storage('credentials.dat')
+    storage = Storage(os.path.expanduser('~/.vim-blogger.credentials'))
   
     # The get() function returns the credentials for the Storage object. If no
     # credentials were found, None is returned.
