@@ -38,9 +38,8 @@ If you're on cygwin, you can just install the windows dl and put `pandoc.exe` so
 ~~~{class="bash"}
 # run through OAuth2 hoops... following needs to be run as root
 # First find your blog Id
+
 blogger --blogid <yourblogid> get
-
-
 
 # This will first open a browser and ask you to sign in and 
 # approve access to your blog
@@ -64,7 +63,6 @@ permissions or if the auth token expires.
 # Change ownership
 sudo chown <youruser>:<youruser> ~/vim-blogger.credentials 
 ~~~
-
 That's it - you're all set!
 
 
@@ -106,12 +104,18 @@ blogger --blogid 6136696198547817747 post -t "Hello World" -l "python,hello" -
 Hello world!!!
 4345108299270352601
 
-# pipe out from pandoc
+# pipe out from pandoc or any other conversion - choose your poison
 pandoc -f markdown -  | blogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc' 
 # Hello from Pandoc
 this is a nice long post
 
 3295765957555899963
+
+# Or just tell blogger.py to convert markdown using pandoc with the --md arg
+blogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc' --md -f -
+Type anything in markdown
+
+2342323423423423423
 ~~~
 
 ### Update posts
@@ -127,6 +131,12 @@ blogger   --blogid 6136696198547817747 update -t 'A new title' -l "new,labels" 3
 # pipe it in too - use --file -; like so
 
 pandoc -f markdown -  | blogger   --blogid 6136696198547817747 update -t 'Hello from Pandoc' --file - 3295765957555899963 
+# This is h1
+## this is h2
+
+Some para text
+[EOF]
+
 ~~~
 
 ### Deleting posts
