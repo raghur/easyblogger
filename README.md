@@ -22,7 +22,7 @@ Blogger integration is planned through `gdata-python-client` using gdata apis.
 
 1. From source
 
-~~~bash
+~~~{class="bash"}
 git clone https://bitbucket.org/raghur/vim-blogger
 cd vim-blogger
 python setup.py install
@@ -35,7 +35,7 @@ If you're on cygwin, you can just install the windows dl and put `pandoc.exe` so
 
 * Authorize the tool API access to your blog
 
-~~~bash
+~~~{class="bash"}
 # run through OAuth2 hoops... following needs to be run as root
 # First find your blog Id
 blogger --blogid <yourblogid> get
@@ -60,7 +60,7 @@ since the file is created as root, you will need to change ownership of the
 you will need to repeat  this process if you ever change the blog, or revoke 
 permissions or if the auth token expires.
 
-~~~bash
+~~~{class="bash"}
 # Change ownership
 sudo chown <youruser>:<youruser> ~/vim-blogger.credentials 
 ~~~
@@ -71,7 +71,7 @@ That's it - you're all set!
 ## Usage
 
 ###Getting a list of posts
-~~~bash
+~~~{class="bash"}
 # get a list of posts
 # param : Blog Id - look at your blog's atom pub url - its the number in the url.
 blogger --blogid 7642453 get 
@@ -100,7 +100,7 @@ blogger  get -p 3728334747597998671 -f "id,title,url,labels"
 
 Note: Blogger API v3 does not allow creating posts as drafts. Please ask/crib about this - I'll add that capability once it becomes available.
 
-~~~bash
+~~~{class="bash"}
 # create a post from stdin with title and labels
 blogger --blogid 6136696198547817747 post -t "Hello World" -l "python,hello" -
 Hello world!!!
@@ -119,7 +119,7 @@ this is a nice long post
 Update works with a patch request - only specify what you need changed
 Blogger API does not allow the blog permalink to be updated - so in case you want to change that you'll need to delete and create another post (though you will probably lose comments etc - so only viable if you've just published it)
 
-~~~bash
+~~~{class="bash"}
 blogger   --blogid 6136696198547817747 update -t 'A new title' -l "new,labels" 3295765957555899963
 
 # you can also update the contents by passing in the --file argument
@@ -133,7 +133,7 @@ pandoc -f markdown -  | blogger   --blogid 6136696198547817747 update -t 'Hello 
 
 To delete posts, you need to specify the post id
 
-~~~bash
+~~~{class="bash"}
 blogger   --blogid 6136696198547817747 delete 234546720561632959 
 ~~~
 
@@ -142,7 +142,7 @@ Specifying --blogid each time is just painful.
 
 you can create a default args file in `~/.vim-blogger` as follows:
 
-~~~bash
+~~~{class="bash"}
 cat > ~/.vim-blogger
 --blogid
 234567
@@ -150,7 +150,7 @@ cat > ~/.vim-blogger
 
 And now you can type the command as:
 
-~~~bash
+~~~{class="bash"}
 blogger get
 ~~~
 
