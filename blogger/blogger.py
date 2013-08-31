@@ -147,16 +147,16 @@ def updatePost(service, blogId, postId, title = None, content = None, labels = N
 
 
 def _getContentFromArgs(args):
-   content = None
-   if args.file:
-       content = args.file.read()
-   else:
-       content = args.content
-   if args.markdown:
-       import pypandoc
-       content = pypandoc.convert(content, 'html', format="md")
-   logger.debug("content is :", content)
-   return content
+    content = None
+    if args.file:
+        content = args.file.read()
+    else:
+        content = args.content
+    if args.markdown:
+        import pypandoc
+        content = pypandoc.convert(content, 'html', format="md")
+    logger.debug("content is :", content)
+    return content
 
 def main(sysargv):
     import argparse
@@ -215,37 +215,36 @@ def main(sysargv):
 
     blog_id = args.blogid
     try:
-       service = OAuth_Authenticate(args.clientid, args.secret)
-       #blog = getBlog(service, blog_id)
-       #print printJson(blog)
+        service = OAuth_Authenticate(args.clientid, args.secret)
+        #blog = getBlog(service, blog_id)
+        #print printJson(blog)
 
-       if args.url:
-           blog = getBlog(service, blogUrl = args.url)
-           printJson(blog)
-           blog_id =  blog['id']
-       posts = {}
+        if args.url:
+            blog = getBlog(service, blogUrl = args.url)
+            printJson(blog)
+            blog_id =  blog['id']
+        posts = {}
 
-       if args.command == "post":
-           newPost = post(service, blog_id, args.title, _getContentFromArgs(args), args.labels)
-           print newPost['id']
+        if args.command == "post":
+            newPost = post(service, blog_id, args.title, _getContentFromArgs(args), args.labels)
+            print newPost['id']
 
-       if args.command == 'delete':
-           for postId in args.postIds:
-               deletePost(service, blog_id, postId)
+        if args.command == 'delete':
+            for postId in args.postIds:
+                deletePost(service, blog_id, postId)
 
-       if args.command == 'update':
-           updatePost(service, blog_id, args.postId, args.title, _getContentFromArgs(args), args.labels)
+        if args.command == 'update':
+            updatePost(service, blog_id, args.postId, args.title, _getContentFromArgs(args), args.labels)
 
-       if args.command == "get":
-           if args.postId:
-               posts = getPosts(service, blog_id, postId = args.postId)
-           elif args.query:
-               posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
-           else:
-               posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
-           printJson(posts)
-           printPosts(posts, args.fields)
-
+        if args.command == "get":
+            if args.postId:
+                posts = getPosts(service, blog_id, postId = args.postId)
+            elif args.query:
+                posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
+            else:
+                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
+            printJson(posts)
+            printPosts(posts, args.fields)
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
@@ -257,11 +256,11 @@ def main(sysargv):
 
 
 def printPosts(posts, fields):
-   if isinstance(fields, basestring):
-       fields = fields.split(",")
-   for item in posts['items']:
-       line = [str(item[k]) for k in fields]
-       print ",".join(line)
+    if isinstance(fields, basestring):
+        fields = fields.split(",")
+    for item in posts['items']:
+        line = [str(item[k]) for k in fields]
+        print ",".join(line)
 
 def printJson(data):
     """@todo: Docstring for printJson
