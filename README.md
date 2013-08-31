@@ -26,8 +26,8 @@ Blogger integration is planned through `gdata-python-client` using gdata apis.
 git clone https://bitbucket.org/raghur/vim-blogger
 cd vim-blogger
 python setup.py install
-
 ~~~
+
 2. Pandoc
 Install [pandoc](http://johnmacfarlane.net/pandoc/installing.html)
 
@@ -63,12 +63,14 @@ permissions or if the auth token expires.
 # Change ownership
 sudo chown <youruser>:<youruser> ~/vim-blogger.credentials 
 ~~~
+
 That's it - you're all set!
 
 
 ## Usage
 
 ###Getting a list of posts
+
 ~~~{class="bash"}
 # get a list of posts
 # param : Blog Id - look at your blog's atom pub url - its the number in the url.
@@ -136,7 +138,6 @@ pandoc -f markdown -  | blogger   --blogid 6136696198547817747 update -t 'Hello 
 
 Some para text
 [EOF]
-
 ~~~
 
 ### Deleting posts
