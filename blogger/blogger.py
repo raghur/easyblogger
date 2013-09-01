@@ -28,6 +28,7 @@ import argparse
 from oauth2client import tools
 import json
 import os
+import re
 
 logger = logging.getLogger()
 logging.basicConfig()
@@ -171,6 +172,25 @@ class  EasyBlogger(object):
         req = service.posts().patch(blogId = self.blogId, postId = postId, body= blogPost)
         return req.execute()
 
+def inferArgsFromContent(theFile):
+    fileContent  = theFile.read()
+    rePostId = re.compile("^\s*postId:\s*(\d+)\s*$", re.I|re.M)
+    reLabels = re.compile("^\s*labels:\s*([\w\d,-_]*)\s*$", re.I|re.M)
+    reTitle = re.compile("^\s*title:\s*(.+)\s*$", re.I|re.M)
+
+    postId = rePostId.search(fileContent)
+    if postId:
+        postId = postId.group(1)
+    
+    labels = reLabels.search(fileContent)
+    if labels:
+        labels = labels.group(1)
+
+    title = reTitle.search(fileContent)
+    if title:
+        title = title.group(1)
+    return (postId, title, labels, fileContent)
+
 
 def main(sysargv):
     import argparse
@@ -215,6 +235,9 @@ def main(sysargv):
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
+    file_parser = subparsers.add_parser("file", help= "Figure out what to do from the input file")
+    file_parser.add_argument("file", type=argparse.FileType('r'), nargs="?", default=sys.stdin, help = "Post content - input file")
+
     config = os.path.expanduser("~/.easyblogger")
     if (os.path.exists(config)):
         sysargv =  ["@" + config] + sysargv
@@ -230,6 +253,10 @@ def main(sysargv):
     blog_id = args.blogid
     try:
         blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
+
+        if args.command == "file":
+            contentArgs = inferArgsFromContent(args.file)
+            print contentArgs
 
 
         if args.command == "post":
