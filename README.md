@@ -25,7 +25,6 @@ git clone https://bitbucket.org/raghur/vim-blogger
 cd vim-blogger
 pip install .
 ~~~
-
 2. Pandoc
 Install [pandoc](http://johnmacfarlane.net/pandoc/installing.html)
 
