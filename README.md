@@ -1,5 +1,4 @@
 # EasyBlogger
-
 Blog to blogger from the command line.
 
 
@@ -10,9 +9,8 @@ I tried. Didn't work. `googlecl` is just too rough and isn't easy to script. For
 2. Doesn't work with blog and post ids.
 3. and others...
 
-## So what does this do
-Blogger integration is via `gdata-python-client` using gdata apis.
-
+## So what does this do?
+Uses Blogger api via  `gdata-python-client` to provide you a cli tool to create, update, delete posts on Blogger.
 
 # Installation and Usage
 
@@ -52,16 +50,16 @@ you might have to do python easyblogger --blogid <yourblogid> get from the Scrip
 
 This will open a browser. You may see a chrome warning that it can't 
 be run as root - but you can ignore that.
-Once you authorize, you will see a file '~/vim-blogger.credentials' in the folder
+Once you authorize, you will see a file '~/.easyblogger.credentials' in the folder
 
 since the file is created as root, you will need to change ownership of the 
-'~/vim-blogger.credentials' file. 
+'~/.easyblogger.credentials' file. 
 you will need to repeat  this process if you ever change the blog, or revoke 
 permissions or if the auth token expires.
 
 ~~~bash
 # Change ownership
-sudo chown <youruser>:<youruser> ~/vim-blogger.credentials 
+sudo chown <youruser>:<youruser> ~/.easyblogger.credentials 
 ~~~
 
 That's it - you're all set!
@@ -99,10 +97,10 @@ easyblogger  get -p 3728334747597998671 -f "id,title,url,labels"
 ## Default Args file
 Specifying --blogid each time is just painful.
 
-you can create a default args file in `~/.vim-blogger` as follows:
+you can create a default args file in `~/.easyblogger` as follows:
 
 ~~~bash
-cat > ~/.vim-blogger
+cat > ~/.easyblogger
 --blogid
 234567
 ~~~
@@ -116,7 +114,8 @@ You can override the args from file by providing the argument on the command lin
 
 ### Create a new blog post
 
-Note: Blogger API v3 does not allow creating posts as drafts. Please ask/crib about this - I'll add that capability once it becomes available.
+Note: Blogger API v3 does not support/expose API for creating posts as drafts. 
+Please ask for this feature on Google's blogger dev group - I'll add that capability once it becomes available.
 
 ~~~bash
 # create a post from stdin with title and labels

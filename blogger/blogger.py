@@ -61,7 +61,7 @@ class  EasyBlogger(object):
         # credentials file is provided. If the file does not exist, it is
         # created. This object can only hold credentials for a single user, so
         # as-written, this script can only handle a single user.
-        storage = Storage(os.path.expanduser('~/.vim-blogger.credentials'))
+        storage = Storage(os.path.expanduser('~/.easyblogger.credentials'))
       
         # The get() function returns the credentials for the Storage object. If no
         # credentials were found, None is returned.
@@ -215,7 +215,7 @@ def main(sysargv):
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
-    config = os.path.expanduser("~/.vim-blogger")
+    config = os.path.expanduser("~/.easyblogger")
     if (os.path.exists(config)):
         sysargv =  ["@" + config] + sysargv
     logger.debug("Final args:", sysargv)
