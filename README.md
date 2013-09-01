@@ -19,18 +19,15 @@ Uses Blogger api via  `gdata-python-client` to provide you a cli tool to create,
 * Install dependencies
 
 1. From source
-
 ~~~bash
-git clone https://bitbucket.org/raghur/vim-blogger
-cd vim-blogger
-pip install .
+pip install git+https://raghur@bitbucket.org/raghur/easyblogger#egg=EasyBlogger
 ~~~
+
 2. Pandoc
 Install [pandoc](http://johnmacfarlane.net/pandoc/installing.html)
-
 If you're on cygwin, you can just install the windows dl and put `pandoc.exe` somewhere on path
 
-* Authorize the tool API access to your blog
+3. Authorize the tool API access to your blog
 
 ~~~bash
 # run through OAuth2 hoops... following needs to be run as root
@@ -60,7 +57,6 @@ permissions or if the auth token expires.
 # Change ownership
 sudo chown <youruser>:<youruser> ~/.easyblogger.credentials 
 ~~~
-
 That's it - you're all set!
 
 
@@ -166,7 +162,7 @@ easyblogger   --blogid 6136696198547817747 delete 234546720561632959
 
 
 ### Client API ids
-If you'd rather use your own API client ids rather than the ones in vim-blogger (aka mine), then register for API 
+If you'd rather use your own API client ids rather than the ones in easyblogger (aka mine), then register for API 
 access at [Google's API console](https://code.google.com/apis/console). Create a client id and secret key at the API access 
 page and request for Blogger API access. Stick the API key and client id in the command line with `--clientid` and `--secret`
-args. You can also stick them in the `~/.vim-blogger` file to avoid specifying them each time
+args. You can also stick them in the `~/.easyblogger` file to avoid specifying them each time
