@@ -1,1 +1,1 @@
-from blogger import EasyBlogger
+from blogger import EasyBlogger, main

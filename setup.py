@@ -5,14 +5,14 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
-        name = "blogger-cli",
+        name = "EasyBlogger",
         version = "0.0.4",
         author = "Raghu Rajagopalan",
         author_email = "raghu.nospam@gmail.com",
-        description = ("CLI interface to Blogger blogs"),
+        description = ("A (very) easy CLI interface to Blogger blogs"),
         license = "BSD",
         keywords = "blogger, cli",
-        url = "http://packages.python.org/an_example_pypi_project",
+        url = "https://bitbucket.org/raghur/vim-blogger",
         packages=['blogger'],
         install_requires = [
             'pypandoc',
@@ -20,8 +20,8 @@ setup(
             'python-gflags',
             'httplib2'
             ],
-        scripts = ['blogger/blogger'],
-        long_description=read('README.md'),
+        scripts = ['blogger/easyblogger'],
+        long_description='see https://bitbucket.org/raghur/vim-blogger',
         classifiers=[
             "Development Status :: 3 - Alpha",
             "Topic :: Utilities",
