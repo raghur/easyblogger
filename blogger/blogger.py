@@ -131,20 +131,20 @@ class  EasyBlogger(object):
         #slug = re.sub(r'[-]+', '-', slug)
         #return slug
 
-    def _getMarkup(self, content, isMarkdown):
+    def _getMarkup(self, content, fmt):
         raw = content
         if hasattr(content, 'read'):
             raw  = content.read()
         html = raw
-        if isMarkdown:
+        if fmt != "html":
             import pypandoc
-            html = pypandoc.convert(raw, 'html', format="md")
+            html = pypandoc.convert(raw, 'html', format=fmt)
         return html
 
-    def post(self, title, content, labels, isDraft = True, isMarkdown = False):
+    def post(self, title, content, labels, isDraft = True, fmt = "html"):
         #url = slugify(title) + ".html"
         service  = self._OAuth_Authenticate()
-        markup = self._getMarkup(content, isMarkdown)
+        markup = self._getMarkup(content, fmt)
         blogPost = {  "content": markup, "title":title }
         if labels and isinstance(labels, basestring):
             blogPost["labels"] = labels.split(",")
@@ -156,7 +156,7 @@ class  EasyBlogger(object):
         req = service.posts().delete(blogId = self.blogId, postId = postId)
         return req.execute()
 
-    def updatePost(self, postId, title = None, content = None, labels = None, isDraft = True, isMarkdown = False ):
+    def updatePost(self, postId, title = None, content = None, labels = None, isDraft = True, fmt = "html" ):
         # Permalink cannot be updated...
         #from datetime import date
         #today = date.today()
@@ -166,30 +166,66 @@ class  EasyBlogger(object):
         if title:
             blogPost['title'] = title
         if content: 
-            blogPost['content'] = self._getMarkup(content, isMarkdown)
+            blogPost['content'] = self._getMarkup(content, fmt)
         if labels:
             blogPost['labels'] = labels.split(",")
         req = service.posts().patch(blogId = self.blogId, postId = postId, body= blogPost)
         return req.execute()
 
-def inferArgsFromContent(theFile):
-    fileContent  = theFile.read()
-    rePostId = re.compile("^\s*postId:\s*(\d+)\s*$", re.I|re.M)
-    reLabels = re.compile("^\s*labels:\s*([\w\d,-_]*)\s*$", re.I|re.M)
-    reTitle = re.compile("^\s*title:\s*(.+)\s*$", re.I|re.M)
+class ContentArgParser(object):
+    rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I|re.M)
+    reLabels = re.compile("^\s*labels\s*:\s*([\w\d,-_]*)\s*$", re.I|re.M)
+    reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I|re.M)
+    reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I|re.M)
+    rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I|re.M)
 
-    postId = rePostId.search(fileContent)
-    if postId:
-        postId = postId.group(1)
-    
-    labels = reLabels.search(fileContent)
-    if labels:
-        labels = labels.group(1)
+    def __init__(self, theFile):
+        self.theFile = theFile
 
-    title = reTitle.search(fileContent)
-    if title:
-        title = title.group(1)
-    return (postId, title, labels, fileContent)
+    def _inferArgsFromContent(self):
+        fileContent  = self.theFile.read()
+
+        self.postId = ContentArgParser.rePostId.search(fileContent)
+        if self.postId:
+            self.postId = self.postId.group(1)
+
+        self.labels = ContentArgParser.reLabels.search(fileContent)
+        if self.labels:
+            self.labels = self.labels.group(1)
+
+        self.title = ContentArgParser.reTitle.search(fileContent)
+        if self.title:
+            self.title = self.title.group(1)
+
+        self.format = ContentArgParser.reFormat.search(fileContent)
+        if self.format:
+            self.format = self.format.group(1)
+        else:
+            self.format = "markdown"
+        self.content = fileContent
+
+    def updateArgs(self, args):
+        self._inferArgsFromContent()
+        args.labels = self.labels
+        args.title = self.title
+        args.content = self.content
+        args.format = self.format
+        if self.postId:
+            args.postId = self.postId
+            args.command = "update"
+        else:
+            args.command = "post"
+
+    def updateFileWithPostId(self, postId):
+        if self.theFile == sys.stdin:
+            return
+
+        with open (self.theFile.name, "w") as f:
+            #logger.debug("updating file {} with postId {}", self.theFile.name, postId)
+            content = ContentArgParser.rePostIdUpdate.sub('PostId: ' + postId, self.content)
+            f.write(content)
+            f.flush()
+
 
 
 def main(sysargv):
@@ -219,8 +255,20 @@ def main(sysargv):
     post_input = post_parser.add_mutually_exclusive_group(required = True)
     post_input.add_argument("-c","--content", help = "Post content")
     post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
-    post_parser.add_argument("-md", "--markdown", help = "Content as markdown", action="store_true", default=False)
-
+    post_parser.add_argument("--format", help = "Content format", 
+            choices = [ "native", 
+                        "json", 
+                        "markdown", 
+                        "markdown_strict", 
+                        "markdown_phpextra", 
+                        "markdown_mmd", 
+                        "rst", 
+                        "mediawiki", 
+                        "docbook", 
+                        "textile", 
+                        "html", 
+                        "latex" ],
+            default = "html")
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
     delete_parser.add_argument("postIds", nargs="+", help = "the post to delete")
 
@@ -231,7 +279,20 @@ def main(sysargv):
     update_input = update_parser.add_mutually_exclusive_group()
     update_input.add_argument("-c","--content",help = "Post content")
     update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
-    update_parser.add_argument("-md", "--markdown", help = "Content as markdown", action="store_true", default=False)
+    update_parser.add_argument("--format", help = "Content format", 
+            choices = [ "native", 
+                        "json", 
+                        "markdown", 
+                        "markdown_strict", 
+                        "markdown_phpextra", 
+                        "markdown_mmd", 
+                        "rst", 
+                        "mediawiki", 
+                        "docbook", 
+                        "textile", 
+                        "html", 
+                        "latex" ],
+            default = "html")
 
     update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
 
@@ -254,21 +315,26 @@ def main(sysargv):
     try:
         blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
 
+        contentArgs = None
         if args.command == "file":
-            contentArgs = inferArgsFromContent(args.file)
-            print contentArgs
+            contentArgs = ContentArgParser(args.file)
+            contentArgs.updateArgs(args)
 
 
         if args.command == "post":
-            newPost = blogger.post( args.title, args.content or args.file,  args.labels, isMarkdown = args.markdown)
-            print newPost['id']
+            newPost = blogger.post( args.title, args.content or args.file,  args.labels, fmt = args.format)
+            postId = newPost['id']
+            if contentArgs:
+                contentArgs.updateFileWithPostId(postId)
+            else:
+                print postId
 
         if args.command == 'delete':
             for postId in args.postIds:
                 blogger.deletePost(postId)
 
         if args.command == 'update':
-            blogger.updatePost(args.postId, args.title, args.content or  args.file , args.labels, isMarkdown = args.markdown)
+            blogger.updatePost(args.postId, args.title, args.content or  args.file , args.labels, fmt = args.format)
 
         if args.command == "get":
             if args.postId:
