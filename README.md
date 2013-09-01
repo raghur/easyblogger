@@ -16,19 +16,14 @@ Uses Blogger api via  `gdata-python-client` to provide you a cli tool to create,
 
 ## Installation
 
-* Install dependencies
-
 1. From source
 ~~~bash
 pip install git+https://raghur@bitbucket.org/raghur/easyblogger#egg=EasyBlogger
 ~~~
-
 2. Pandoc
 Install [pandoc](http://johnmacfarlane.net/pandoc/installing.html)
 If you're on cygwin, you can just install the windows dl and put `pandoc.exe` somewhere on path
-
 3. Authorize the tool API access to your blog
-
 ~~~bash
 # run through OAuth2 hoops... following needs to be run as root
 # First find your blog Id
@@ -40,23 +35,25 @@ easyblogger --blogid <yourblogid> get
 ~~~
 
 ###Windows: 
+
 you might have to do python easyblogger --blogid <yourblogid> get from the Scripts folder
 
 ###Linux:
 
 This will open a browser. You may see a chrome warning that it can't 
 be run as root - but you can ignore that.
-Once you authorize, you will see a file '~/.easyblogger.credentials' in the folder
+Once you authorize, `~/.easyblogger.credentials` is created with your OAuth2 token
 
-since the file is created as root, you will need to change ownership of the 
-'~/.easyblogger.credentials' file. 
-you will need to repeat  this process if you ever change the blog, or revoke 
-permissions or if the auth token expires.
+Since the file is created as root, you will need to change ownership of the 
+`~/.easyblogger.credentials` file. 
 
 ~~~bash
 # Change ownership
 sudo chown <youruser>:<youruser> ~/.easyblogger.credentials 
 ~~~
+You will need to repeat  this process if you ever change the blog, or revoke 
+permissions or if the auth token expires.
+
 That's it - you're all set!
 
 
