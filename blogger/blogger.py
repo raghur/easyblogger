@@ -32,131 +32,145 @@ import os
 logger = logging.getLogger()
 logging.basicConfig()
 
+class  EasyBlogger(object):
+    def __init__(self, clientId, clientSecret, blogId = None, blogUrl = None):
+        self.clientId = clientId
+        self.clientSecret = clientSecret
+        self.service = None
+        self._setBlog(blogId,blogUrl)
 
-def OAuth_Authenticate(client_id, client_secret):
-    """@todo: Docstring for OAuth_Authenticate
+    def _OAuth_Authenticate(self):
+        """@todo: Docstring for OAuth_Authenticate
 
-    :client_id: Client ID - Get it from google API console
-    :client_secret: Client secret - same as above
-    :returns: service object
+        :client_id: Client ID - Get it from google API console
+        :client_secret: Client secret - same as above
+        :returns: service object
 
-    """
-    # The scope URL for read/write access to a user's blogger data
-    scope = 'https://www.googleapis.com/auth/blogger'
+        """
+        if self.service:
+            return self.service
+        # The scope URL for read/write access to a user's blogger data
+        scope = 'https://www.googleapis.com/auth/blogger'
 
-    # Create a flow object. This object holds the client_id, client_secret, and
-    # scope. It assists with OAuth 2.0 steps to get user authorization and
-    # credentials.
-    flow = OAuth2WebServerFlow(client_id, client_secret, scope)
-    # Create a Storage object. This object holds the credentials that your
-    # application needs to authorize access to the user's data. The name of the
-    # credentials file is provided. If the file does not exist, it is
-    # created. This object can only hold credentials for a single user, so
-    # as-written, this script can only handle a single user.
-    storage = Storage(os.path.expanduser('~/.vim-blogger.credentials'))
-  
-    # The get() function returns the credentials for the Storage object. If no
-    # credentials were found, None is returned.
-    credentials = storage.get()
-  
-    # If no credentials are found or the credentials are invalid due to
-    # expiration, new credentials need to be obtained from the authorization
-    # server. The oauth2client.tools.run() function attempts to open an
-    # authorization server page in your default web browser. The server
-    # asks the user to grant your application access to the user's data.
-    # If the user grants access, the run() function returns new credentials.
-    # The new credentials are also stored in the supplied Storage object,
-    # which updates the credentials.dat file.
-  
-    if credentials is None or credentials.invalid:
-        credentials = run(flow, storage)
-  
-    # Create an httplib2.Http object to handle our HTTP requests, and authorize it
-    # using the credentials.authorize() function.
-    http = httplib2.Http()
-    http.disable_ssl_certificate_validation = True
-    http = credentials.authorize(http)
-  
-    # The apiclient.discovery.build() function returns an instance of an API service
-    # object can be used to make API calls. The object is constructed with
-    # methods specific to the blogger API. The arguments provided are:
-    #   name of the API ('blogger')
-    #   version of the API you are using ('v3')
-    #   authorized httplib2.Http() object that can be used for API calls
-    service = build('blogger', 'v3', http=http)
-    return service
+        # Create a flow object. This object holds the client_id, client_secret, and
+        # scope. It assists with OAuth 2.0 steps to get user authorization and
+        # credentials.
+        flow = OAuth2WebServerFlow(self.clientId, self.clientSecret, scope)
+        # Create a Storage object. This object holds the credentials that your
+        # application needs to authorize access to the user's data. The name of the
+        # credentials file is provided. If the file does not exist, it is
+        # created. This object can only hold credentials for a single user, so
+        # as-written, this script can only handle a single user.
+        storage = Storage(os.path.expanduser('~/.vim-blogger.credentials'))
+      
+        # The get() function returns the credentials for the Storage object. If no
+        # credentials were found, None is returned.
+        credentials = storage.get()
+      
+        # If no credentials are found or the credentials are invalid due to
+        # expiration, new credentials need to be obtained from the authorization
+        # server. The oauth2client.tools.run() function attempts to open an
+        # authorization server page in your default web browser. The server
+        # asks the user to grant your application access to the user's data.
+        # If the user grants access, the run() function returns new credentials.
+        # The new credentials are also stored in the supplied Storage object,
+        # which updates the credentials.dat file.
+      
+        if credentials is None or credentials.invalid:
+            credentials = run(flow, storage)
+      
+        # Create an httplib2.Http object to handle our HTTP requests, and authorize it
+        # using the credentials.authorize() function.
+        http = httplib2.Http()
+        http.disable_ssl_certificate_validation = True
+        http = credentials.authorize(http)
+      
+        # The apiclient.discovery.build() function returns an instance of an API service
+        # object can be used to make API calls. The object is constructed with
+        # methods specific to the blogger API. The arguments provided are:
+        #   name of the API ('blogger')
+        #   version of the API you are using ('v3')
+        #   authorized httplib2.Http() object that can be used for API calls
+        self.service = build('blogger', 'v3', http=http)
+        return self.service
 
-def getBlog(service, blogId = None, blogUrl = None, posts = 0):
-    if blogUrl:
-        request = service.blogs().getByUrl(url = blogUrl)
-    else:
-        request = service.blogs().get(blogId=blogId, maxPosts=posts)
-    return request.execute()
 
-def getPosts(service, blogId, postId = None, query=None,  labels = "", maxResults = 1 ):
-    try:
-        if postId:
-            request = service.posts().get(blogId = blogId, postId = postId)
-            post = request.execute()
-            return {"items": [post]}
-        elif query:
-            request = service.posts().search(blogId = blogId, q = query )
+    def _setBlog(self, blogId = None, blogUrl = None):
+        service = self._OAuth_Authenticate()
+        if blogUrl:
+            request = service.blogs().getByUrl(url = blogUrl)
+            blog = request.execute()
+            self.blogId = blog['id']
         else:
-            request = service.posts().list(blogId = blogId, labels = labels, maxResults = maxResults)
-        return request.execute()
-    except HttpError as he:
-        if he.resp.status == 404:
-            return {"items": []}
-        raise
+            self.blogId = blogId
 
-#def slugify(s):
-    #from text_unidecode import unidecode
-    #import re
-    #slug = unidecode(s)
-    #slug = slug.encode('ascii', 'ignore').lower()
-    #slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
-    #slug = re.sub(r'[-]+', '-', slug)
-    #return slug
+    def getPosts(self, postId = None, query=None,  labels = "", maxResults = 1 ):
+        try:
+            service  = self._OAuth_Authenticate()
+            if postId:
+                request = service.posts().get(blogId = self.blogId, postId = postId)
+                post = request.execute()
+                return {"items": [post]}
+            elif query:
+                request = service.posts().search(blogId = self.blogId, q = query )
+            else:
+                request = service.posts().list(blogId = self.blogId, labels = labels, maxResults = maxResults)
+            return request.execute()
+        except HttpError as he:
+            if he.resp.status == 404:
+                return {"items": []}
+            raise
 
-def post(service, blogId, title, content, labels, isDraft = True ):
-    #url = slugify(title) + ".html"
-    blogPost = {  "content": content, "title":title }
-    if labels:
-        blogPost["labels"] = labels.split(",")
-    req = service.posts().insert(blogId = blogId, body= blogPost)
-    return req.execute()
+    #def slugify(s):
+        #from text_unidecode import unidecode
+        #import re
+        #slug = unidecode(s)
+        #slug = slug.encode('ascii', 'ignore').lower()
+        #slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
+        #slug = re.sub(r'[-]+', '-', slug)
+        #return slug
 
-def deletePost(service, blogId, postId):
-    req = service.posts().delete(blogId = blogId, postId = postId)
-    return req.execute()
+    def _getMarkup(self, content, isMarkdown):
+        raw = content
+        if hasattr(content, 'read'):
+            raw  = content.read()
+        html = raw
+        if isMarkdown:
+            import pypandoc
+            html = pypandoc.convert(raw, 'html', format="md")
+        return html
 
-def updatePost(service, blogId, postId, title = None, content = None, labels = None, isDraft = True ):
-    # Permalink cannot be updated...
-    #from datetime import date
-    #today = date.today()
-    #url = "/{}/{}/{}".format(today.year, today.month, slugify(title) + ".html")
-    blogPost = {}
-    if title:
-        blogPost['title'] = title
-    if content: 
-        blogPost['content'] = content
-    if labels:
-        blogPost['labels'] = labels.split(",")
-    req = service.posts().patch(blogId = blogId, postId = postId, body= blogPost)
-    return req.execute()
+    def post(self, title, content, labels, isDraft = True, isMarkdown = False):
+        #url = slugify(title) + ".html"
+        service  = self._OAuth_Authenticate()
+        markup = self._getMarkup(content, isMarkdown)
+        blogPost = {  "content": markup, "title":title }
+        if labels and isinstance(labels, basestring):
+            blogPost["labels"] = labels.split(",")
+        req = service.posts().insert(blogId = self.blogId, body= blogPost)
+        return req.execute()
 
+    def deletePost(self, postId):
+        service  = self._OAuth_Authenticate()
+        req = service.posts().delete(blogId = self.blogId, postId = postId)
+        return req.execute()
 
-def _getContentFromArgs(args):
-    content = None
-    if args.file:
-        content = args.file.read()
-    else:
-        content = args.content
-    if args.markdown:
-        import pypandoc
-        content = pypandoc.convert(content, 'html', format="md")
-    logger.debug("content is :", content)
-    return content
+    def updatePost(self, postId, title = None, content = None, labels = None, isDraft = True, isMarkdown = False ):
+        # Permalink cannot be updated...
+        #from datetime import date
+        #today = date.today()
+        #url = "/{}/{}/{}".format(today.year, today.month, slugify(title) + ".html")
+        service  = self._OAuth_Authenticate()
+        blogPost = {}
+        if title:
+            blogPost['title'] = title
+        if content: 
+            blogPost['content'] = self._getMarkup(content, isMarkdown)
+        if labels:
+            blogPost['labels'] = labels.split(",")
+        req = service.posts().patch(blogId = self.blogId, postId = postId, body= blogPost)
+        return req.execute()
+
 
 def main(sysargv):
     import argparse
@@ -208,41 +222,34 @@ def main(sysargv):
 
     args = parser.parse_args(sysargv)
     
-    verbosity = 50- args.verbose*10
+    verbosity = 50 - args.verbose*10
     if args.verbose > 0:
         print("Setting log level to %s" % logging.getLevelName(verbosity))
     logger.setLevel(verbosity)
 
     blog_id = args.blogid
     try:
-        service = OAuth_Authenticate(args.clientid, args.secret)
-        #blog = getBlog(service, blog_id)
-        #print printJson(blog)
+        blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
 
-        if args.url:
-            blog = getBlog(service, blogUrl = args.url)
-            printJson(blog)
-            blog_id =  blog['id']
-        posts = {}
 
         if args.command == "post":
-            newPost = post(service, blog_id, args.title, _getContentFromArgs(args), args.labels)
+            newPost = blogger.post( args.title, args.content or args.file,  args.labels, isMarkdown = args.markdown)
             print newPost['id']
 
         if args.command == 'delete':
             for postId in args.postIds:
-                deletePost(service, blog_id, postId)
+                blogger.deletePost(postId)
 
         if args.command == 'update':
-            updatePost(service, blog_id, args.postId, args.title, _getContentFromArgs(args), args.labels)
+            blogger.updatePost(args.postId, args.title, args.content or  args.file , args.labels, isMarkdown = args.markdown)
 
         if args.command == "get":
             if args.postId:
-                posts = getPosts(service, blog_id, postId = args.postId)
+                posts = blogger.getPosts(postId = args.postId)
             elif args.query:
-                posts = getPosts(service, blog_id, query = args.query, maxResults = args.count)
+                posts = blogger.getPosts(query = args.query, maxResults = args.count)
             else:
-                posts = getPosts(service, blog_id, labels =args.labels, maxResults = args.count)
+                posts = blogger.getPosts(labels =args.labels, maxResults = args.count)
             printJson(posts)
             printPosts(posts, args.fields)
     except AccessTokenRefreshError:
