@@ -32,3 +32,20 @@ class MainTests(TestCase):
         postId  = blogger.runner(args, blogObj)
 
         blogObj.updatePost.assert_called_with("100", "t", "content", None, fmt ="html")
+
+    def test_should_invoke_getbyid(self):
+        args = blogger.parse_args(['get', "-p", "100"])
+        blogObj = Mock()
+        blogObj.getPosts.return_value = {
+                "items": [
+                    {
+                        "id":"100",
+                        "title":"title",
+                        "url": "url"
+                        }
+                    ]
+                }
+
+        postId  = blogger.runner(args, blogObj)
+
+        blogObj.getPosts.assert_called_with(postId = "100")
