@@ -23,13 +23,14 @@ from apiclient.errors import HttpError
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.tools import run, run_flow
+from oauth2client.tools import run
 import argparse
 import pypandoc
 from oauth2client import tools
 import json
 import os
 import re
+import argparse
 
 logger = logging.getLogger()
 logging.basicConfig()
@@ -234,10 +235,7 @@ class ContentArgParser(object):
             f.flush()
 
 
-
-def main(sysargv):
-    import argparse
-
+def parse_args(sysargv):
     parser = argparse.ArgumentParser(prog= 'blogger', fromfile_prefix_chars = '@')
     parser.add_argument("-i","--clientid", help = "Your API Client id", default="132424086208.apps.googleusercontent.com" )
     parser.add_argument("-s","--secret", help = "Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
@@ -309,19 +307,24 @@ def main(sysargv):
     config = os.path.expanduser("~/.easyblogger")
     if (os.path.exists(config)):
         sysargv =  ["@" + config] + sysargv
-    logger.debug("Final args:", sysargv)
+    logger.debug("Final args:")
+    logger.debug(sysargv)
 
     args = parser.parse_args(sysargv)
-    
     verbosity = 50 - args.verbose*10
     if args.verbose > 0:
         print("Setting log level to %s" % logging.getLevelName(verbosity))
     logger.setLevel(verbosity)
+    return args
+    
 
-    blog_id = args.blogid
+def main (sysargv):
+    args = parse_args(sysargv)
+    blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
+    return runner(args, blogger)
+
+def runner(args, blogger):
     try:
-        blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
-
         contentArgs = None
         if args.command == "file":
             contentArgs = ContentArgParser(args.file)
@@ -380,3 +383,4 @@ def printJson(data):
 if __name__ == '__main__':
     #print sys.argv
     main(sys.argv[1:])
+
