@@ -25,6 +25,7 @@ from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import run, run_flow
 import argparse
+import pypandoc
 from oauth2client import tools
 import json
 import os
@@ -40,6 +41,7 @@ class  EasyBlogger(object):
         self.service = None
         self.blogId = blogId
         self.blogUrl = blogUrl
+        self.converter = pypandoc
 
     def _OAuth_Authenticate(self):
         """@todo: Docstring for OAuth_Authenticate
@@ -138,8 +140,7 @@ class  EasyBlogger(object):
             raw  = content.read()
         html = raw
         if fmt != "html":
-            import pypandoc
-            html = pypandoc.convert(raw, 'html', format=fmt)
+            html = self.converter.convert(raw, 'html', format=fmt)
         return html
 
     def post(self, title, content, labels, isDraft = True, fmt = "html"):
@@ -167,12 +168,14 @@ class  EasyBlogger(object):
         self._setBlog()
         service  = self._OAuth_Authenticate()
         blogPost = {}
+        if not (title or content or labels):
+            raise ValueError("At least one of title, content or labels is required")
         if title:
             blogPost['title'] = title
         if content: 
             blogPost['content'] = self._getMarkup(content, fmt)
         if labels:
-            blogPost['labels'] = labels.split(",")
+            blogPost['labels'] = labels.split(",") if isinstance(labels, basestring) else labels
         req = service.posts().patch(blogId = self.blogId, postId = postId, body= blogPost)
         return req.execute()
 
