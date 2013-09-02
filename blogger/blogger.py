@@ -38,7 +38,8 @@ class  EasyBlogger(object):
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.service = None
-        self._setBlog(blogId,blogUrl)
+        self.blogId = blogId
+        self.blogUrl = blogUrl
 
     def _OAuth_Authenticate(self):
         """@todo: Docstring for OAuth_Authenticate
@@ -96,16 +97,16 @@ class  EasyBlogger(object):
         return self.service
 
 
-    def _setBlog(self, blogId = None, blogUrl = None):
+    def _setBlog(self):
+        if self.blogId:
+            return
         service = self._OAuth_Authenticate()
-        if blogUrl:
-            request = service.blogs().getByUrl(url = blogUrl)
-            blog = request.execute()
-            self.blogId = blog['id']
-        else:
-            self.blogId = blogId
+        request = service.blogs().getByUrl(url = self.blogUrl)
+        blog = request.execute()
+        self.blogId = blog['id']
 
     def getPosts(self, postId = None, query=None,  labels = "", maxResults = 1 ):
+        self._setBlog()
         try:
             service  = self._OAuth_Authenticate()
             if postId:
@@ -142,6 +143,7 @@ class  EasyBlogger(object):
         return html
 
     def post(self, title, content, labels, isDraft = True, fmt = "html"):
+        self._setBlog()
         #url = slugify(title) + ".html"
         service  = self._OAuth_Authenticate()
         markup = self._getMarkup(content, fmt)
@@ -152,6 +154,7 @@ class  EasyBlogger(object):
         return req.execute()
 
     def deletePost(self, postId):
+        self._setBlog()
         service  = self._OAuth_Authenticate()
         req = service.posts().delete(blogId = self.blogId, postId = postId)
         return req.execute()
@@ -161,6 +164,7 @@ class  EasyBlogger(object):
         #from datetime import date
         #today = date.today()
         #url = "/{}/{}/{}".format(today.year, today.month, slugify(title) + ".html")
+        self._setBlog()
         service  = self._OAuth_Authenticate()
         blogPost = {}
         if title:
