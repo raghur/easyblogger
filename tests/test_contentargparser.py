@@ -7,7 +7,7 @@ class ContentArgParserTests(TestCase):
     def test_should_infer_args_from_content(self):
         theFile = Mock()
         theFile.read.return_value = """
-            <!-- 
+            <!--
             Title: t
             Labels: l
             PostId: 234
@@ -26,7 +26,7 @@ class ContentArgParserTests(TestCase):
     def test_should_infer_args_for_post(self):
         theFile = Mock()
         theFile.read.return_value = """
-            <!-- 
+            <!--
             Title: t
             Labels: l
             -->
@@ -43,7 +43,7 @@ class ContentArgParserTests(TestCase):
     def test_should_infer_args_for_post2(self):
         theFile = Mock()
         theFile.read.return_value = """
-            <!-- 
+            <!--
             Title: t
             PostId:
             Labels: l
@@ -61,7 +61,7 @@ class ContentArgParserTests(TestCase):
     def test_should_handle_empty_file(self):
         theFile = Mock()
         fileContent= """
-            <!-- 
+            <!--
             -->
         """
         theFile.read.return_value = fileContent
@@ -78,7 +78,7 @@ class ContentArgParserTests(TestCase):
     def test_should_allow_format_to_be_specified(self):
         theFile = Mock()
         fileContent= """
-            <!-- 
+            <!--
             format: markdown_strict
             -->
         """
@@ -100,7 +100,7 @@ class ContentArgParserTests(TestCase):
             return DEFAULT
 
         fileContent= """
-            <!-- 
+            <!--
             PostId:
             format: markdown_strict
             -->
