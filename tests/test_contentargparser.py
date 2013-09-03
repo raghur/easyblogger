@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mock import Mock, DEFAULT, call
+from mock import Mock, DEFAULT, call, MagicMock
 from blogger import blogger
 from apiclient.errors import HttpError
 
@@ -92,3 +92,32 @@ class ContentArgParserTests(TestCase):
         assert args.format == "markdown_strict"
         assert args.command == "post"
         assert args.content == fileContent
+
+    def test_should_update_doc_with_postid(self):
+        def validateFileContent(content):
+            print content
+            assert blogger.ContentArgParser.rePostId.search(content)
+            return DEFAULT
+
+        fileContent= """
+            <!-- 
+            PostId:
+            format: markdown_strict
+            -->
+        """
+        theFile = MagicMock(spec = file)
+        theFile.name = "thefilename"
+        theFile.read.return_value = fileContent
+
+        mock_open = Mock()
+        mock_open.return_value = theFile
+        fileHandle =theFile.__enter__.return_value
+        fileHandle.write.side_effect = validateFileContent
+
+        parser = blogger.ContentArgParser(theFile, open = mock_open)
+        parser.updateFileWithPostId("1000")
+
+        mock_open.assert_called_with(theFile.name, "w")
+        theFile.flush.assert_called()
+        fileHandle.write.assert_called()
+

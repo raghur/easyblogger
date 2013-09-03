@@ -14,23 +14,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import httplib2
+import os
+import re
 import sys
 
 import logging
+
+import argparse
+import pypandoc
+import json
+import httplib2
+
 from apiclient.discovery import build
 from apiclient.errors import HttpError
+from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
 from oauth2client.tools import run
-import argparse
-import pypandoc
-from oauth2client import tools
-import json
-import os
-import re
-import argparse
 
 logger = logging.getLogger()
 logging.basicConfig()
@@ -187,8 +188,9 @@ class ContentArgParser(object):
     reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I|re.M)
     rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I|re.M)
 
-    def __init__(self, theFile):
+    def __init__(self, theFile, open = open):
         self.theFile = theFile
+        self.open = open
 
     def _inferArgsFromContent(self):
         fileContent  = self.theFile.read()
@@ -227,8 +229,9 @@ class ContentArgParser(object):
     def updateFileWithPostId(self, postId):
         if self.theFile == sys.stdin:
             return
-
-        with open (self.theFile.name, "w") as f:
+        if not hasattr(self, "content"):
+            self.content = self.theFile.read()
+        with self.open (self.theFile.name, "w") as f:
             #logger.debug("updating file {} with postId {}", self.theFile.name, postId)
             content = ContentArgParser.rePostIdUpdate.sub('PostId: ' + postId, self.content)
             f.write(content)
