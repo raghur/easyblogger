@@ -67,11 +67,11 @@ class  EasyBlogger(object):
         # created. This object can only hold credentials for a single user, so
         # as-written, this script can only handle a single user.
         storage = Storage(os.path.expanduser('~/.easyblogger.credentials'))
-      
+
         # The get() function returns the credentials for the Storage object. If no
         # credentials were found, None is returned.
         credentials = storage.get()
-      
+
         # If no credentials are found or the credentials are invalid due to
         # expiration, new credentials need to be obtained from the authorization
         # server. The oauth2client.tools.run() function attempts to open an
@@ -80,16 +80,16 @@ class  EasyBlogger(object):
         # If the user grants access, the run() function returns new credentials.
         # The new credentials are also stored in the supplied Storage object,
         # which updates the credentials.dat file.
-      
+
         if credentials is None or credentials.invalid:
             credentials = run(flow, storage)
-      
+
         # Create an httplib2.Http object to handle our HTTP requests, and authorize it
         # using the credentials.authorize() function.
         http = httplib2.Http()
         http.disable_ssl_certificate_validation = True
         http = credentials.authorize(http)
-      
+
         # The apiclient.discovery.build() function returns an instance of an API service
         # object can be used to make API calls. The object is constructed with
         # methods specific to the blogger API. The arguments provided are:
@@ -173,7 +173,7 @@ class  EasyBlogger(object):
             raise ValueError("At least one of title, content or labels is required")
         if title:
             blogPost['title'] = title
-        if content: 
+        if content:
             blogPost['content'] = self._getMarkup(content, fmt)
         if labels:
             blogPost['labels'] = labels.split(",") if isinstance(labels, basestring) else labels
@@ -260,18 +260,18 @@ def parse_args(sysargv):
     post_input = post_parser.add_mutually_exclusive_group(required = True)
     post_input.add_argument("-c","--content", help = "Post content")
     post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
-    post_parser.add_argument("--format", help = "Content format", 
-            choices = [ "native", 
-                        "json", 
-                        "markdown", 
-                        "markdown_strict", 
-                        "markdown_phpextra", 
-                        "markdown_mmd", 
-                        "rst", 
-                        "mediawiki", 
-                        "docbook", 
-                        "textile", 
-                        "html", 
+    post_parser.add_argument("--format", help = "Content format",
+            choices = [ "native",
+                        "json",
+                        "markdown",
+                        "markdown_strict",
+                        "markdown_phpextra",
+                        "markdown_mmd",
+                        "rst",
+                        "mediawiki",
+                        "docbook",
+                        "textile",
+                        "html",
                         "latex" ],
             default = "html")
     delete_parser = subparsers.add_parser("delete", help= "delete a post")
@@ -284,18 +284,18 @@ def parse_args(sysargv):
     update_input = update_parser.add_mutually_exclusive_group()
     update_input.add_argument("-c","--content",help = "Post content")
     update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
-    update_parser.add_argument("--format", help = "Content format", 
-            choices = [ "native", 
-                        "json", 
-                        "markdown", 
-                        "markdown_strict", 
-                        "markdown_phpextra", 
-                        "markdown_mmd", 
-                        "rst", 
-                        "mediawiki", 
-                        "docbook", 
-                        "textile", 
-                        "html", 
+    update_parser.add_argument("--format", help = "Content format",
+            choices = [ "native",
+                        "json",
+                        "markdown",
+                        "markdown_strict",
+                        "markdown_phpextra",
+                        "markdown_mmd",
+                        "rst",
+                        "mediawiki",
+                        "docbook",
+                        "textile",
+                        "html",
                         "latex" ],
             default = "html")
 
@@ -316,7 +316,6 @@ def parse_args(sysargv):
         print("Setting log level to %s" % logging.getLevelName(verbosity))
     logger.setLevel(verbosity)
     return args
-    
 
 def main (sysargv):
     args = parse_args(sysargv)
