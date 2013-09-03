@@ -4,7 +4,15 @@ from blogger import blogger
 from apiclient.errors import HttpError
 
 class MainTests(TestCase):
-
+    posts = {
+                "items": [
+                    {
+                        "id":"100",
+                        "title":"title",
+                        "url": "url"
+                        }
+                    ]
+                }
     def test_should_invoke_post(self):
         args = blogger.parse_args(['post', "-t", "t", "-c", "content"])
         blogObj = Mock()
@@ -36,16 +44,18 @@ class MainTests(TestCase):
     def test_should_invoke_getbyid(self):
         args = blogger.parse_args(['get', "-p", "100"])
         blogObj = Mock()
-        blogObj.getPosts.return_value = {
-                "items": [
-                    {
-                        "id":"100",
-                        "title":"title",
-                        "url": "url"
-                        }
-                    ]
-                }
+        blogObj.getPosts.return_value = MainTests.posts
 
         postId  = blogger.runner(args, blogObj)
 
         blogObj.getPosts.assert_called_with(postId = "100")
+
+    def test_should_invoke_search(self):
+        args = blogger.parse_args(['get', "-q", "query"])
+        blogObj = Mock()
+        blogObj.getPosts.return_value = MainTests.posts
+
+        postId  = blogger.runner(args, blogObj)
+
+        blogObj.getPosts.assert_called_with(query = "query", maxResults = 10)
+
