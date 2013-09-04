@@ -240,7 +240,9 @@ class ContentArgParser(object):
 
 
 def parse_args(sysargv):
-    parser = argparse.ArgumentParser(prog='blogger', fromfile_prefix_chars='@')
+    parser = argparse.ArgumentParser(prog='easyblogger',
+                                     description="Easily manage posts on Blogger blogs",
+                                     fromfile_prefix_chars='@')
     parser.add_argument("-i", "--clientid", help="Your API Client id", default="132424086208.apps.googleusercontent.com")
     parser.add_argument("-s", "--secret", help="Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
     parser.add_argument("-v", "--verbose",  help="verbosity(log level) -vvvv = DEBUG, -v = CRITICAL", action="count", default=0)
@@ -322,8 +324,8 @@ def parse_args(sysargv):
     return args
 
 
-def main(sysargv):
-    args = parse_args(sysargv)
+def main(sysargv=sys.argv):
+    args = parse_args(sysargv[1:])
     blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
     return runner(args, blogger)
 
@@ -386,4 +388,4 @@ def printJson(data):
 
 if __name__ == '__main__':
     #print sys.argv
-    main(sys.argv[1:])
+    main()

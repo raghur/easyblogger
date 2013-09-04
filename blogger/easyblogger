@@ -1,4 +1,0 @@
-#! /usr/bin/python
-import sys
-from blogger import main
-main(sys.argv[1:])

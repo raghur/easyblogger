@@ -41,6 +41,7 @@ lines near the top:
 On the last link, the number `7642453` is the blogId
 
 1. Authorize
+
 On Linux:
 
 ~~~bash
