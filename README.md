@@ -42,7 +42,7 @@ On the last link, the number `7642453` is the blogId
 
 1. Authorize
 
-On Linux:
+**On Linux**
 
 ~~~bash
  # run through OAuth2 hoops... following needs to be run as root
@@ -66,14 +66,12 @@ Since the file is created as root, you will need to change ownership of the
 sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
 ~~~
 
-On Windows:
+**On Windows**
 
-1. For Authorization, open a `cmd` window and navigate to  `<python install folder>\Scripts`
-1. Run `python easyblogger --blogid <yourblogid> get` 
-1. If you'd like to have the script in `PATH` and run it from anywhere then open
-Control Panel > System > Advanced System Settings > Environment Variables
-    1. Ensure that `<python install folder>` and `<python install\Scripts>` are in `PATH`
-    2. Ensure that `PATHEXT` include `*.py`
+If your `PATH` variable has the python Scripts folder, then you should just 
+be able to run `easyblogger --blogid <id> get` in a command window. If not, 
+then open a `cmd` window and navigate to  `<python install folder>\Scripts` 
+and run `python easyblogger --blogid <yourblogid> get` 
 
 You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
 permissions or if the auth token expires.
