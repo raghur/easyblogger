@@ -1,7 +1,7 @@
 from unittest import TestCase
-from mock import Mock, DEFAULT, call, MagicMock
+from mock import Mock, DEFAULT,  MagicMock
 from blogger import blogger
-from apiclient.errors import HttpError
+
 
 class ContentArgParserTests(TestCase):
     def test_should_infer_args_from_content(self):
@@ -60,7 +60,7 @@ class ContentArgParserTests(TestCase):
 
     def test_should_handle_empty_file(self):
         theFile = Mock()
-        fileContent= """
+        fileContent = """
             <!--
             -->
         """
@@ -69,15 +69,15 @@ class ContentArgParserTests(TestCase):
         args = Mock()
         parser.updateArgs(args)
 
-        assert args.title == None
-        assert args.labels == None
+        assert args.title is None
+        assert args.labels is None
         assert args.format == "markdown"
         assert args.command == "post"
         assert args.content == fileContent
 
     def test_should_allow_format_to_be_specified(self):
         theFile = Mock()
-        fileContent= """
+        fileContent = """
             <!--
             format: markdown_strict
             -->
@@ -87,8 +87,8 @@ class ContentArgParserTests(TestCase):
         args = Mock()
         parser.updateArgs(args)
 
-        assert args.title == None
-        assert args.labels == None
+        assert args.title is None
+        assert args.labels is None
         assert args.format == "markdown_strict"
         assert args.command == "post"
         assert args.content == fileContent
@@ -99,25 +99,24 @@ class ContentArgParserTests(TestCase):
             assert blogger.ContentArgParser.rePostId.search(content)
             return DEFAULT
 
-        fileContent= """
+        fileContent = """
             <!--
             PostId:
             format: markdown_strict
             -->
         """
-        theFile = MagicMock(spec = file)
+        theFile = MagicMock(spec=file)
         theFile.name = "thefilename"
         theFile.read.return_value = fileContent
 
         mock_open = Mock()
         mock_open.return_value = theFile
-        fileHandle =theFile.__enter__.return_value
+        fileHandle = theFile.__enter__.return_value
         fileHandle.write.side_effect = validateFileContent
 
-        parser = blogger.ContentArgParser(theFile, open = mock_open)
+        parser = blogger.ContentArgParser(theFile, open=mock_open)
         parser.updateFileWithPostId("1000")
 
         mock_open.assert_called_with(theFile.name, "w")
         theFile.flush.assert_called()
         fileHandle.write.assert_called()
-

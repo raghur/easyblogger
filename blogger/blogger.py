@@ -36,8 +36,9 @@ from oauth2client.tools import run
 logger = logging.getLogger()
 logging.basicConfig()
 
-class  EasyBlogger(object):
-    def __init__(self, clientId, clientSecret, blogId = None, blogUrl = None):
+
+class EasyBlogger(object):
+    def __init__(self, clientId, clientSecret, blogId=None, blogUrl=None):
         self.clientId = clientId
         self.clientSecret = clientSecret
         self.service = None
@@ -100,27 +101,26 @@ class  EasyBlogger(object):
         self.service = build('blogger', 'v3', http=http)
         return self.service
 
-
     def _setBlog(self):
         if self.blogId:
             return
         service = self._OAuth_Authenticate()
-        request = service.blogs().getByUrl(url = self.blogUrl)
+        request = service.blogs().getByUrl(url=self.blogUrl)
         blog = request.execute()
         self.blogId = blog['id']
 
-    def getPosts(self, postId = None, query=None,  labels = "", maxResults = 1 ):
+    def getPosts(self, postId=None, query=None,  labels="", maxResults=1):
         self._setBlog()
         try:
-            service  = self._OAuth_Authenticate()
+            service = self._OAuth_Authenticate()
             if postId:
-                request = service.posts().get(blogId = self.blogId, postId = postId)
+                request = service.posts().get(blogId=self.blogId, postId=postId)
                 post = request.execute()
                 return {"items": [post]}
             elif query:
-                request = service.posts().search(blogId = self.blogId, q = query )
+                request = service.posts().search(blogId=self.blogId, q=query)
             else:
-                request = service.posts().list(blogId = self.blogId, labels = labels, maxResults = maxResults)
+                request = service.posts().list(blogId=self.blogId, labels=labels, maxResults=maxResults)
             return request.execute()
         except HttpError as he:
             if he.resp.status == 404:
@@ -139,36 +139,36 @@ class  EasyBlogger(object):
     def _getMarkup(self, content, fmt):
         raw = content
         if hasattr(content, 'read'):
-            raw  = content.read()
+            raw = content.read()
         html = raw
         if fmt != "html":
             html = self.converter.convert(raw, 'html', format=fmt)
         return html
 
-    def post(self, title, content, labels, isDraft = True, fmt = "html"):
+    def post(self, title, content, labels, isDraft=True, fmt="html"):
         self._setBlog()
         #url = slugify(title) + ".html"
-        service  = self._OAuth_Authenticate()
+        service = self._OAuth_Authenticate()
         markup = self._getMarkup(content, fmt)
-        blogPost = {  "content": markup, "title":title }
+        blogPost = {"content": markup, "title": title}
         if labels and isinstance(labels, basestring):
             blogPost["labels"] = labels.split(",")
-        req = service.posts().insert(blogId = self.blogId, body= blogPost)
+        req = service.posts().insert(blogId=self.blogId, body=blogPost)
         return req.execute()
 
     def deletePost(self, postId):
         self._setBlog()
-        service  = self._OAuth_Authenticate()
-        req = service.posts().delete(blogId = self.blogId, postId = postId)
+        service = self._OAuth_Authenticate()
+        req = service.posts().delete(blogId=self.blogId, postId=postId)
         return req.execute()
 
-    def updatePost(self, postId, title = None, content = None, labels = None, isDraft = True, fmt = "html" ):
+    def updatePost(self, postId, title=None, content=None, labels=None, isDraft=True, fmt="html"):
         # Permalink cannot be updated...
         #from datetime import date
         #today = date.today()
         #url = "/{}/{}/{}".format(today.year, today.month, slugify(title) + ".html")
         self._setBlog()
-        service  = self._OAuth_Authenticate()
+        service = self._OAuth_Authenticate()
         blogPost = {}
         if not (title or content or labels):
             raise ValueError("At least one of title, content or labels is required")
@@ -178,22 +178,23 @@ class  EasyBlogger(object):
             blogPost['content'] = self._getMarkup(content, fmt)
         if labels:
             blogPost['labels'] = labels.split(",") if isinstance(labels, basestring) else labels
-        req = service.posts().patch(blogId = self.blogId, postId = postId, body= blogPost)
+        req = service.posts().patch(blogId=self.blogId, postId=postId, body=blogPost)
         return req.execute()
 
-class ContentArgParser(object):
-    rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I|re.M)
-    reLabels = re.compile("^\s*labels\s*:\s*([\w\d,-_]*)\s*$", re.I|re.M)
-    reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I|re.M)
-    reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I|re.M)
-    rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I|re.M)
 
-    def __init__(self, theFile, open = open):
+class ContentArgParser(object):
+    rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I | re.M)
+    reLabels = re.compile("^\s*labels\s*:\s*([\w\d,-_]*)\s*$", re.I | re.M)
+    reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
+    reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
+    rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I | re.M)
+
+    def __init__(self, theFile, open=open):
         self.theFile = theFile
         self.open = open
 
     def _inferArgsFromContent(self):
-        fileContent  = self.theFile.read()
+        fileContent = self.theFile.read()
 
         self.postId = ContentArgParser.rePostId.search(fileContent)
         if self.postId:
@@ -231,7 +232,7 @@ class ContentArgParser(object):
             return
         if not hasattr(self, "content"):
             self.content = self.theFile.read()
-        with self.open (self.theFile.name, "w") as f:
+        with self.open(self.theFile.name, "w") as f:
             #logger.debug("updating file {} with postId {}", self.theFile.name, postId)
             content = ContentArgParser.rePostIdUpdate.sub('PostId: ' + postId, self.content)
             f.write(content)
@@ -239,31 +240,31 @@ class ContentArgParser(object):
 
 
 def parse_args(sysargv):
-    parser = argparse.ArgumentParser(prog= 'blogger', fromfile_prefix_chars = '@')
-    parser.add_argument("-i","--clientid", help = "Your API Client id", default="132424086208.apps.googleusercontent.com" )
-    parser.add_argument("-s","--secret", help = "Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
-    parser.add_argument("-v","--verbose",  help = "verbosity(log level) -vvvv = DEBUG, -v = CRITICAL", action="count", default=0)
+    parser = argparse.ArgumentParser(prog='blogger', fromfile_prefix_chars='@')
+    parser.add_argument("-i", "--clientid", help="Your API Client id", default="132424086208.apps.googleusercontent.com")
+    parser.add_argument("-s", "--secret", help="Your API Client secret", default="DKEk2rvDKGDAigx9q9jpkyqI")
+    parser.add_argument("-v", "--verbose",  help="verbosity(log level) -vvvv = DEBUG, -v = CRITICAL", action="count", default=0)
     group = parser.add_mutually_exclusive_group()
-    group.add_argument("--blogid", help = "Your blog id")
-    group.add_argument("--url", help = "Your blog url")
+    group.add_argument("--blogid", help="Your blog id")
+    group.add_argument("--url", help="Your blog url")
 
-    subparsers = parser.add_subparsers(help = "sub-command help", dest="command")
+    subparsers = parser.add_subparsers(help="sub-command help", dest="command")
 
-    get_parser = subparsers.add_parser("get", help= "list posts")
+    get_parser = subparsers.add_parser("get", help="list posts")
     group = get_parser.add_mutually_exclusive_group()
-    group.add_argument("-p","--postId", help = "the post id")
-    group.add_argument("-l","--labels", help = "comma separated list of labels")
-    group.add_argument("-q","--query", help = "search term")
-    get_parser.add_argument("-f","--fields", help = "fields to output", default="id,title,url")
-    get_parser.add_argument("-c","--count", type=int, help = "count", default=10)
+    group.add_argument("-p", "--postId", help="the post id")
+    group.add_argument("-l", "--labels", help="comma separated list of labels")
+    group.add_argument("-q", "--query", help="search term")
+    get_parser.add_argument("-f", "--fields", help="fields to output", default="id,title,url")
+    get_parser.add_argument("-c", "--count", type=int, help="count", default=10)
 
-    post_parser = subparsers.add_parser("post", help= "create a new post")
-    post_parser.add_argument("-t", "--title", help = "Post title")
-    post_parser.add_argument("-l","--labels", help = "comma separated list of labels")
-    post_input = post_parser.add_mutually_exclusive_group(required = True)
-    post_input.add_argument("-c","--content", help = "Post content")
-    post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
-    post_parser.add_argument("--format", help = "Content format",
+    post_parser = subparsers.add_parser("post", help="create a new post")
+    post_parser.add_argument("-t", "--title", help="Post title")
+    post_parser.add_argument("-l", "--labels", help="comma separated list of labels")
+    post_input=post_parser.add_mutually_exclusive_group(required=True)
+    post_input.add_argument("-c", "--content", help="Post content")
+    post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help="Post content - input file")
+    post_parser.add_argument("--format", help="Content format",
             choices = [ "native",
                         "json",
                         "markdown",
@@ -277,17 +278,17 @@ def parse_args(sysargv):
                         "html",
                         "latex" ],
             default = "html")
-    delete_parser = subparsers.add_parser("delete", help= "delete a post")
-    delete_parser.add_argument("postIds", nargs="+", help = "the post to delete")
+    delete_parser = subparsers.add_parser("delete", help="delete a post")
+    delete_parser.add_argument("postIds", nargs="+", help="the post to delete")
 
-    update_parser = subparsers.add_parser("update", help= "update a post")
-    update_parser.add_argument("postId", help = "the post to update")
-    update_parser.add_argument("-t", "--title", help = "Post title")
+    update_parser = subparsers.add_parser("update", help="update a post")
+    update_parser.add_argument("postId", help="the post to update")
+    update_parser.add_argument("-t", "--title", help="Post title")
 
     update_input = update_parser.add_mutually_exclusive_group()
-    update_input.add_argument("-c","--content",help = "Post content")
-    update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help = "Post content - input file")
-    update_parser.add_argument("--format", help = "Content format",
+    update_input.add_argument("-c", "--content", help="Post content")
+    update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help="Post content - input file")
+    update_parser.add_argument("--format", help="Content format",
             choices = [ "native",
                         "json",
                         "markdown",
@@ -302,28 +303,30 @@ def parse_args(sysargv):
                         "latex" ],
             default = "html")
 
-    update_parser.add_argument("-l","--labels", help = "comma separated list of labels")
+    update_parser.add_argument("-l", "--labels", help="comma separated list of labels")
 
-    file_parser = subparsers.add_parser("file", help= "Figure out what to do from the input file")
-    file_parser.add_argument("file", type=argparse.FileType('r'), nargs="?", default=sys.stdin, help = "Post content - input file")
+    file_parser = subparsers.add_parser("file", help="Figure out what to do from the input file")
+    file_parser.add_argument("file", type=argparse.FileType('r'), nargs="?", default=sys.stdin, help="Post content - input file")
 
     config = os.path.expanduser("~/.easyblogger")
     if (os.path.exists(config)):
-        sysargv =  ["@" + config] + sysargv
+        sysargv = ["@" + config] + sysargv
     logger.debug("Final args:")
     logger.debug(sysargv)
 
     args = parser.parse_args(sysargv)
-    verbosity = 50 - args.verbose*10
+    verbosity = 50 - args.verbose * 10
     if args.verbose > 0:
         print("Setting log level to %s" % logging.getLevelName(verbosity))
     logger.setLevel(verbosity)
     return args
 
-def main (sysargv):
+
+def main(sysargv):
     args = parse_args(sysargv)
     blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
     return runner(args, blogger)
+
 
 def runner(args, blogger):
     try:
@@ -332,9 +335,8 @@ def runner(args, blogger):
             contentArgs = ContentArgParser(args.file)
             contentArgs.updateArgs(args)
 
-
         if args.command == "post":
-            newPost = blogger.post( args.title, args.content or args.file,  args.labels, fmt = args.format)
+            newPost = blogger.post(args.title, args.content or args.file, args.labels, fmt=args.format)
             postId = newPost['id']
             if contentArgs:
                 contentArgs.updateFileWithPostId(postId)
@@ -346,25 +348,24 @@ def runner(args, blogger):
                 blogger.deletePost(postId)
 
         if args.command == 'update':
-            blogger.updatePost(args.postId, args.title, args.content or  args.file , args.labels, fmt = args.format)
+            blogger.updatePost(args.postId, args.title, args.content or args.file, args.labels, fmt=args.format)
 
         if args.command == "get":
             if args.postId:
-                posts = blogger.getPosts(postId = args.postId)
+                posts = blogger.getPosts(postId=args.postId)
             elif args.query:
-                posts = blogger.getPosts(query = args.query, maxResults = args.count)
+                posts = blogger.getPosts(query=args.query, maxResults=args.count)
             else:
-                posts = blogger.getPosts(labels =args.labels, maxResults = args.count)
+                posts = blogger.getPosts(labels=args.labels, maxResults=args.count)
             printJson(posts)
             printPosts(posts, args.fields)
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
         print ('The credentials have been revoked or expired, please re-run'
-            'the application to re-authorize')
+               'the application to re-authorize')
         return -1
     return 0
-
 
 
 def printPosts(posts, fields):
@@ -373,6 +374,7 @@ def printPosts(posts, fields):
     for item in posts['items']:
         line = [str(item[k]) for k in fields]
         print ",".join(line)
+
 
 def printJson(data):
     """@todo: Docstring for printJson
@@ -385,4 +387,3 @@ def printJson(data):
 if __name__ == '__main__':
     #print sys.argv
     main(sys.argv[1:])
-
