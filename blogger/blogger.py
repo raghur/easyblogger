@@ -371,10 +371,12 @@ def runner(args, blogger):
 
 
 def printPosts(posts, fields):
+    if not "items" in posts:
+        return
     if isinstance(fields, basestring):
         fields = fields.split(",")
     for item in posts['items']:
-        line = [str(item[k]) for k in fields]
+        line = [str(item[k]) for k in fields if k in item]
         print ",".join(line)
 
 

@@ -40,7 +40,6 @@ class GetPostsTests(TestCase):
         posts.search.assert_called_with(blogId=self.blogger.blogId, q="test")
         req.execute.assert_called()
 
-
     def test_should_get_blog_by_id(self):
         posts = self.blogger.service \
                         .posts       \
@@ -75,7 +74,6 @@ class GetPostsTests(TestCase):
         assert len(post["items"]) == 0
 
     def test_should_rethrow_exception_other_than_404(self):
-
         posts = self.blogger.service \
                 .posts       \
                 .return_value

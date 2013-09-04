@@ -56,5 +56,20 @@ class MainTests(TestCase):
         blogObj.getPosts.return_value = MainTests.posts
 
         blogger.runner(args, blogObj)
+        blogObj.getPosts.assert_called_with(query="query", maxResults=10)
 
+    def test_empty_results_in_get(self):
+        args = blogger.parse_args(['get', "-q", "query"])
+        blogObj = Mock()
+        blogObj.getPosts.return_value = {}
+
+        blogger.runner(args, blogObj)
+        blogObj.getPosts.assert_called_with(query="query", maxResults=10)
+
+    def test_handle_non_existent_keys_in_fields(self):
+        args = blogger.parse_args(['get', "-q", "query", "-f", "id,b"])
+        blogObj = Mock()
+        blogObj.getPosts.return_value = MainTests.posts
+
+        blogger.runner(args, blogObj)
         blogObj.getPosts.assert_called_with(query="query", maxResults=10)
