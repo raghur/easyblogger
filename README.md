@@ -39,6 +39,7 @@ lines near the top:
 <link rel="service.post" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://www.blogger.com/feeds/7642453/posts/default" />
 ~~~
 On the last link, the number `7642453` is the blogId
+
 1. Authorize
 On Linux:
 
@@ -66,9 +67,14 @@ sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
 
 On Windows:
 
-You might have to do `python easyblogger --blogid <yourblogid> get` from the Scripts folder
+1. For Authorization, open a `cmd` window and navigate to  `<python install folder>\Scripts`
+1. Run `python easyblogger --blogid <yourblogid> get` 
+1. If you'd like to have the script in `PATH` and run it from anywhere then open
+Control Panel > System > Advanced System Settings > Environment Variables
+    1. Ensure that `<python install folder>` and `<python install\Scripts>` are in `PATH`
+    2. Ensure that `PATHEXT` include `*.py`
 
-You will need to repeat  this process if you ever change the blog, or revoke
+You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
 permissions or if the auth token expires.
 
 That's it - you're all set!
