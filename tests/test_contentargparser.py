@@ -46,7 +46,7 @@ class ContentArgParserTests(TestCase):
             <!--
             Title: t
             PostId:
-            Labels: l
+            Labels: l, a, c
             -->
         """
         parser = blogger.ContentArgParser(theFile)
@@ -54,10 +54,27 @@ class ContentArgParserTests(TestCase):
         parser.updateArgs(args)
 
         assert args.title == "t"
-        assert args.labels == "l"
+        assert args.labels == "l, a, c"
         assert args.format == "markdown"
         assert args.command == "post"
 
+    def test_should_infer_args_for_post2(self):
+        theFile = Mock()
+        theFile.read.return_value = """
+            <!--
+            Title: t
+            PostId:
+            Labels:
+            -->
+        """
+        parser = blogger.ContentArgParser(theFile)
+        args = Mock()
+        parser.updateArgs(args)
+
+        assert args.title == "t"
+        assert args.labels == ""
+        assert args.format == "markdown"
+        assert args.command == "post"
     def test_should_handle_empty_file(self):
         theFile = Mock()
         fileContent = """
@@ -79,7 +96,8 @@ class ContentArgParserTests(TestCase):
         theFile = Mock()
         fileContent = """
             <!--
-            format: markdown_strict
+            format : markdown_strict 
+            
             -->
         """
         theFile.read.return_value = fileContent
@@ -90,6 +108,7 @@ class ContentArgParserTests(TestCase):
         assert args.title is None
         assert args.labels is None
         assert args.format == "markdown_strict"
+        assert "\n" not in args.format
         assert args.command == "post"
         assert args.content == fileContent
 

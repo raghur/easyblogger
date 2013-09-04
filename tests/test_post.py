@@ -30,7 +30,7 @@ class PostsTests(TestCase):
         def validateBody(blogId=None, body=None):
             assert body["title"] == "t"
             assert body["content"] == "c"
-            self.assertTrue("labels" not in body)
+            self.assertTrue(body["labels"] is None)
             return DEFAULT
         self.posts.insert.side_effect = validateBody
         req = self.posts.insert.return_value

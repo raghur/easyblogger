@@ -38,6 +38,20 @@ logging.basicConfig()
 
 
 class EasyBlogger(object):
+    @staticmethod
+    def _parseLabels(labels):
+        if not labels:
+            return None
+
+        if isinstance(labels, basestring):
+            if labels.strip() == "":
+                return None
+            lbl = [i.strip() for i in labels.split(",") if i.strip()]
+            return lbl if lbl else None
+        else:
+            lbl = [i.strip() for i in labels if i.strip()]
+            return lbl if lbl else None
+
     def __init__(self, clientId, clientSecret, blogId=None, blogUrl=None):
         self.clientId = clientId
         self.clientSecret = clientSecret
@@ -151,8 +165,8 @@ class EasyBlogger(object):
         service = self._OAuth_Authenticate()
         markup = self._getMarkup(content, fmt)
         blogPost = {"content": markup, "title": title}
-        if labels and isinstance(labels, basestring):
-            blogPost["labels"] = labels.split(",")
+        blogPost['labels'] = EasyBlogger._parseLabels(labels)
+
         req = service.posts().insert(blogId=self.blogId, body=blogPost)
         return req.execute()
 
@@ -176,15 +190,14 @@ class EasyBlogger(object):
             blogPost['title'] = title
         if content:
             blogPost['content'] = self._getMarkup(content, fmt)
-        if labels:
-            blogPost['labels'] = labels.split(",") if isinstance(labels, basestring) else labels
+        blogPost['labels'] = EasyBlogger._parseLabels(labels)
         req = service.posts().patch(blogId=self.blogId, postId=postId, body=blogPost)
         return req.execute()
 
 
 class ContentArgParser(object):
     rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I | re.M)
-    reLabels = re.compile("^\s*labels\s*:\s*([\w\d,-_]*)\s*$", re.I | re.M)
+    reLabels = re.compile("^\s*labels\s*:\s*([\w\d\- ,_]*)\s*$", re.I | re.M)
     reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
     reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
     rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I | re.M)
@@ -198,19 +211,19 @@ class ContentArgParser(object):
 
         self.postId = ContentArgParser.rePostId.search(fileContent)
         if self.postId:
-            self.postId = self.postId.group(1)
+            self.postId = self.postId.group(1).strip()
 
         self.labels = ContentArgParser.reLabels.search(fileContent)
         if self.labels:
-            self.labels = self.labels.group(1)
+            self.labels = self.labels.group(1).strip()
 
         self.title = ContentArgParser.reTitle.search(fileContent)
         if self.title:
-            self.title = self.title.group(1)
+            self.title = self.title.group(1).strip()
 
         self.format = ContentArgParser.reFormat.search(fileContent)
         if self.format:
-            self.format = self.format.group(1)
+            self.format = self.format.group(1).strip()
         else:
             self.format = "markdown"
         self.content = fileContent
