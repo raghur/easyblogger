@@ -33,52 +33,51 @@ The tool needs to be granted access to manage the blog. Google APIs use OAuth2.
 1. First, get your blog id. You can find the blog id by viewing the source. For ex. on my blog, I have the following
 lines near the top:
 
-~~~html
-<link rel="alternate" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://blog.rraghur.in/feeds/posts/default" />
-<link rel="alternate" type="application/rss+xml" title="Nifty Tidbits - RSS" href="http://blog.rraghur.in/feeds/posts/default?alt=rss" />
-<link rel="service.post" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://www.blogger.com/feeds/7642453/posts/default" />
-~~~
-On the last link, the number `7642453` is the blogId
-
+    ~~~html
+        <link rel="alternate" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://blog.rraghur.in/feeds/posts/default" />
+        <link rel="alternate" type="application/rss+xml" title="Nifty Tidbits - RSS" href="http://blog.rraghur.in/feeds/posts/default?alt=rss" />
+        <link rel="service.post" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://www.blogger.com/feeds/7642453/posts/default" />
+    ~~~
+    On the last link, the number `7642453` is the blogId
 1. Authorize
 
-**On Linux**
+    **On Linux**
 
-~~~bash
- # run through OAuth2 hoops... following needs to be run as root
- # First find your blog Id
+    ~~~bash
+     # run through OAuth2 hoops... following needs to be run as root
+     # First find your blog Id
 
- sudo easyblogger --blogid <yourblogid> get
+     sudo easyblogger --blogid <yourblogid> get
 
- # This will first open a browser and ask you to sign in and
- # approve access to your blog
-~~~
+     # This will first open a browser and ask you to sign in and
+     # approve access to your blog
+    ~~~
 
-This will open a browser. You may see a chrome warning that it can't
-be run as root - but you can ignore that.
-Once you authorize, `~/.easyblogger.credentials` is created with your OAuth2 token
+    This will open a browser. You may see a chrome warning that it can't
+    be run as root - but you can ignore that.
+    Once you authorize, `~/.easyblogger.credentials` is created with your OAuth2 token
 
-Since the file is created as root, you will need to change ownership of the
-`~/.easyblogger.credentials` file.
+    Since the file is created as root, you will need to change ownership of the
+    `~/.easyblogger.credentials` file.
 
-~~~bash
- # Change ownership
-sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
-~~~
+    ~~~bash
+     # Change ownership
+    sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
+    ~~~
 
-**On Windows**
+    **On Windows**
 
-If your `PATH` variable has the python Scripts folder, then you should just 
-be able to run `easyblogger --blogid <id> get` in a command window. If not, 
-then open a `cmd` window and navigate to  `<python install folder>\Scripts` 
-and run `python easyblogger --blogid <yourblogid> get` 
+    If your `PATH` variable has the python Scripts folder, then you should just 
+    be able to run `easyblogger --blogid <id> get` in a command window. If not, 
+    then open a `cmd` window and navigate to  `<python install folder>\Scripts` 
+    and run `python easyblogger --blogid <yourblogid> get` 
 
-All set!
+3. All set!
 
-That's it - you're all set!
+    That's it - you're all set!
 
-You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
-permissions or if the auth token expires.
+    You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
+    permissions or if the auth token expires.
 
 
 
