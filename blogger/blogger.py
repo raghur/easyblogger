@@ -266,8 +266,7 @@ def parse_args(sysargv):
     post_input=post_parser.add_mutually_exclusive_group(required=True)
     post_input.add_argument("-c", "--content", help="Post content")
     post_input.add_argument("-f", "--file", type=argparse.FileType('r'), help="Post content - input file")
-    post_parser.add_argument("--format", help="Content format",
-            choices = [ "native",
+    pandocInputFormats = ["native",
                         "json",
                         "markdown",
                         "markdown_strict",
@@ -278,8 +277,8 @@ def parse_args(sysargv):
                         "docbook",
                         "textile",
                         "html",
-                        "latex" ],
-            default = "html")
+                        "latex"]
+    post_parser.add_argument("--format", help="Content format", choices=pandocInputFormats, default="html")
     delete_parser = subparsers.add_parser("delete", help="delete a post")
     delete_parser.add_argument("postIds", nargs="+", help="the post to delete")
 
@@ -290,20 +289,7 @@ def parse_args(sysargv):
     update_input = update_parser.add_mutually_exclusive_group()
     update_input.add_argument("-c", "--content", help="Post content")
     update_input.add_argument("-f", "--file", type=argparse.FileType('r'), help="Post content - input file")
-    update_parser.add_argument("--format", help="Content format",
-            choices = [ "native",
-                        "json",
-                        "markdown",
-                        "markdown_strict",
-                        "markdown_phpextra",
-                        "markdown_mmd",
-                        "rst",
-                        "mediawiki",
-                        "docbook",
-                        "textile",
-                        "html",
-                        "latex" ],
-            default = "html")
+    update_parser.add_argument("--format", help="Content format", choices = pandocInputFormats, default = "html")
 
     update_parser.add_argument("-l", "--labels", help="comma separated list of labels")
 
