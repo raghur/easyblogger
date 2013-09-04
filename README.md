@@ -73,10 +73,13 @@ be able to run `easyblogger --blogid <id> get` in a command window. If not,
 then open a `cmd` window and navigate to  `<python install folder>\Scripts` 
 and run `python easyblogger --blogid <yourblogid> get` 
 
+All set!
+
+That's it - you're all set!
+
 You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
 permissions or if the auth token expires.
 
-That's it - you're all set!
 
 
 ## Usage
