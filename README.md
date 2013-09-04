@@ -1,7 +1,6 @@
 # EasyBlogger
 Blog to blogger from the command line.
 
-
 ## Why not googlecl?
 I tried. Didn't work. `googlecl` is just too rough and isn't easy to script. For ex:
 
@@ -10,36 +9,48 @@ I tried. Didn't work. `googlecl` is just too rough and isn't easy to script. For
 3. and others...
 
 ## So what does this do?
-Uses Blogger api via  `gdata-python-client` to provide you a cli tool to create, update, delete posts on Blogger.
+1. Provides a command line tool and create, update or delete posts on Blogger hosted blogs.
+2. Post content can be piped in - so you can use your favourite way to generate html markup
+2. Integrates with Pandoc natively, so that you can write your doc in any of the input formats that Pandoc supports
+3. Understands specially marked comments - so you can just hand it a file and it'll figure out what to do - great for
+posting from vim etc.
 
-# Installation, Configurationa and Usage
+# Installation, Configuration and Usage
 
 ## Installation
 
 ~~~bash
-pip install git+https://raghur@bitbucket.org/raghur/easyblogger#egg=EasyBlogger
+sudo pip install git+https://raghur@bitbucket.org/raghur/easyblogger#egg=EasyBlogger
 ~~~
 This installs EasyBlogger and its dependencies. It also installs the `easyblogger` script
-2. Pandoc
+### Pandoc
 Install [pandoc](http://johnmacfarlane.net/pandoc/installing.html)
 If you're on cygwin, you can just install the windows dl and put `pandoc.exe` somewhere on path
 
 ## OAuth2 API Authentication and Authorization
+The tool needs to be granted access to manage the blog. Google APIs use OAuth2.
+
+1. First, get your blog id. You can find the blog id by viewing the source. For ex. on my blog, I have the following
+lines near the top:
+
+~~~html
+<link rel="alternate" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://blog.rraghur.in/feeds/posts/default" />
+<link rel="alternate" type="application/rss+xml" title="Nifty Tidbits - RSS" href="http://blog.rraghur.in/feeds/posts/default?alt=rss" />
+<link rel="service.post" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://www.blogger.com/feeds/7642453/posts/default" />
+~~~
+On the last link, the number `7642453` is the blogId
+1. Authorize
+On Linux:
+
 ~~~bash
  # run through OAuth2 hoops... following needs to be run as root
  # First find your blog Id
 
- easyblogger --blogid <yourblogid> get
+ sudo easyblogger --blogid <yourblogid> get
 
  # This will first open a browser and ask you to sign in and
  # approve access to your blog
 ~~~
-
-###Windows:
-
-You might have to do `python easyblogger --blogid <yourblogid> get` from the Scripts folder
-
-###Linux:
 
 This will open a browser. You may see a chrome warning that it can't
 be run as root - but you can ignore that.
@@ -52,6 +63,11 @@ Since the file is created as root, you will need to change ownership of the
  # Change ownership
 sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
 ~~~
+
+On Windows:
+
+You might have to do `python easyblogger --blogid <yourblogid> get` from the Scripts folder
+
 You will need to repeat  this process if you ever change the blog, or revoke
 permissions or if the auth token expires.
 
@@ -88,9 +104,7 @@ That's it - you're all set!
 ~~~
 
 ### Default Args file
-Specifying --blogid each time is just painful.
-
-you can create a default args file in `~/.easyblogger` as follows:
+Specifying --blogid each time is just painful. You can set a default blogId by creating a default args file `~/.easyblogger` as follows:
 
 ~~~bash
 cat > ~/.easyblogger
@@ -108,7 +122,7 @@ You can override the args from file by providing the argument on the command lin
 ### Create a new blog post
 
 Note: Blogger API v3 does not support/expose API for creating posts as drafts.
-Please ask for this feature on Google's blogger dev group - I'll add that capability once it becomes available.
+Please ask for this feature on Google's blogger dev group - I'll add that capability once/if it becomes available.
 
 ~~~bash
  # create a post from stdin with title and labels
@@ -130,30 +144,6 @@ Type anything in markdown
 2342323423423423423
 ~~~
 
-### Posting or Updating from a file
-
-I wrote `EasyBlogger` primarily so I can blog from Vim. If your file has properly formatted comments, then
-it will `EasyBlogger` will figure out what to do (insert or update) based on the metadata.
-
-So, given a file like this:
-~~~bash
-    cat MyBlogPost.md
-    <!--
-    Title: This is your title
-    PostId:
-    Labels: a,b,c
-    format: markdown
-    -->
-    # This is my content
-~~~
-
-You can post this to your blog like so:
-
-~~~bash
-    easyblogger file MyBlogPost.md
-~~~
-Once its posted, the tool will also update the `MyBlogPost.md` file with the `postId` of the generated post
-
 ### Update posts
 
 Update works with a patch request - only specify what you need changed
@@ -174,6 +164,31 @@ Blogger API does not allow the blog permalink to be updated - so in case you wan
  [EOF]
 ~~~
 
+
+### Posting or Updating from a file
+
+I wrote `easyblogger` script primarily so I can blog from Vim. If your file has properly formatted comments, then `EasyBlogger` will figure out what to do (insert or update) based on the metadata.
+
+So, you can author a post like so:
+~~~bash
+    cat MyBlogPost.md
+    <!--
+    Title: This is your title
+    PostId:
+    Labels: a,b,c
+    format: markdown
+    -->
+    # This is my content
+~~~
+
+And post it to your blog like so:
+
+~~~bash
+    easyblogger file MyBlogPost.md
+~~~
+
+And `easyblogger` will update your post doc back with the `postId` of the generated post. Now, if you edit the
+doc and publish again with the same command, your post will be updated.
 
 ### Deleting posts
 
