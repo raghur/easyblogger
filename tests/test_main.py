@@ -1,6 +1,7 @@
 from unittest import TestCase
 from mock import Mock, call
 from blogger import blogger
+from oauth2client.client import AccessTokenRefreshError
 
 
 class MainTests(TestCase):
@@ -49,6 +50,23 @@ class MainTests(TestCase):
         blogger.runner(args, blogObj)
 
         blogObj.getPosts.assert_called_with(postId="100")
+
+    def test_should_return_error_exit_code_on_exception(self):
+        args = blogger.parse_args(['get', "-p", "100"])
+        blogObj = Mock()
+        blogObj.getPosts.side_effect = AccessTokenRefreshError
+
+        rval = blogger.runner(args, blogObj)
+        assert rval == -1
+
+    def test_should_invoke_bylabel_bydefault(self):
+        args = blogger.parse_args(['get'])
+        blogObj = Mock()
+        blogObj.getPosts.return_value = MainTests.posts
+
+        blogger.runner(args, blogObj)
+
+        blogObj.getPosts.assert_called_with(labels = None, maxResults = 10)
 
     def test_should_invoke_search(self):
         args = blogger.parse_args(['get', "-q", "query"])
