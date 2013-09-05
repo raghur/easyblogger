@@ -472,7 +472,7 @@ Format      : {3}
 -->
 
 {4}
-    """
+"""
     if not "items" in posts:
         return
     if docFormat:
