@@ -1,9 +1,10 @@
 from unittest import TestCase
-from mock import Mock, DEFAULT,  MagicMock
+from mock import Mock, DEFAULT, MagicMock
 from blogger import blogger
 
 
 class ContentArgParserTests(TestCase):
+
     def test_should_infer_args_from_content(self):
         theFile = Mock()
         theFile.read.return_value = """
@@ -75,6 +76,7 @@ class ContentArgParserTests(TestCase):
         assert args.labels == ""
         assert args.format == "markdown"
         assert args.command == "post"
+
     def test_should_handle_empty_file(self):
         theFile = Mock()
         fileContent = """
@@ -96,8 +98,8 @@ class ContentArgParserTests(TestCase):
         theFile = Mock()
         fileContent = """
             <!--
-            format : markdown_strict 
-            
+            format : markdown_strict
+
             -->
         """
         theFile.read.return_value = fileContent

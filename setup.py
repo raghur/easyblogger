@@ -1,6 +1,7 @@
 import os
 from setuptools import setup
 
+
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
@@ -8,7 +9,7 @@ setup(name="EasyBlogger",
       version="0.0.4",
       author="Raghu Rajagopalan",
       author_email="raghu.nospam@gmail.com",
-      description = ("A (very) easy CLI interface to Blogger blogs"),
+      description=("A (very) easy CLI interface to Blogger blogs"),
       license = "BSD",
       keywords = "blogger, cli",
       url = "https://bitbucket.org/raghur/vim-blogger",
@@ -18,10 +19,10 @@ setup(name="EasyBlogger",
           'google-api-python-client',
           'python-gflags',
           'httplib2'
-          ],
+      ],
       entry_points = {
-                     'console_scripts': [
-                         'easyblogger = blogger.blogger:main'
+          'console_scripts': [
+    'easyblogger = blogger.blogger:main'
                          ]
                      },
       long_description='see https://bitbucket.org/raghur/vim-blogger',

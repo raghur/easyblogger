@@ -4,6 +4,7 @@ from blogger import EasyBlogger
 
 
 class PostsTests(TestCase):
+
     def setUp(self):
         self.blogger = EasyBlogger("id", "secret", "1234")
         self.blogger.service = Mock()
@@ -89,6 +90,9 @@ class PostsTests(TestCase):
         self.blogger.post("t", fileMock, "a,b,c", fmt="markdown")
 
         fileMock.read.assert_called()
-        converterMock.convert.assert_called_with("filecontent", 'html', format="markdown")
+        converterMock.convert.assert_called_with(
+            "filecontent",
+            'html',
+            format="markdown")
         self.posts.insert.assert_called()
         req.execute.assert_called()

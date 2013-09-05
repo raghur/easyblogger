@@ -4,6 +4,7 @@ from blogger import EasyBlogger
 
 
 class UpdateDeleteTests(TestCase):
+
     def setUp(self):
         self.blogger = EasyBlogger("id", "secret", "1234")
         self.blogger.service = Mock()

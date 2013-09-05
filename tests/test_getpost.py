@@ -5,6 +5,7 @@ from apiclient.errors import HttpError
 
 
 class GetPostsTests(TestCase):
+
     def setUp(self):
         self.blogger = EasyBlogger("id", "secret", "1234")
         self.blogger.service = Mock()
@@ -19,22 +20,28 @@ class GetPostsTests(TestCase):
         # act
         self.blogger.getPosts(labels="abc", maxResults=4)
 
-        #assert
-        posts.list.assert_called_with(blogId="1234", labels="abc", maxResults=4)
+        # assert
+        posts.list.assert_called_with(
+            blogId="1234",
+            labels="abc",
+            maxResults=4)
 
     def test_should_default_search_by_labels(self):
         posts = self.blogger.service \
-                        .posts       \
-                        .return_value
+            .posts       \
+            .return_value
         req = posts.get.return_value
         self.blogger.getPosts()
-        posts.list.assert_called_with(blogId=self.blogger.blogId, labels="", maxResults=1)
+        posts.list.assert_called_with(
+            blogId=self.blogger.blogId,
+            labels="",
+            maxResults=1)
         req.execute.assert_called()
 
     def test_should_use_search_when_query_is_provided(self):
         posts = self.blogger.service \
-                        .posts       \
-                        .return_value
+            .posts       \
+            .return_value
         req = posts.get.return_value
         self.blogger.getPosts(query="test")
         posts.search.assert_called_with(blogId=self.blogger.blogId, q="test")
@@ -42,8 +49,8 @@ class GetPostsTests(TestCase):
 
     def test_should_get_blog_by_id(self):
         posts = self.blogger.service \
-                        .posts       \
-                        .return_value
+            .posts       \
+            .return_value
         req = posts.get.return_value
         item = {"id": 23234}
         req.execute.return_value = item
@@ -59,8 +66,8 @@ class GetPostsTests(TestCase):
     def test_should_return_empty_array_when_id_not_found(self):
 
         posts = self.blogger.service \
-                        .posts       \
-                        .return_value
+            .posts       \
+            .return_value
         req = posts.get.return_value
         resp = Mock()
         resp.status = 404
@@ -75,8 +82,8 @@ class GetPostsTests(TestCase):
 
     def test_should_rethrow_exception_other_than_404(self):
         posts = self.blogger.service \
-                .posts       \
-                .return_value
+            .posts       \
+            .return_value
         req = posts.get.return_value
         resp = Mock()
         resp.status = 401
