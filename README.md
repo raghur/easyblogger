@@ -84,7 +84,7 @@ permissions or if the auth token expires.
 
 ## Usage
 
-### Getting a list of posts
+### Getting posts
 
 ~~~bash
  # get a list of posts
@@ -109,6 +109,31 @@ permissions or if the auth token expires.
  # output field control
  easyblogger  get -p 3728334747597998671 -f "id,title,url,labels"
 3728334747597998671,Rewriting history with Git,http://blog.rraghur.in/2012/12/rewriting-history-with-git.html,[u'git', u'HOWTO', u'Tips']
+
+ # You can also get the output in your favourite lightweight markup syntax too!
+ # as markdown:
+ easyblogger --blogid 7642453 get -p 3728334747597998671 -d markdown
+
+ # This gets the post content, converts it to markdown and prints it on console
+ # It also includes a header that will allow you to edit the file and 
+ # update the post back with the file subcommand below
+
+ # If you'd rather have it write to a file, use:
+ easyblogger --blogid 7642453 get -p 3728334747597998671 -d markdown --tofiles
+
+ # File name is automatically derived from post title and format
+
+ # You can also do this for multiple posts
+ easyblogger --blogid 7642453 get -q vim -c 5 -d markdown
+
+ # This creates one file per post (--tofiles is considered true )
+
+ # values for -d are any of the output formats supported by pandoc
+ # Output formats: native, json, docx, odt, epub, epub3, fb2, html, html5, s5,
+                 slidy, slideous, dzslides, docbook, opendocument, latex, beamer,
+                 context, texinfo, man, markdown, markdown_strict,
+                 markdown_phpextra, markdown_github, markdown_mmd, plain, rst,
+                 mediawiki, textile, rtf, org, asciidoc
 ~~~
 
 ### Default Args file

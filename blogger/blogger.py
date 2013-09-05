@@ -15,6 +15,8 @@
 # limitations under the License.
 
 import os
+import os.path
+import urlparse
 import re
 import sys
 
@@ -270,7 +272,13 @@ def parse_args(sysargv):
     group.add_argument("-p", "--postId", help="the post id")
     group.add_argument("-l", "--labels", help="comma separated list of labels")
     group.add_argument("-q", "--query", help="search term")
-    get_parser.add_argument("-f", "--fields", help="fields to output", default="id,title,url")
+    output_format = get_parser.add_mutually_exclusive_group()
+    output_format.add_argument("-f", "--fields", help="fields to output", default="id,title,url")
+    output_format.add_argument("-d", "--doc",
+                               help="Output as document - use one of the output formats supported by pandoc")
+    get_parser.add_argument("--tofiles",
+                            help="write output files (only used with --doc). True if more than one post is retrieved",
+                            action="store_true")
     get_parser.add_argument("-c", "--count", type=int, help="count", default=10)
 
     post_parser = subparsers.add_parser("post", help="create a new post")
@@ -359,7 +367,7 @@ def runner(args, blogger):
             else:
                 posts = blogger.getPosts(labels=args.labels, maxResults=args.count)
             printJson(posts)
-            printPosts(posts, args.fields)
+            printPosts(posts, args.fields, args.doc, args.tofiles)
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
@@ -368,9 +376,42 @@ def runner(args, blogger):
         return -1
     return 0
 
+def getFilenameFromPostUrl(url, format):
+    urlp = urlparse.urlparse(url)
+    filename = os.path.basename(urlp.path)
+    return os.path.splitext(filename)[0] + "." + format
 
-def printPosts(posts, fields):
+
+def printPosts(posts, fields, docFormat=None, writeToFiles = False):
+    template = """<!--
+Title       : {0}
+PostId      : {1}
+Labels      : {2}
+Format      : {3}
+-->
+
+{4}
+    """
     if not "items" in posts:
+        return
+    if docFormat:
+        if len(posts["items"]) > 1:
+            writeToFiles = True
+        for item in posts["items"]:
+            converted = pypandoc.convert(item["content"].encode('utf-8', 'ignore'), docFormat, format="html")
+            content = template.format(
+                    item["title"],
+                    item['id'],
+                    ",".join(item["labels"]),
+                    docFormat,
+                    converted)
+            if writeToFiles:
+                filename = getFilenameFromPostUrl(item['url'], docFormat)
+                logger.info(filename)
+                with open(filename, "w") as outputFile:
+                    outputFile.write(content)
+            else:
+                print content
         return
     if isinstance(fields, basestring):
         fields = fields.split(",")
