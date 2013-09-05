@@ -408,7 +408,7 @@ Format      : {3}
             if writeToFiles:
                 filename = getFilenameFromPostUrl(item['url'], docFormat)
                 logger.info(filename)
-                with open(filename, "w") as outputFile:
+                with open(filename, "wb") as outputFile:
                     outputFile.write(content)
             else:
                 print content
