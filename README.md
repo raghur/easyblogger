@@ -11,7 +11,9 @@ I tried. Didn't work. `googlecl` is just too rough and isn't easy to script. For
 ## So what does this do?
 1. Provides a command line tool and create, update or delete posts on Blogger hosted blogs.
 2. Post content can be piped in - so you can use your favourite way to generate html markup
-2. Integrates with Pandoc natively, so that you can write your doc in any of the input formats that Pandoc supports
+2. Pandoc goodness -  so that you can write your doc in any of the input formats that Pandoc supports
+3. You can also export your existing posts to your favourite lightweight markup format like markdown etc as individual
+ files. Then edit them in a real editor, and publish them back! All pandoc output formats!
 3. Understands specially marked comments - so you can just hand it a file and it'll figure out what to do - great for
 posting from vim etc.
 
@@ -19,10 +21,12 @@ posting from vim etc.
 
 ## Installation
 
-~~~bash
-sudo pip install git+https://raghur@bitbucket.org/raghur/easyblogger#egg=EasyBlogger
+~~~{.bash}
+# Now live on PyPI
+sudo pip install EasyBlogger
 ~~~
 This installs EasyBlogger and its dependencies. It also installs the `easyblogger` script
+
 ### Pandoc
 Install [pandoc](http://johnmacfarlane.net/pandoc/installing.html)
 If you're on cygwin, you can just install the windows dl and put `pandoc.exe` somewhere on path
@@ -33,108 +37,123 @@ The tool needs to be granted access to manage the blog. Google APIs use OAuth2.
 1. First, get your blog id. You can find the blog id by viewing the source. For ex. on my blog, I have the following
 lines near the top:
 
-~~~html
+    ~~~html
     <link rel="alternate" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://blog.rraghur.in/feeds/posts/default" />
     <link rel="alternate" type="application/rss+xml" title="Nifty Tidbits - RSS" href="http://blog.rraghur.in/feeds/posts/default?alt=rss" />
     <link rel="service.post" type="application/atom+xml" title="Nifty Tidbits - Atom" href="http://www.blogger.com/feeds/7642453/posts/default" />
-~~~
-On the last link, the number `7642453` is the blogId
+    ~~~
+    On the last link, the number `7642453` is the blogId
 
 1. Authorize
 
-**On Linux**
+    **On Linux**
 
-~~~bash
- # run through OAuth2 hoops... following needs to be run as root
- # First find your blog Id
+    ~~~bash
+     # run through OAuth2 hoops... following needs to be run as root
+     # First find your blog Id
 
- sudo easyblogger --blogid <yourblogid> get
+     sudo easyblogger --blogid <yourblogid> get
 
- # This will first open a browser and ask you to sign in and
- # approve access to your blog
-~~~
+     # This will first open a browser and ask you to sign in and
+     # approve access to your blog
+    ~~~
 
-This will open a browser. You may see a chrome warning that it can't
-be run as root - but you can ignore that.
-Once you authorize, `~/.easyblogger.credentials` is created with your OAuth2 token
+    This will open a browser. You may see a chrome warning that it can't
+    be run as root - but you can ignore that.
+    Once you authorize, `~/.easyblogger.credentials` is created with your OAuth2 token
 
-Since the file is created as root, you will need to change ownership of the
-`~/.easyblogger.credentials` file.
+    Since the file is created as root, you will need to change ownership of the
+    `~/.easyblogger.credentials` file.
 
-~~~bash
- # Change ownership
-sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
-~~~
+    ~~~bash
+     # Change ownership
+    sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
+    ~~~
 
-**On Windows**
+    **On Windows**
 
-If your `PATH` variable has the python Scripts folder, then you should just 
-be able to run `easyblogger --blogid <id> get` in a command window. If not, 
-then open a `cmd` window and navigate to  `<python install folder>\Scripts` 
-and run `python easyblogger --blogid <yourblogid> get` 
+    If your `PATH` variable has the python Scripts folder, then you should just 
+    be able to run `easyblogger --blogid <id> get` in a command window. If not, 
+    then open a `cmd` window and navigate to  `<python install folder>\Scripts` 
+    and run `python easyblogger --blogid <yourblogid> get` 
 
-All set!
+3. All set!
 
-That's it - you're all set!
+    That's it - you're all set!
 
-You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
-permissions or if the auth token expires.
-
-
+    You will need to repeat the OAuth2 authorization process if you ever change the blog, or revoke
+    permissions or if the auth token expires.
 
 ## Usage
 
 ### Getting posts
 
-~~~bash
- # get a list of posts
- # param : Blog Id - look at your blog's atom pub url - its the number in the url.
- easyblogger --blogid 7642453 get
+1. Get a list of posts
+    post Id, title and url are output by default.
 
- 4424091495287409038,Moving from Wordpress.com to Blogger,http://blog.rraghur.in/2013/08/moving-from-wordpresscom-to-blogger.html
- ...
- ...
- # 10 rows shown
+    ~~~bash
+     # get a list of posts
+     # param : Blog Id - look at your blog's atom pub url - its the number in the url.
+     easyblogger --blogid 7642453 get
 
- # get only the last 5 with tag 'vim'
- # you can specify multiple tags - separate them with commas
- easyblogger --blogid 7642453 get -l vim -c 5
+     4424091495287409038,Moving from Wordpress.com to Blogger,http://blog.rraghur.in/2013/08/moving-from-wordpresscom-to-blogger.html
+     ...
+     ...
+     # 10 rows shown
+    ~~~
+2. Filter by labels or search; specify `max` results to be returned.
 
- # search for all posts with 'vim'
- easyblogger --blogid 7642453 get -q vim -c 5
+    ~~~bash
+    # get only the last 5 with tag 'vim'
+    # you can specify multiple tags - separate them with commas
+    easyblogger --blogid 7642453 get -l vim -c 5
 
- # get a specific post by id
- easyblogger --blogid 7642453 get -p 3728334747597998671
+    # search for all posts with 'vim'
+    easyblogger --blogid 7642453 get -q vim -c 5
+    ~~~
 
- # output field control
- easyblogger  get -p 3728334747597998671 -f "id,title,url,labels"
-3728334747597998671,Rewriting history with Git,http://blog.rraghur.in/2012/12/rewriting-history-with-git.html,[u'git', u'HOWTO', u'Tips']
+3. Get a specific post by its id
 
- # You can also get the output in your favourite lightweight markup syntax too!
- # as markdown:
- easyblogger --blogid 7642453 get -p 3728334747597998671 -d markdown
+    ~~~bash
+    # get a specific post by id
+    easyblogger --blogid 7642453 get -p 3728334747597998671
+    ~~~
+4. Control which fields are printed out.
 
- # This gets the post content, converts it to markdown and prints it on console
- # It also includes a header that will allow you to edit the file and 
- # update the post back with the file subcommand below
+    ~~~bash
+    # output field control
+    easyblogger  get -p 3728334747597998671 -f "id,title,url,labels"
+    3728334747597998671,Rewriting history with Git,http://blog.rraghur.in/2012/12/rewriting-history-with-git.html,[u'git', u'HOWTO', u'Tips']
+    ~~~
 
- # If you'd rather have it write to a file, use:
- easyblogger --blogid 7642453 get -p 3728334747597998671 -d markdown --tofiles
+5. Output in (lightweight) markup - very good for updates.
+    * If its a single post, then its printed to console.
 
- # File name is automatically derived from post title and format
+        ~~~bash
+        easyblogger --blogid 7642453 get -p 3728334747597998671 -d markdown
+        ~~~
 
- # You can also do this for multiple posts
- easyblogger --blogid 7642453 get -q vim -c 5 -d markdown
+        It also includes a header that will allow you to edit the file and update the post back with the file subcommand below
 
- # This creates one file per post (--tofiles is considered true )
+    * if more than one post, then each post is written to a file (name derived from the title)
+        
+        ~~~{class="bash"}
+        easyblogger --blogid 7642453 get -l vim -d markdown
+        ~~~
+    * If you'd like to get a single post as a file, specific `-w` or `--write-files`
+        
+        ~~~{class="bash"}
+        easyblogger --blogid 7642453 get -p 3728334747597998671 -d markdown --write-files
+        ~~~
+    * Supports all mark up formats supported by `pandoc`
 
- # values for -d are any of the output formats supported by pandoc
- # Output formats: native, json, docx, odt, epub, epub3, fb2, html, html5, s5,
+        ~~~{class="bash"}
+        # Output formats: native, json, docx, odt, epub, epub3, fb2, html, html5, s5,
                  slidy, slideous, dzslides, docbook, opendocument, latex, beamer,
                  context, texinfo, man, markdown, markdown_strict,
                  markdown_phpextra, markdown_github, markdown_mmd, plain, rst,
                  mediawiki, textile, rtf, org, asciidoc
-~~~
+        ~~~
 
 ### Default Args file
 Specifying --blogid each time is just painful. You can set a default blogId by creating a default args file `~/.easyblogger` as follows:
@@ -159,36 +178,51 @@ Please ask for this feature on Google's blogger dev group - I'll add that capabi
 
 ~~~bash
  # create a post from stdin with title and labels
-easyblogger --blogid 6136696198547817747 post -t "Hello World" -l "python,hello" -
+easyblogger post -t "Hello World" -l "python,hello"  -f -
 Hello world!!!
 4345108299270352601
+~~~
 
- # pipe out from pandoc or any other conversion - choose your poison
-pandoc -f markdown -  | easyblogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc'
+Pipe out from any HTML generation mechanism
+
+~~~bash
+pandoc -f markdown -  | easyblogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc' -f -
  # Hello from Pandoc
 this is a nice long post
 
 3295765957555899963
+~~~
 
- # Or just tell easyblogger to convert markdown using pandoc with the --md arg
-easyblogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc' --md -f -
+Or just tell easyblogger to convert from `markdown` with the --format arg
+
+~~~bash
+ # --format supports 
+ #                native,json,markdown,
+ #                markdown_strict,markdown_phpextra,
+ #                markdown_mmd,rst,mediawiki,
+ #                docbook,textile,html,latex
+easyblogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc' --format markdown -f -
 Type anything in markdown
 
 2342323423423423423
 ~~~
 
+
 ### Update posts
 
 Update works with a patch request - only specify what you need changed
-Blogger API does not allow the blog permalink to be updated - so in case you want to change that you'll need to delete and create another post (though you will probably lose comments etc - so only viable if you've just published it)
+Blogger API does not allow the blog permalink to be updated - so in case 
+you want to change that you'll need to delete and create another post 
+(though you will probably lose comments etc - so only viable 
+if you've just published it)
 
 ~~~bash
  easyblogger update -t 'A new title' -l "new,labels" 3295765957555899963
+~~~
 
- # you can also update the contents by passing in the --file argument
+You can also update the contents by passing in the --file argument. Piping it in works too - use --file -; like so
 
- # pipe it in too - use --file -; like so
-
+~~~bash
  pandoc -f markdown -  | easyblogger  update -t 'Hello from Pandoc' --file - 3295765957555899963
  # This is h1
  ## this is h2
@@ -203,6 +237,7 @@ Blogger API does not allow the blog permalink to be updated - so in case you wan
 I wrote `easyblogger` script primarily so I can blog from Vim. If your file has properly formatted comments, then `EasyBlogger` will figure out what to do (insert or update) based on the metadata.
 
 So, you can author a post like so:
+
 ~~~bash
     cat MyBlogPost.md
     <!--
