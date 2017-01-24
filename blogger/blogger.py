@@ -33,7 +33,6 @@ from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client.client import AccessTokenRefreshError
 from oauth2client.client import OAuth2WebServerFlow
-from oauth2client.tools import run
 
 logger = logging.getLogger()
 logging.basicConfig()
@@ -101,7 +100,8 @@ class EasyBlogger(object):
         # which updates the credentials.dat file.
 
         if credentials is None or credentials.invalid:
-            credentials = run(flow, storage)
+            flags = tools.argparser.parse_args(args=[])
+            credentials = tools.run_flow(flow, storage, flags)
 
         # Create an httplib2.Http object to handle our HTTP requests, and authorize it
         # using the credentials.authorize() function.
