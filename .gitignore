@@ -1,2 +1,5 @@
 credentials.dat
 *.pyc
+.ropeproject/
+EasyBlogger.egg-info/
+dist/
