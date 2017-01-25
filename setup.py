@@ -6,7 +6,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(name="EasyBlogger",
-      version="0.9.1",
+      version="0.9.2",
       author="Raghu Rajagopalan",
       author_email="raghu.nospam@gmail.com",
       description=("A (very) easy CLI interface to Blogger blogs"),

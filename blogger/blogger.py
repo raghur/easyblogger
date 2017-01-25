@@ -420,20 +420,20 @@ def runner(args, blogger):
             postId = newPost['id']
             if contentArgs:
                 contentArgs.updateFileWithPostId(postId)
-            else:
-                print postId
+            print newPost['url']
 
         if args.command == 'delete':
             for postId in args.postIds:
                 blogger.deletePost(postId)
 
         if args.command == 'update':
-            blogger.updatePost(
+            updated = blogger.updatePost(
                 args.postId,
                 args.title,
                 args.content or args.file,
                 args.labels,
                 fmt=args.format)
+            print updated['url']
 
         if args.command == "get":
             if args.postId:
