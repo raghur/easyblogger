@@ -10,25 +10,25 @@ setup(name="EasyBlogger",
       author="Raghu Rajagopalan",
       author_email="raghu.nospam@gmail.com",
       description=("A (very) easy CLI interface to Blogger blogs"),
-      license = "BSD",
-      keywords = "blogger, cli",
-      url = "https://bitbucket.org/raghur/easyblogger",
+      license="BSD",
+      keywords="blogger, cli",
+      url="https://github.com/raghur/easyblogger",
       packages=['blogger'],
-      install_requires = [
+      install_requires=[
           'pypandoc',
           'google-api-python-client',
           'python-gflags',
           'httplib2'
       ],
-      entry_points = {
+      entry_points={
           'console_scripts': [
-    'easyblogger = blogger.blogger:main'
-                         ]
-                     },
+              'easyblogger = blogger.blogger:main'
+          ]
+      },
       long_description='see https://bitbucket.org/raghur/easyblogger',
       classifiers=[
           "Development Status :: 4 - Beta",
           "Topic :: Utilities",
           "License :: OSI Approved :: BSD License",
-          ],
-)
+      ],
+      )
