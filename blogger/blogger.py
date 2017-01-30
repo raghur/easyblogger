@@ -16,7 +16,26 @@
 
 import os
 import os.path
-import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+     from urlparse import urlparse
+
+try:
+    unicode = unicode
+except NameError:
+    # 'unicode' is undefined, must be Python 3
+    str = str
+    unicode = str
+    bytes = bytes
+    basestring = (str,bytes)
+else:
+    # 'unicode' exists, must be Python 2
+    str = str
+    unicode = unicode
+    bytes = str
+    basestring = basestring
+    
 import re
 import sys
 
@@ -420,7 +439,7 @@ def runner(args, blogger):
             postId = newPost['id']
             if contentArgs:
                 contentArgs.updateFileWithPostId(postId)
-            print newPost['url']
+            print(newPost['url'])
 
         if args.command == 'delete':
             for postId in args.postIds:
@@ -433,7 +452,7 @@ def runner(args, blogger):
                 args.content or args.file,
                 args.labels,
                 fmt=args.format)
-            print updated['url']
+            print(updated['url'])
 
         if args.command == "get":
             if args.postId:
@@ -496,13 +515,13 @@ Format      : {3}
                 with open(filename, "wb") as outputFile:
                     outputFile.write(content)
             else:
-                print content
+                print(content)
         return
     if isinstance(fields, basestring):
         fields = fields.split(",")
     for item in posts['items']:
         line = [str(item[k]) for k in fields if k in item]
-        print ",".join(line)
+        print(",".join(line))
 
 
 def printJson(data):
