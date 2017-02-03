@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #
-# Copyright 2012 Google Inc. All Rights Reserved.
+# Copyright 2012 Raghu Rajagopalan. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -540,5 +540,3 @@ def printJson(data):
 if __name__ == '__main__':
     # print sys.argv
     main()
-
-
