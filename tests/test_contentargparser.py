@@ -59,7 +59,7 @@ class ContentArgParserTests(TestCase):
         assert args.format == "markdown"
         assert args.command == "post"
 
-    def test_should_infer_args_for_post2(self):
+    def test_should_infer_args_for_post3(self):
         theFile = Mock()
         theFile.read.return_value = """
             <!--
