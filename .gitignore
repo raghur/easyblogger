@@ -5,3 +5,4 @@ EasyBlogger.egg-info/
 dist/
 .dev/
 .tox/
+.coverage
