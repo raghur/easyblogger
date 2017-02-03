@@ -3,5 +3,5 @@ credentials.dat
 .ropeproject/
 EasyBlogger.egg-info/
 dist/
-.venv/
+.dev/
 .tox/

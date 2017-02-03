@@ -340,3 +340,18 @@ If you're integrating by shelling out, then stick the API key and client
 id in the command line with ``--clientid`` and ``--secret`` args. You
 can also stick them in the ``~/.easyblogger`` file to avoid specifying
 them each time
+
+Dev Guide
+=============
+
+1. Clone the repo
+2. Start a virtualenv - ``virtualenv .dev``
+3. Activate it - ``.dev\Scripts\activate``
+3. Install dependencies - ``pip install -r requirements.txt``
+4. ``pip install -e .``
+
+Running tests
+~~~~~~~~~~~~~~~
+
+1. Exit out of any virtualenvs 
+2. Run ``tox``
