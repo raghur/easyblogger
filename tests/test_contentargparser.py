@@ -116,7 +116,7 @@ class ContentArgParserTests(TestCase):
 
     def test_should_update_doc_with_postid(self):
         def validateFileContent(content):
-            print content
+            print (content)
             assert blogger.ContentArgParser.rePostId.search(content)
             return DEFAULT
 
@@ -126,6 +126,12 @@ class ContentArgParserTests(TestCase):
             format: markdown_strict
             -->
         """
+        try:
+            from io import RawIOBase
+            file=RawIOBase
+        except ImportError:
+            # do nothing
+            pass
         theFile = MagicMock(spec=file)
         theFile.name = "thefilename"
         theFile.read.return_value = fileContent
@@ -139,5 +145,5 @@ class ContentArgParserTests(TestCase):
         parser.updateFileWithPostId("1000")
 
         mock_open.assert_called_with(theFile.name, "w")
-        theFile.flush.assert_called()
+        fileHandle.flush.assert_called()
         fileHandle.write.assert_called()

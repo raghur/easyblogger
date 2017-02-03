@@ -17,7 +17,7 @@ class MainTests(TestCase):
     def test_should_invoke_post(self):
         args = blogger.parse_args(['post', "-t", "t", "-c", "content"])
         blogObj = Mock()
-        blogObj.post.return_value = {"id": "100"}
+        blogObj.post.return_value = {"id": "100", "url":"someurl"}
 
         exitStatus = blogger.runner(args, blogObj)
 
@@ -38,7 +38,9 @@ class MainTests(TestCase):
         args = blogger.parse_args(
             ['update', "-t", "t", "-c", "content", "100"])
         blogObj = Mock()
+        blogObj.updatePost.return_value = {"id": "100", "url":"someurl"}
 
+        
         blogger.runner(args, blogObj)
 
         blogObj.updatePost.assert_called_with(

@@ -1,2 +1,2 @@
-import blogger
+from .blogger import *
 

@@ -4,3 +4,4 @@ credentials.dat
 EasyBlogger.egg-info/
 dist/
 .venv/
+.tox/

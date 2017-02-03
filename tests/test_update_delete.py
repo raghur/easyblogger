@@ -20,10 +20,10 @@ class UpdateDeleteTests(TestCase):
             return DEFAULT
 
         self.posts.patch.side_effect = validateBody
-        req = self.posts.return_value
 
         self.blogger.updatePost("4321", "t", "c", "l")
 
+        req = self.posts.patch.return_value
         self.posts.patch.assert_called()
         assert self.posts.patch.call_count == 1
         req.execute.assert_called()
@@ -38,10 +38,10 @@ class UpdateDeleteTests(TestCase):
             return DEFAULT
 
         self.posts.patch.side_effect = validateBody
-        req = self.posts.return_value
 
         self.blogger.updatePost("4321", "t", "c", ["l"])
 
+        req = self.posts.patch.return_value
         self.posts.patch.assert_called()
         assert self.posts.patch.call_count == 1
         req.execute.assert_called()
@@ -56,4 +56,4 @@ class UpdateDeleteTests(TestCase):
         self.blogger.deletePost("12345")
 
         self.posts.delete.assert_called_with(blogId="1234", postId="12345")
-        req.assert_called()
+        req.execute.assert_called()

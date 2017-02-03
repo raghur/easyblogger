@@ -4,6 +4,11 @@ from blogger import EasyBlogger
 from apiclient.errors import HttpError
 
 
+try:
+    content=bytes("", "UTF-8")
+except TypeError:
+    content=bytes("")
+
 class GetPostsTests(TestCase):
 
     def setUp(self):
@@ -30,7 +35,7 @@ class GetPostsTests(TestCase):
         posts = self.blogger.service \
             .posts       \
             .return_value
-        req = posts.get.return_value
+        req = posts.list.return_value
         self.blogger.getPosts()
         posts.list.assert_called_with(
             blogId=self.blogger.blogId,
@@ -42,7 +47,7 @@ class GetPostsTests(TestCase):
         posts = self.blogger.service \
             .posts       \
             .return_value
-        req = posts.get.return_value
+        req = posts.search.return_value
         self.blogger.getPosts(query="test")
         posts.search.assert_called_with(blogId=self.blogger.blogId, q="test")
         req.execute.assert_called()
@@ -71,7 +76,7 @@ class GetPostsTests(TestCase):
         req = posts.get.return_value
         resp = Mock()
         resp.status = 404
-        req.execute.side_effect = HttpError(resp, "")
+        req.execute.side_effect = HttpError(resp, content)
 
         post = self.blogger.getPosts(postId="234")
 
@@ -87,7 +92,7 @@ class GetPostsTests(TestCase):
         req = posts.get.return_value
         resp = Mock()
         resp.status = 401
-        req.execute.side_effect = HttpError(resp, "")
+        req.execute.side_effect = HttpError(resp, content)
 
         with self.assertRaises(HttpError):
             post = self.blogger.getPosts(postId="234")
