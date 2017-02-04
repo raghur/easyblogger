@@ -14,12 +14,26 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import argparse
+import json
+import logging
 import os
 import os.path
+import re
+import sys
+
+import httplib2
+import pypandoc
+from apiclient.discovery import build
+from apiclient.errors import HttpError
+from oauth2client import tools
+from oauth2client.client import AccessTokenRefreshError, OAuth2WebServerFlow
+from oauth2client.file import Storage
+
 try:
     from urllib.parse import urlparse
 except ImportError:
-     from urlparse import urlparse
+    from urlparse import urlparse
 
 try:
     unicode = unicode
@@ -28,30 +42,17 @@ except NameError:
     str = str
     unicode = str
     bytes = bytes
-    basestring = (str,bytes)
+    basestring = (str, bytes)
 else:
     # 'unicode' exists, must be Python 2
     str = str
     unicode = unicode
     bytes = str
     basestring = basestring
-    
-import re
-import sys
 
-import logging
 
-import argparse
-import pypandoc
-import json
-import httplib2
 
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from oauth2client import tools
-from oauth2client.file import Storage
-from oauth2client.client import AccessTokenRefreshError
-from oauth2client.client import OAuth2WebServerFlow
+
 
 logger = logging.getLogger()
 logging.basicConfig()
@@ -470,8 +471,8 @@ def runner(args, blogger):
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
-        print ('The credentials have been revoked or expired, please re-run'
-               'the application to re-authorize')
+        print('The credentials have been revoked or expired, please re-run'
+              'the application to re-authorize')
         return -1
     return 0
 

@@ -5,9 +5,10 @@ from apiclient.errors import HttpError
 
 
 try:
-    content=bytes("", "UTF-8")
+    content = bytes("", "UTF-8")
 except TypeError:
-    content=bytes("")
+    content = bytes("")
+
 
 class GetPostsTests(TestCase):
 

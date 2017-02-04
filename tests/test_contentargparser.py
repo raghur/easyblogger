@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mock import Mock, DEFAULT, MagicMock
+from mock import DEFAULT, MagicMock, Mock
 from blogger import blogger
 
 
@@ -116,7 +116,7 @@ class ContentArgParserTests(TestCase):
 
     def test_should_update_doc_with_postid(self):
         def validateFileContent(content):
-            print (content)
+            print(content)
             assert blogger.ContentArgParser.rePostId.search(content)
             return DEFAULT
 
@@ -128,7 +128,7 @@ class ContentArgParserTests(TestCase):
         """
         try:
             from io import RawIOBase
-            file=RawIOBase
+            file = RawIOBase
         except ImportError:
             # do nothing
             pass
