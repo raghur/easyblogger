@@ -6,3 +6,5 @@ dist/
 .dev/
 .tox/
 .coverage
+.vscode/
+.noseids
