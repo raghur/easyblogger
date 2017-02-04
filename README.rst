@@ -1,7 +1,7 @@
-|Build Status| |Coverage Status|
-
 EasyBlogger
 ===========
+
+|Build Status| |Coverage Status|
 
 Blog to blogger from the command line.
 

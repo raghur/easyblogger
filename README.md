@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/raghur/easyblogger.svg?branch=master)](https://travis-ci.org/raghur/easyblogger)
-[![Coverage Status](https://coveralls.io/repos/github/raghur/easyblogger/badge.svg?branch=master)](https://coveralls.io/github/raghur/easyblogger?branch=master)
-
 EasyBlogger
 ===========
+
+[![Build Status](https://travis-ci.org/raghur/easyblogger.svg?branch=master)](https://travis-ci.org/raghur/easyblogger)
+[![Coverage Status](https://coveralls.io/repos/github/raghur/easyblogger/badge.svg?branch=master)](https://coveralls.io/github/raghur/easyblogger?branch=master)
 
 Blog to blogger from the command line.
 
