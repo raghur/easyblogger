@@ -1,12 +1,17 @@
 language: python
 python:
-    - "2.7"
-    - "3.5"
-    - "3.6"
-install: 
-    - pip install -r requirements.txt
-    - pip install coveralls
-script:
-    coverage run --source=blogger -m nose2
-after_success:
-    coveralls
+- '2.7'
+- '3.5'
+- '3.6'
+install:
+- pip install -r requirements.txt
+- pip install coveralls
+script: coverage run --source=blogger -m nose2
+after_success: coveralls
+notifications:
+  pushover:
+    api_key:
+      secure: Sf9GVKM23O2G45uDBajBm0+phkKTiMCSjjzMCaBOhrvN57D6kXZhQnaoXMiTbR4nU8jjHPCT5O0L87hnteLiN1Zr0fj2seHX5aD1wSUjcpF9yLNyYC1JfyOY3OZquWX0oFchXdP7ZJcS7eqdw0V44I5sBr87XEiwSvFW2m+tkbCixlVqG5aqp1vpbYdGNZxA203tTsuJ1NIzePVmHggSUZLcfqCQow+bZCfUdDy0PSCf8MhFtwLkK0UtD+SjznFvKTcF7Oy7tKyIDW4hFMvO2oJr8dIuWCNUCY4w+3kK3OSZbLss8WDrbMB8bB6s1inQyTuSC2f2UD5SlqapZaW6NtUuNI2T+B3ugIxRgaICxBKRSsHodVC7rrxBSXPLqRvFubxGTto5mzuN9VrrNciDzcNFAm+E5I/1FyEZh/ChMMhr4WRSA6JMzkxTjrfkJaqFPUUU9WL6AgJbjRSn1TOR5QIPD0bHX/Vqzn8oWnlvTFNSmdVtRWoRbkbGiJ/UiE04auEDF/cHCUOvf0wMpGaX3gsxBwf+0kfxspQtWdY9oezcWMaCOIls8cZKv8JUdmdLgjeZl/c8hkD9L9889GLjZRv//LdvLflQKZgjH2nquQNDdy9ocgC/ueQKdddudQ+dzQPvfLFWt2bdTNUVjr7C6TV6mMTvqyxEuM0gLnZ2AMw=
+    users:
+      secure: V7qLMmTEY4gnRe70hZVL/dYsfOqrpn8aaL9erM5G+4MMROq2xnxsXkxUM47djP7/fiL0rQW1bUUw2dYNH+ex0bO8NW8qd03FELdRhj08JDVXWau/4t81UfnsF6izXvfdQxgBr8KYDA3LEfzSK6pbMtRzJEgy/svHPuutdcW2S0rvNWt7FHClCqU00SV2SlnaiTH2xDSPXkE5R6aYN1iDKzioNnrr13MsqR+xJ+aEISX5sFzLJL3CPgeF09U40BmLrXWN+Af9tjlxnkmXmc2CEcd1c+xTqd/RLYB9e4ybKea9k2G9eNHte4iXLCxaCGm1qSzOdNGxSuN/L/5vDbuCUTGa7jUmXnDurHmiGtde7gSrJlOYPbM5e5tUpSCLmlPK/nsYF01EzZe+piE4hoMVpp1T4xpVxm5weepJOjwEyyRhpbf6OaK7CqNze+jWlCvujwDMLABX0RVrDs8UlcvttiQctC6XAvFe/0lAN9Ay+bvJYSE0YN5tp9iSRVtB40Q6jkxa7dOLCYhkoRpezYYRSsG5//1BNgsEH7H/wyFtwo3RgTQfMMc89OkBd8Ek/O0cRTXM8+887IWF1Vp/iRJJag0WFm4LW+OPotdibGydcmUcAMHIw7OaloQnGEbgusURQv7jGrMtL/v6i441Ps8PsM2y90LdVsL7RuREOGD7NcQ=
+    template: "%{repository} (%{commit}) : %{message} %{foo} - Build details: %{build_url}"
