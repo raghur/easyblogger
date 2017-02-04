@@ -63,7 +63,8 @@ class GetPostsTests(TestCase):
 
         post = self.blogger.getPosts(postId="234")
 
-        posts.get.assert_called_with(blogId="1234", postId="234")
+        posts.get.assert_called_with(
+            blogId="1234", postId="234", view="AUTHOR")
         req.execute.assert_called()
         assert "items" in post
         assert len(post["items"]) == 1
@@ -81,7 +82,8 @@ class GetPostsTests(TestCase):
 
         post = self.blogger.getPosts(postId="234")
 
-        posts.get.assert_called_with(blogId="1234", postId="234")
+        posts.get.assert_called_with(
+            blogId="1234", postId="234", view="AUTHOR")
         req.execute.assert_called()
         assert "items" in post
         assert len(post["items"]) == 0
@@ -98,5 +100,6 @@ class GetPostsTests(TestCase):
         with self.assertRaises(HttpError):
             post = self.blogger.getPosts(postId="234")
 
-        posts.get.assert_called_with(blogId="1234", postId="234")
+        posts.get.assert_called_with(
+            blogId="1234", postId="234", view="AUTHOR")
         req.execute.assert_called()

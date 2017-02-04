@@ -12,6 +12,7 @@ class ContentArgParserTests(TestCase):
             Title: t
             Labels: l
             PostId: 234
+            Published: false
             -->
         """
         parser = blogger.ContentArgParser(theFile)
@@ -23,6 +24,7 @@ class ContentArgParserTests(TestCase):
         assert args.postId == "234"
         assert args.format == "markdown"
         assert args.command == "update"
+        assert args.publish == False
 
     def test_should_infer_args_for_post(self):
         theFile = Mock()
@@ -30,6 +32,7 @@ class ContentArgParserTests(TestCase):
             <!--
             Title: t
             Labels: l
+            Published: true
             -->
         """
         parser = blogger.ContentArgParser(theFile)
@@ -40,6 +43,7 @@ class ContentArgParserTests(TestCase):
         assert args.labels == "l"
         assert args.format == "markdown"
         assert args.command == "post"
+        assert args.publish
 
     def test_should_infer_args_for_post2(self):
         theFile = Mock()
@@ -58,6 +62,7 @@ class ContentArgParserTests(TestCase):
         assert args.labels == "l, a, c"
         assert args.format == "markdown"
         assert args.command == "post"
+        assert args.publish == False
 
     def test_should_infer_args_for_post3(self):
         theFile = Mock()
@@ -76,6 +81,7 @@ class ContentArgParserTests(TestCase):
         assert args.labels == ""
         assert args.format == "markdown"
         assert args.command == "post"
+        assert not args.publish
 
     def test_should_handle_empty_file(self):
         theFile = Mock()
@@ -93,6 +99,7 @@ class ContentArgParserTests(TestCase):
         assert args.format == "markdown"
         assert args.command == "post"
         assert args.content == fileContent
+        assert not args.publish
 
     def test_should_allow_format_to_be_specified(self):
         theFile = Mock()
@@ -113,6 +120,7 @@ class ContentArgParserTests(TestCase):
         assert "\n" not in args.format
         assert args.command == "post"
         assert args.content == fileContent
+        assert not args.publish
 
     def test_should_update_doc_with_postid(self):
         def validateFileContent(content):

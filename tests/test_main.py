@@ -16,12 +16,14 @@ class MainTests(TestCase):
 
     def test_should_invoke_post(self):
         args = blogger.parse_args(['post', "-t", "t", "-c", "content"])
+        print(args)
         blogObj = Mock()
-        blogObj.post.return_value = {"id": "100", "url":"someurl"}
+        blogObj.post.return_value = {"id": "100", "url": "someurl"}
 
         exitStatus = blogger.runner(args, blogObj)
 
-        blogObj.post.assert_called_with("t", "content", None, fmt="html")
+        blogObj.post.assert_called_with(
+            "t", "content", None, isDraft=True, fmt="html")
         assert exitStatus == 0
 
     def test_should_invoke_delete(self):
@@ -38,13 +40,12 @@ class MainTests(TestCase):
         args = blogger.parse_args(
             ['update', "-t", "t", "-c", "content", "100"])
         blogObj = Mock()
-        blogObj.updatePost.return_value = {"id": "100", "url":"someurl"}
+        blogObj.updatePost.return_value = {"id": "100", "url": "someurl"}
 
-        
         blogger.runner(args, blogObj)
 
         blogObj.updatePost.assert_called_with(
-            "100", "t", "content", None, fmt="html")
+            "100", "t", "content", None, isDraft=True, fmt="html")
 
     def test_should_invoke_getbyid(self):
         args = blogger.parse_args(['get', "-p", "100"])

@@ -152,7 +152,7 @@ class EasyBlogger(object):
             service = self._OAuth_Authenticate()
             if postId:
                 request = service.posts().get(
-                    blogId=self.blogId, postId=postId)
+                    blogId=self.blogId, postId=postId, view="AUTHOR")
                 post = request.execute()
                 return {"items": [post]}
             elif query:
@@ -194,7 +194,7 @@ class EasyBlogger(object):
         blogPost = {"content": markup, "title": title}
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
-        req = service.posts().insert(blogId=self.blogId, body=blogPost)
+        req = service.posts().insert(blogId=self.blogId, body=blogPost, isDraft=isDraft)
         return req.execute()
 
     def deletePost(self, postId):
@@ -220,11 +220,28 @@ class EasyBlogger(object):
         if content:
             blogPost['content'] = self._getMarkup(content, fmt)
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
-        req = service.posts().patch(
+
+        postStatus = service.posts().get(
             blogId=self.blogId,
             postId=postId,
-            body=blogPost)
-        return req.execute()
+            view="AUTHOR",
+            fields="status"
+        ).execute()['status']
+        # print("poststatus:", postStatus)
+        # print("isdraft:", isDraft)
+        mustRevert = postStatus != 'DRAFT' and isDraft
+        mustPublish = postStatus == 'DRAFT' and not isDraft
+        # print("must revert (postStatus != 'DRAFT' and isDraft):", mustRevert)
+        # print("must publish (postStatus == 'DRAFT' and not isDraft):", mustPublish )
+        if postStatus == "DRAFT":
+            service.posts().publish(blogId=self.blogId, postId=postId).execute()
+        resp = service.posts().patch(
+            blogId=self.blogId,
+            postId=postId,
+            body=blogPost,
+            revert=mustRevert,
+            publish=mustPublish).execute()
+        return resp
 
 
 class ContentArgParser(object):
@@ -232,6 +249,7 @@ class ContentArgParser(object):
     reLabels = re.compile("^\s*labels\s*:\s*([\w\d\- ,_]*)\s*$", re.I | re.M)
     reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
     reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
+    rePublishStatus = re.compile("^\s*published\s*:\s*(true|false)\s*$", re.I|re.M)
     rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I | re.M)
 
     def __init__(self, theFile, open=open):
@@ -258,6 +276,13 @@ class ContentArgParser(object):
             self.format = self.format.group(1).strip()
         else:
             self.format = "markdown"
+        
+        self.publishStatus = ContentArgParser.rePublishStatus.search(fileContent)
+        if self.publishStatus:
+            self.publishStatus = self.publishStatus.group(1).strip() == "true"
+        else:
+            self.publishStatus=False
+
         self.content = fileContent
 
     def updateArgs(self, args):
@@ -271,6 +296,7 @@ class ContentArgParser(object):
             args.command = "update"
         else:
             args.command = "post"
+        args.publish = self.publishStatus
 
     def updateFileWithPostId(self, postId):
         if self.theFile == sys.stdin:
@@ -346,6 +372,9 @@ def parse_args(sysargv):
         "-l",
         "--labels",
         help="comma separated list of labels")
+    post_parser.add_argument(
+        "--publish", action="store_true", 
+        help="Publish to the blog [default: false]")
     post_input = post_parser.add_mutually_exclusive_group(required=True)
     post_input.add_argument("-c", "--content", help="Post content")
     post_input.add_argument(
@@ -395,7 +424,11 @@ def parse_args(sysargv):
         "-l",
         "--labels",
         help="comma separated list of labels")
-
+    
+    update_parser.add_argument(
+        "--publish", action="store_true", 
+        help="Publish to the blog [default: false]")
+    
     file_parser = subparsers.add_parser(
         "file",
         help="Figure out what to do from the input file")
@@ -436,7 +469,7 @@ def runner(args, blogger):
         if args.command == "post":
             newPost = blogger.post(args.title,
                                    args.content or args.file,
-                                   args.labels, fmt=args.format)
+                                   args.labels, isDraft=not args.publish, fmt=args.format)
             postId = newPost['id']
             if contentArgs:
                 contentArgs.updateFileWithPostId(postId)
@@ -452,6 +485,7 @@ def runner(args, blogger):
                 args.title,
                 args.content or args.file,
                 args.labels,
+                isDraft=not args.publish,
                 fmt=args.format)
             print(updated['url'])
 

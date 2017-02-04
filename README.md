@@ -213,16 +213,19 @@ command line
 
 ### Create a new blog post
 
-Note: Blogger API v3 does not support/expose API for creating posts as
+~~Note: Blogger API v3 does not support/expose API for creating posts as
 drafts. Please ask for this feature on Google's blogger dev group - I'll
-add that capability once/if it becomes available.
+add that capability once/if it becomes available.~~
+
+Blogs are created as drafts by default now. You can override this with the `--publish` flag
+which will post the blog directly (current behavior)
 
 ``` {.sourceCode .bash}
 # create a post from stdin with title and labels
-```
 
-> easyblogger post -t "Hello World" -l "python,hello" -f -Hello world!!!
-> 4345108299270352601
+
+easyblogger post -t "Hello World" -l "python,hello" -c "Hello world!!!"
+```
 
 Pipe out from any HTML generation mechanism
 
@@ -243,12 +246,11 @@ arg
 #                markdown_strict,markdown_phpextra,
 #                markdown_mmd,rst,mediawiki,
 #                docbook,textile,html,latex
-```
 
-> easyblogger --blogid 6136696198547817747 post -t 'Hello from Pandoc'
-> --format markdown -f -Type anything in markdown
->
-> 2342323423423423423
+easyblogger post -t 'Hello from Pandoc' --format markdown -c "##heading2"
+
+2342323423423423423
+```
 
 ### Update posts
 
@@ -262,8 +264,8 @@ just published it)
 easyblogger update -t 'A new title' -l "new,labels" 3295765957555899963
 ```
 
-You can also update the contents by passing in the --file argument.
-Piping it in works too - use --file -; like so
+You can also update the contents by passing in the `--file` argument.
+Piping it in works too - use `--file -`; like so
 
 ``` {.sourceCode .bash}
 pandoc -f markdown -  | easyblogger  update -t 'Hello from Pandoc' --file - 3295765957555899963
@@ -289,6 +291,7 @@ Title: This is your title
 PostId:
 Labels: a,b,c
 format: markdown
+published: false
 -->
 # This is my content
 ```

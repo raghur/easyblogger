@@ -1,3 +1,5 @@
+|Build Status| |Coverage Status|
+
 EasyBlogger
 ===========
 
@@ -73,13 +75,13 @@ OAuth2.
 
    .. code:: bash
 
-        # run through OAuth2 hoops... following needs to be run as root
-        # First find your blog Id
+       # run through OAuth2 hoops... following needs to be run as root
+       # First find your blog Id
 
-        sudo easyblogger --blogid <yourblogid> get
+       sudo easyblogger --blogid <yourblogid> get
 
-        # This will first open a browser and ask you to sign in and
-        # approve access to your blog
+       # This will first open a browser and ask you to sign in and
+       # approve access to your blog
 
    This will open a browser. You may see a chrome warning that it can't
    be run as root - but you can ignore that. Once you authorize,
@@ -90,7 +92,8 @@ OAuth2.
 
    .. code:: bash
 
-        # Change ownership
+       # Change ownership
+
        sudo chown <youruser>:<youruser> ~/.easyblogger.credentials
 
    **On Windows**
@@ -118,14 +121,14 @@ Getting posts
 
    .. code:: bash
 
-        # get a list of posts
-        # param : Blog Id - look at your blog's atom pub url - its the number in the url.
-        easyblogger --blogid 7642453 get
+       # get a list of posts
+       # param : Blog Id - look at your blog's atom pub url - its the number in the url.
+       easyblogger --blogid 7642453 get
 
-        4424091495287409038,Moving from Wordpress.com to Blogger,http://blog.rraghur.in/2013/08/moving-from-wordpresscom-to-blogger.html
-        ...
-        ...
-        # 10 rows shown
+       4424091495287409038,Moving from Wordpress.com to Blogger,http://blog.rraghur.in/2013/08/moving-from-wordpresscom-to-blogger.html
+       ...
+       ...
+       # 10 rows shown
 
 2. Filter by labels or search; specify ``max`` results to be returned.
 
@@ -212,16 +215,20 @@ command line
 Create a new blog post
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Note: Blogger API v3 does not support/expose API for creating posts as
-drafts. Please ask for this feature on Google's blogger dev group - I'll
-add that capability once/if it becomes available.
+[STRIKEOUT:Note: Blogger API v3 does not support/expose API for creating
+posts as drafts. Please ask for this feature on Google's blogger dev
+group - I'll add that capability once/if it becomes available.]
+
+Blogs are created as drafts by default now. You can override this with
+the ``--publish`` flag which will post the blog directly (current
+behavior)
 
 .. code:: bash
 
-     # create a post from stdin with title and labels
-    easyblogger post -t "Hello World" -l "python,hello"  -f -
-    Hello world!!!
-    4345108299270352601
+    # create a post from stdin with title and labels
+
+
+    easyblogger post -t "Hello World" -l "python,hello" -c "Hello world!!!"
 
 Pipe out from any HTML generation mechanism
 
@@ -238,13 +245,13 @@ arg
 
 .. code:: bash
 
-     # --format supports 
-     #                native,json,markdown,
-     #                markdown_strict,markdown_phpextra,
-     #                markdown_mmd,rst,mediawiki,
-     #                docbook,textile,html,latex
-    easyblogger   --blogid 6136696198547817747 post -t 'Hello from Pandoc' --format markdown -f -
-    Type anything in markdown
+    # --format supports 
+    #                native,json,markdown,
+    #                markdown_strict,markdown_phpextra,
+    #                markdown_mmd,rst,mediawiki,
+    #                docbook,textile,html,latex
+
+    easyblogger post -t 'Hello from Pandoc' --format markdown -c "##heading2"
 
     2342323423423423423
 
@@ -259,19 +266,19 @@ just published it)
 
 .. code:: bash
 
-     easyblogger update -t 'A new title' -l "new,labels" 3295765957555899963
+    easyblogger update -t 'A new title' -l "new,labels" 3295765957555899963
 
-You can also update the contents by passing in the --file argument.
-Piping it in works too - use --file -; like so
+You can also update the contents by passing in the ``--file`` argument.
+Piping it in works too - use ``--file -``; like so
 
 .. code:: bash
 
-     pandoc -f markdown -  | easyblogger  update -t 'Hello from Pandoc' --file - 3295765957555899963
-     # This is h1
-     ## this is h2
+    pandoc -f markdown -  | easyblogger  update -t 'Hello from Pandoc' --file - 3295765957555899963
+    # This is h1
+    ## this is h2
 
-     Some para text
-     [EOF]
+    Some para text
+    [EOF]
 
 Posting or Updating from a file
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -284,20 +291,21 @@ So, you can author a post like so:
 
 .. code:: bash
 
-        cat MyBlogPost.md
-        <!--
-        Title: This is your title
-        PostId:
-        Labels: a,b,c
-        format: markdown
-        -->
-        # This is my content
+    cat MyBlogPost.md
+    <!--
+    Title: This is your title
+    PostId:
+    Labels: a,b,c
+    format: markdown
+    published: false
+    -->
+    # This is my content
 
 And post it to your blog like so:
 
 .. code:: bash
 
-        easyblogger file MyBlogPost.md
+    easyblogger file MyBlogPost.md
 
 And ``easyblogger`` will update your post doc back with the ``postId``
 of the generated post. Now, if you edit the doc and publish again with
@@ -322,8 +330,8 @@ Feel free to use the EasyBlogger class in your own tool/utility whatever
 else. Just remember:
 
 1. Use your own API client id (see below)
-2. Include an attribution and a link to EasyBlogger - not mandatory -
-   but just be nice:)
+2. Include an attribution and a link to EasyBlogger - not mandatory -but
+   just be nice:)
 
 Client API ids
 ~~~~~~~~~~~~~~
@@ -342,16 +350,21 @@ can also stick them in the ``~/.easyblogger`` file to avoid specifying
 them each time
 
 Dev Guide
-=============
+=========
 
 1. Clone the repo
 2. Start a virtualenv - ``virtualenv .dev``
 3. Activate it - ``.dev\Scripts\activate``
-3. Install dependencies - ``pip install -r requirements.txt``
-4. ``pip install -e .``
+4. Install dependencies - ``pip install -r requirements.txt``
+5. ``pip install -e .``
 
 Running tests
-~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
 
-1. Exit out of any virtualenvs 
+1. Exit out of any virtualenvs
 2. Run ``tox``
+
+.. |Build Status| image:: https://travis-ci.org/raghur/easyblogger.svg?branch=master
+   :target: https://travis-ci.org/raghur/easyblogger
+.. |Coverage Status| image:: https://coveralls.io/repos/github/raghur/easyblogger/badge.svg?branch=master
+   :target: https://coveralls.io/github/raghur/easyblogger?branch=master
