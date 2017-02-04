@@ -113,6 +113,36 @@ OAuth2.
     You will need to repeat the OAuth2 authorization process if you ever
     change the blog, or revoke permissions or if the auth token expires.
 
+VIM Configuration
+-------------------
+
+1. Stick the following in your `~/.vimrc`
+    ```vim
+    func! s:systemwrapper(cmd)
+        echom a:cmd
+        let output=system(a:cmd)
+        return output
+    endfunction
+    func! BlogSave(file)
+        " to debug, replace with
+        " exec "!easyblogger file " . a:file
+        let output=s:systemwrapper("easyblogger file ". a:file)
+        echom output
+    endfunction
+    command! BlogSave call BlogSave(expand("%:p"))
+    ```
+1. Start writing a post - create a markdown file (.md) with a comment header
+    ```markdown
+    <!--
+    PostId: 
+    Title    : title
+    Labels   : any, comma, separated, labels
+    Format	 : markdown
+    Published: true
+    -->
+    ```
+1. When done, call `:BlogSave` and your blog will be published
+
 Usage
 -----
 
