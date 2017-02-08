@@ -221,6 +221,7 @@ class EasyBlogger(object):
             blogPost['content'] = self._getMarkup(content, fmt)
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
+        logger.debug("blogpost %s", labels);
         postStatus = service.posts().get(
             blogId=self.blogId,
             postId=postId,
@@ -246,7 +247,7 @@ class EasyBlogger(object):
 
 class ContentArgParser(object):
     rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I | re.M)
-    reLabels = re.compile("^\s*labels\s*:\s*([\w\d\- ,_]*)\s*$", re.I | re.M)
+    reLabels = re.compile("^\s*labels\s*:(.*)$", re.I | re.M)
     reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
     reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
     rePublishStatus = re.compile("^\s*published\s*:\s*(true|false)\s*$", re.I|re.M)
@@ -276,7 +277,7 @@ class ContentArgParser(object):
             self.format = self.format.group(1).strip()
         else:
             self.format = "markdown"
-        
+
         self.publishStatus = ContentArgParser.rePublishStatus.search(fileContent)
         if self.publishStatus:
             self.publishStatus = self.publishStatus.group(1).strip() == "true"
@@ -297,6 +298,7 @@ class ContentArgParser(object):
         else:
             args.command = "post"
         args.publish = self.publishStatus
+        logger.debug("args after updateArgs", args.labels)
 
     def updateFileWithPostId(self, postId):
         if self.theFile == sys.stdin:
@@ -373,7 +375,7 @@ def parse_args(sysargv):
         "--labels",
         help="comma separated list of labels")
     post_parser.add_argument(
-        "--publish", action="store_true", 
+        "--publish", action="store_true",
         help="Publish to the blog [default: false]")
     post_input = post_parser.add_mutually_exclusive_group(required=True)
     post_input.add_argument("-c", "--content", help="Post content")
@@ -424,11 +426,11 @@ def parse_args(sysargv):
         "-l",
         "--labels",
         help="comma separated list of labels")
-    
+
     update_parser.add_argument(
-        "--publish", action="store_true", 
+        "--publish", action="store_true",
         help="Publish to the blog [default: false]")
-    
+
     file_parser = subparsers.add_parser(
         "file",
         help="Figure out what to do from the input file")
