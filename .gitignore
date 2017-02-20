@@ -8,3 +8,4 @@ dist/
 .coverage
 .vscode/
 .noseids
+assets/img/*

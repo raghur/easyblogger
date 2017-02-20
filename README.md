@@ -25,6 +25,8 @@ So what does this do?
     generate html markup
 3.  Pandoc goodness - so that you can write your doc in any of the input
     formats that Pandoc supports
+3.  More Pandoc goodness - supports pandoc filters so you can do nice things like
+    create diagrams with [`mermaid-filter`](https://github.com/raghur/mermaid-filter)
 4.  You can also export your existing posts to your favourite
     lightweight markup format like markdown etc as individual files.
     Then edit them in a real editor, and publish them back! All pandoc
@@ -134,11 +136,12 @@ command! BlogSave call BlogSave(expand("%:p"))
 1. Start writing a post - create a markdown file (.md) with a comment header
 ```markdown
 <!--
-PostId: 
+PostId:
 Title    : title
 Labels   : any, comma, separated, labels
 Format	 : markdown
 Published: true
+filters: <path to your filter>
 -->
 ```
 1. When done, call `:BlogSave` and your blog will be published
@@ -243,9 +246,7 @@ command line
 
 ### Create a new blog post
 
-~~Note: Blogger API v3 does not support/expose API for creating posts as
-drafts. Please ask for this feature on Google's blogger dev group - I'll
-add that capability once/if it becomes available.~~
+Note: ~~Blogger API v3 does not support/expose API for creating posts as drafts. Please ask for this feature on Google's blogger dev group - I'll add that capability once/if it becomes available.~~
 
 Blogs are created as drafts by default now. You can override this with the `--publish` flag
 which will post the blog directly (current behavior)
@@ -271,7 +272,7 @@ Or just tell easyblogger to convert from `markdown` with the --format
 arg
 
 ``` {.sourceCode .bash}
-# --format supports 
+# --format supports
 #                native,json,markdown,
 #                markdown_strict,markdown_phpextra,
 #                markdown_mmd,rst,mediawiki,
@@ -322,6 +323,7 @@ PostId:
 Labels: a,b,c
 format: markdown
 published: false
+filters: <path to your installed filter>
 -->
 # This is my content
 ```

@@ -97,6 +97,7 @@ class PostsTests(TestCase):
         converterMock.convert.assert_called_with(
             "filecontent",
             'html',
+            filters=[],
             format="markdown")
         self.posts.insert.assert_called()
         req.execute.assert_called()

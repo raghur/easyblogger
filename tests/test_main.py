@@ -23,7 +23,7 @@ class MainTests(TestCase):
         exitStatus = blogger.runner(args, blogObj)
 
         blogObj.post.assert_called_with(
-            "t", "content", None, isDraft=True, fmt="html")
+            "t", "content", None, [], isDraft=True, fmt="html")
         assert exitStatus == 0
 
     def test_should_invoke_delete(self):
@@ -45,7 +45,7 @@ class MainTests(TestCase):
         blogger.runner(args, blogObj)
 
         blogObj.updatePost.assert_called_with(
-            "100", "t", "content", None, isDraft=True, fmt="html")
+            "100", "t", "content", None, [], isDraft=True, fmt="html")
 
     def test_should_invoke_getbyid(self):
         args = blogger.parse_args(['get', "-p", "100"])

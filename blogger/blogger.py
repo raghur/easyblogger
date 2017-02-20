@@ -177,20 +177,21 @@ class EasyBlogger(object):
         #slug = re.sub(r'[-]+', '-', slug)
         # return slug
 
-    def _getMarkup(self, content, fmt):
+    def _getMarkup(self, content, fmt, filters):
         raw = content
         if hasattr(content, 'read'):
             raw = content.read()
         html = raw
         if fmt != "html":
-            html = self.converter.convert(raw, 'html', format=fmt)
+            html = self.converter.convert(raw, 'html', format=fmt, filters=filters)
+        logger.debug("Converted text: %s", html)
         return html
 
-    def post(self, title, content, labels, isDraft=True, fmt="html"):
+    def post(self, title, content, labels, filters=[], isDraft=True, fmt="html"):
         self._setBlog()
         #url = slugify(title) + ".html"
         service = self._OAuth_Authenticate()
-        markup = self._getMarkup(content, fmt)
+        markup = self._getMarkup(content, fmt, filters)
         blogPost = {"content": markup, "title": title}
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
@@ -204,7 +205,7 @@ class EasyBlogger(object):
         return req.execute()
 
     def updatePost(self, postId, title=None,
-                   content=None, labels=None, isDraft=True, fmt="html"):
+                   content=None, labels=None, filters=[], isDraft=True, fmt="html"):
         # Permalink cannot be updated...
         #from datetime import date
         #today = date.today()
@@ -218,7 +219,7 @@ class EasyBlogger(object):
         if title:
             blogPost['title'] = title
         if content:
-            blogPost['content'] = self._getMarkup(content, fmt)
+            blogPost['content'] = self._getMarkup(content, fmt, filters)
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
         logger.debug("blogpost %s", labels);
@@ -251,6 +252,7 @@ class ContentArgParser(object):
     reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
     reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
     rePublishStatus = re.compile("^\s*published\s*:\s*(true|false)\s*$", re.I|re.M)
+    reFilters = re.compile("^\s*filters\s*:(.*)$", re.I|re.M)
     rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I | re.M)
 
     def __init__(self, theFile, open=open):
@@ -284,6 +286,10 @@ class ContentArgParser(object):
         else:
             self.publishStatus=False
 
+        self.filters = ContentArgParser.reFilters.search(fileContent)
+        if self.filters:
+            self.filters = self.filters.group(1).strip().split(",")
+
         self.content = fileContent
 
     def updateArgs(self, args):
@@ -298,7 +304,8 @@ class ContentArgParser(object):
         else:
             args.command = "post"
         args.publish = self.publishStatus
-        logger.debug("args after updateArgs", args.labels)
+        args.filters =  self.filters
+        logger.debug("args after updateArgs labels=%s, filters=%s", args.labels, args.filters)
 
     def updateFileWithPostId(self, postId):
         if self.theFile == sys.stdin:
@@ -384,18 +391,33 @@ def parse_args(sysargv):
         "--file",
         type=argparse.FileType('r'),
         help="Post content - input file")
-    pandocInputFormats = ["native",
-                          "json",
-                          "markdown",
-                          "markdown_strict",
-                          "markdown_phpextra",
-                          "markdown_mmd",
-                          "rst",
-                          "mediawiki",
+    pandocInputFormats = ["commonmark",
                           "docbook",
-                          "textile",
+                          "docx",
+                          "epub",
+                          "haddock",
                           "html",
-                          "latex"]
+                          "json",
+                          "latex",
+                          "markdown",
+                          "markdown_github",
+                          "markdown_mmd",
+                          "markdown_phpextra",
+                          "markdown_strict",
+                          "mediawiki",
+                          "native",
+                          "odt",
+                          "opml",
+                          "org",
+                          "rst",
+                          "t2t",
+                          "textile",
+                          "twiki"]
+    post_parser.add_argument(
+        "--filters",
+        nargs="+",
+        default=[],
+        help = "pandoc filters")
     post_parser.add_argument(
         "--format",
         help="Content format",
@@ -430,6 +452,12 @@ def parse_args(sysargv):
     update_parser.add_argument(
         "--publish", action="store_true",
         help="Publish to the blog [default: false]")
+
+    update_parser.add_argument(
+        "--filters",
+        nargs="+",
+        default=[],
+        help = "pandoc filters")
 
     file_parser = subparsers.add_parser(
         "file",
@@ -471,7 +499,10 @@ def runner(args, blogger):
         if args.command == "post":
             newPost = blogger.post(args.title,
                                    args.content or args.file,
-                                   args.labels, isDraft=not args.publish, fmt=args.format)
+                                   args.labels,
+                                   args.filters,
+                                   isDraft=not args.publish,
+                                   fmt=args.format)
             postId = newPost['id']
             if contentArgs:
                 contentArgs.updateFileWithPostId(postId)
@@ -487,6 +518,7 @@ def runner(args, blogger):
                 args.title,
                 args.content or args.file,
                 args.labels,
+                args.filters,
                 isDraft=not args.publish,
                 fmt=args.format)
             print(updated['url'])
@@ -577,3 +609,5 @@ def printJson(data):
 if __name__ == '__main__':
     # print sys.argv
     main()
+
+

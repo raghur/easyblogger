@@ -24,10 +24,13 @@ So what does this do?
    generate html markup
 3. Pandoc goodness - so that you can write your doc in any of the input
    formats that Pandoc supports
-4. You can also export your existing posts to your favourite lightweight
+4. More Pandoc goodness - supports pandoc filters so you can do nice
+   things like create diagrams with
+   ```mermaid-filter`` <https://github.com/raghur/mermaid-filter>`__
+5. You can also export your existing posts to your favourite lightweight
    markup format like markdown etc as individual files. Then edit them
    in a real editor, and publish them back! All pandoc output formats!
-5. Understands specially marked comments - so you can just hand it a
+6. Understands specially marked comments - so you can just hand it a
    file and it'll figure out what to do - great for posting from vim
    etc.
 
@@ -110,6 +113,42 @@ OAuth2.
 
    You will need to repeat the OAuth2 authorization process if you ever
    change the blog, or revoke permissions or if the auth token expires.
+
+VIM Configuration
+-----------------
+
+1. Stick the following in your ``~/.vimrc``
+
+   .. code:: vim
+
+       func! s:systemwrapper(cmd)
+       echom a:cmd
+       let output=system(a:cmd)
+       return output
+       endfunction
+       func! BlogSave(file)
+       " to debug, replace with
+       " exec "!easyblogger file " . a:file
+       let output=s:systemwrapper("easyblogger file ". a:file)
+       echom output
+       endfunction
+       command! BlogSave call BlogSave(expand("%:p"))
+
+2. Start writing a post - create a markdown file (.md) with a comment
+   header
+
+   .. code:: markdown
+
+       <!--
+       PostId:
+       Title    : title
+       Labels   : any, comma, separated, labels
+       Format   : markdown
+       Published: true
+       filters: <path to your filter>
+       -->
+
+3. When done, call ``:BlogSave`` and your blog will be published
 
 Usage
 -----
@@ -215,7 +254,7 @@ command line
 Create a new blog post
 ~~~~~~~~~~~~~~~~~~~~~~
 
-[STRIKEOUT:Note: Blogger API v3 does not support/expose API for creating
+Note: [STRIKEOUT:Blogger API v3 does not support/expose API for creating
 posts as drafts. Please ask for this feature on Google's blogger dev
 group - I'll add that capability once/if it becomes available.]
 
@@ -245,7 +284,7 @@ arg
 
 .. code:: bash
 
-    # --format supports 
+    # --format supports
     #                native,json,markdown,
     #                markdown_strict,markdown_phpextra,
     #                markdown_mmd,rst,mediawiki,
@@ -298,6 +337,7 @@ So, you can author a post like so:
     Labels: a,b,c
     format: markdown
     published: false
+    filters: <path to your installed filter>
     -->
     # This is my content
 
