@@ -51,9 +51,6 @@ else:
     basestring = basestring
 
 
-
-
-
 logger = logging.getLogger()
 logging.basicConfig()
 
@@ -95,9 +92,9 @@ class EasyBlogger(object):
         # The scope URL for read/write access to a user's blogger data
         scope = 'https://www.googleapis.com/auth/blogger'
 
-        # Create a flow object. This object holds the client_id, client_secret, and
-        # scope. It assists with OAuth 2.0 steps to get user authorization and
-        # credentials.
+        # Create a flow object. This object holds the client_id, client_secret,
+        # and scope. It assists with OAuth 2.0 steps to get user authorization
+        # and credentials.
         flow = OAuth2WebServerFlow(self.clientId, self.clientSecret, scope)
         # Create a Storage object. This object holds the credentials that your
         # application needs to authorize access to the user's data. The name of the
@@ -183,7 +180,8 @@ class EasyBlogger(object):
             raw = content.read()
         html = raw
         if fmt != "html":
-            html = self.converter.convert(raw, 'html', format=fmt, filters=filters)
+            html = self.converter.convert(
+                raw, 'html', format=fmt, filters=filters)
         logger.debug("Converted text: %s", html)
         return html
 
@@ -222,7 +220,7 @@ class EasyBlogger(object):
             blogPost['content'] = self._getMarkup(content, fmt, filters)
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
-        logger.debug("blogpost %s", labels);
+        logger.debug("blogpost %s", labels)
         postStatus = service.posts().get(
             blogId=self.blogId,
             postId=postId,
@@ -251,8 +249,9 @@ class ContentArgParser(object):
     reLabels = re.compile("^\s*labels\s*:(.*)$", re.I | re.M)
     reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
     reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
-    rePublishStatus = re.compile("^\s*published\s*:\s*(true|false)\s*$", re.I|re.M)
-    reFilters = re.compile("^\s*filters\s*:(.*)$", re.I|re.M)
+    rePublishStatus = re.compile(
+        "^\s*published\s*:\s*(true|false)\s*$", re.I | re.M)
+    reFilters = re.compile("^\s*filters\s*:(.*)$", re.I | re.M)
     rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I | re.M)
 
     def __init__(self, theFile, open=open):
@@ -280,11 +279,12 @@ class ContentArgParser(object):
         else:
             self.format = "markdown"
 
-        self.publishStatus = ContentArgParser.rePublishStatus.search(fileContent)
+        self.publishStatus = ContentArgParser.rePublishStatus.search(
+            fileContent)
         if self.publishStatus:
             self.publishStatus = self.publishStatus.group(1).strip() == "true"
         else:
-            self.publishStatus=False
+            self.publishStatus = False
 
         self.filters = ContentArgParser.reFilters.search(fileContent)
         if self.filters:
@@ -304,8 +304,9 @@ class ContentArgParser(object):
         else:
             args.command = "post"
         args.publish = self.publishStatus
-        args.filters =  self.filters
-        logger.debug("args after updateArgs labels=%s, filters=%s", args.labels, args.filters)
+        args.filters = self.filters
+        logger.debug("args after updateArgs labels=%s, filters=%s",
+                     args.labels, args.filters)
 
     def updateFileWithPostId(self, postId):
         if self.theFile == sys.stdin:
@@ -417,7 +418,7 @@ def parse_args(sysargv):
         "--filters",
         nargs="+",
         default=[],
-        help = "pandoc filters")
+        help="pandoc filters")
     post_parser.add_argument(
         "--format",
         help="Content format",
@@ -457,7 +458,7 @@ def parse_args(sysargv):
         "--filters",
         nargs="+",
         default=[],
-        help = "pandoc filters")
+        help="pandoc filters")
 
     file_parser = subparsers.add_parser(
         "file",
@@ -561,7 +562,7 @@ Format      : {3}
 
 {4}
 """
-    if not "items" in posts:
+    if "items" not in posts:
         return
     if docFormat:
         if len(posts["items"]) > 1:
@@ -609,5 +610,3 @@ def printJson(data):
 if __name__ == '__main__':
     # print sys.argv
     main()
-
-
