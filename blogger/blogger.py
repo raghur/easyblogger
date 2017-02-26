@@ -191,18 +191,23 @@ class EasyBlogger(object):
                     htmlfile = htmlfile + ".html"
                     logger.debug("Html file will be: %s", htmlfile)
 
-                check_output(["asciidoctor",
-                                    "-r",
-                                    "asciidoctor-diagram",
-                                    "-b", "html",
-                                    "-a", "stylesheet!",
-                                    "-a", "last-update-label!",
-                                    "-a", "experimental",
-                                    "-a", "data-uri",
-                                    "-a", "icons=font",
-                                    fp.name],
-                                shell=True)
-                html = open(htmlfile).read()
+                try:
+                    cmd = ["asciidoctor",
+                           "-v",
+                           "-r",
+                           "asciidoctor-diagram",
+                           "-a", "stylesheet!",
+                           "-a", "last-update-label!",
+                           "-a", "experimental",
+                           "-a", "data-uri",
+                           "-a", "icons=font",
+                           fp.name]
+                    logger.debug("Running command: %s", " ".join(cmd))
+                    check_output(cmd)
+                    html = open(htmlfile).read()
+                except Exception as e:
+                    print(e)
+                    raise e
             else:
                 html = self.converter.convert(
                     raw, 'html', format=fmt, filters=filters)
@@ -306,7 +311,10 @@ class ContentArgParser(object):
         self.publishStatus = ContentArgParser.rePublishStatus.search(
             fileContent)
         if self.publishStatus:
-            self.publishStatus = self.publishStatus.group(1).strip() == "true"
+            self.publishStatus = self \
+                                    .publishStatus \
+                                    .group(1) \
+                                    .strip().lower() == "true"
         else:
             self.publishStatus = False
 
