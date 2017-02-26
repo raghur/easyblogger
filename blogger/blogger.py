@@ -21,7 +21,8 @@ import os
 import os.path
 import re
 import sys
-
+from subprocess import check_output
+from tempfile import NamedTemporaryFile
 import httplib2
 import pypandoc
 from apiclient.discovery import build
@@ -180,9 +181,32 @@ class EasyBlogger(object):
             raw = content.read()
         html = raw
         if fmt != "html":
-            html = self.converter.convert(
-                raw, 'html', format=fmt, filters=filters)
-        logger.debug("Converted text: %s", html)
+            if fmt == "asciidoc":
+                logger.debug("using asciidoc")
+                with NamedTemporaryFile(delete=False, suffix=".adoc") as fp:
+                    fp.write(bytes(raw, "utf8"))
+                    fp.seek(0)
+                    logger.debug("temp file: %s", fp.name)
+                    htmlfile, ext = os.path.splitext(fp.name)
+                    htmlfile = htmlfile + ".html"
+                    logger.debug("Html file will be: %s", htmlfile)
+
+                check_output(["asciidoctor",
+                                    "-r",
+                                    "asciidoctor-diagram",
+                                    "-b", "html",
+                                    "-a", "stylesheet!",
+                                    "-a", "last-update-label!",
+                                    "-a", "experimental",
+                                    "-a", "data-uri",
+                                    "-a", "icons=font",
+                                    fp.name],
+                                shell=True)
+                html = open(htmlfile).read()
+            else:
+                html = self.converter.convert(
+                    raw, 'html', format=fmt, filters=filters)
+        # logger.debug("Converted text: %s", html)
         return html
 
     def post(self, title, content, labels, filters=[], isDraft=True, fmt="html"):

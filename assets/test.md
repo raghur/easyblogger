@@ -1,6 +1,6 @@
 # This is a test file
 
-```{.mermaid loc=imgur}
+```{.mermaid loc=inline}
 graph LR
  A[frontend] --> B[service proxy]
  B -->C[uSvc1]

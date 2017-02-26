@@ -12,12 +12,12 @@ def readme():
 
 
 setup(name="EasyBlogger",
-      version="1.1.1",
+      version="1.2.0",
       author="Raghu Rajagopalan",
       author_email="raghu.nospam@gmail.com",
       description=("A (very) easy CLI interface to Blogger blogs"),
       license="BSD",
-      keywords="blogger, cli",
+      keywords="blogger, cli, markdown, asciidoc",
       url="https://github.com/raghur/easyblogger",
       packages=['blogger'],
       install_requires=[

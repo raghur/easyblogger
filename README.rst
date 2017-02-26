@@ -27,10 +27,12 @@ So what does this do?
 4. More Pandoc goodness - supports pandoc filters so you can do nice
    things like create diagrams with
    ```mermaid-filter`` <https://github.com/raghur/mermaid-filter>`__
-5. You can also export your existing posts to your favourite lightweight
+5. AsciiDoc support - Supports asciidoc as a source format as well using
+   ``asciidoctor`` & ``asciidoctor-diagram``
+6. You can also export your existing posts to your favourite lightweight
    markup format like markdown etc as individual files. Then edit them
    in a real editor, and publish them back! All pandoc output formats!
-6. Understands specially marked comments - so you can just hand it a
+7. Understands specially marked comments - so you can just hand it a
    file and it'll figure out what to do - great for posting from vim
    etc.
 
@@ -148,7 +150,23 @@ VIM Configuration
        filters: <path to your filter>
        -->
 
-3. When done, call ``:BlogSave`` and your blog will be published
+3. If you prefer using ``asciidoc``, then use the following comment
+   header:
+
+   .. code:: asciidoc
+
+       ////
+       PostId:
+       Title    : title
+       Labels   : any, comma, separated, labels
+       Format   : asciidoc
+       Published: true
+       ////
+
+Asciidoc does not require filters - it has a better system of plugins.
+Just ensure that you have installed ``asciidoctor`` and
+``asciidoctor-diagram`` gems 1. When done, call ``:BlogSave`` and your
+blog will be published
 
 Usage
 -----

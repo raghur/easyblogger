@@ -27,6 +27,8 @@ So what does this do?
     formats that Pandoc supports
 3.  More Pandoc goodness - supports pandoc filters so you can do nice things like
     create diagrams with [`mermaid-filter`](https://github.com/raghur/mermaid-filter)
+4.  AsciiDoc support - Supports asciidoc as a source format as well using
+    `asciidoctor` & `asciidoctor-diagram`
 4.  You can also export your existing posts to your favourite
     lightweight markup format like markdown etc as individual files.
     Then edit them in a real editor, and publish them back! All pandoc
@@ -144,6 +146,20 @@ Published: true
 filters: <path to your filter>
 -->
 ```
+
+2. If you prefer using `asciidoc`, then use the following comment header:
+```asciidoc
+////
+PostId:
+Title    : title
+Labels   : any, comma, separated, labels
+Format	 : asciidoc
+Published: true
+////
+```
+
+Asciidoc does not require filters - it has a better system of plugins. Just
+ensure that you have installed `asciidoctor` and `asciidoctor-diagram` gems
 1. When done, call `:BlogSave` and your blog will be published
 
 Usage
