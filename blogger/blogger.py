@@ -203,7 +203,10 @@ class EasyBlogger(object):
                            "-a", "icons=font",
                            fp.name]
                     logger.debug("Running command: %s", " ".join(cmd))
-                    check_output(cmd)
+                    if (os.name == "nt"):
+                        check_output(cmd, shell=True)
+                    else:
+                        check_output(cmd)
                     html = open(htmlfile).read()
                 except Exception as e:
                     print(e)
