@@ -98,14 +98,14 @@ class EasyBlogger(object):
         # and credentials.
         flow = OAuth2WebServerFlow(self.clientId, self.clientSecret, scope)
         # Create a Storage object. This object holds the credentials that your
-        # application needs to authorize access to the user's data. The name of the
-        # credentials file is provided. If the file does not exist, it is
+        # application needs to authorize access to the user's data. The name
+        # of the credentials file is provided. If the file does not exist, it is
         # created. This object can only hold credentials for a single user, so
         # as-written, this script can only handle a single user.
         storage = Storage(os.path.expanduser('~/.easyblogger.credentials'))
 
-        # The get() function returns the credentials for the Storage object. If no
-        # credentials were found, None is returned.
+        # The get() function returns the credentials for the Storage object.
+        # If no credentials were found, None is returned.
         credentials = storage.get()
 
         # If no credentials are found or the credentials are invalid due to
@@ -121,15 +121,16 @@ class EasyBlogger(object):
             flags = tools.argparser.parse_args(args=[])
             credentials = tools.run_flow(flow, storage, flags)
 
-        # Create an httplib2.Http object to handle our HTTP requests, and authorize it
-        # using the credentials.authorize() function.
+        # Create an httplib2.Http object to handle our HTTP requests, and
+        # authorize it using the credentials.authorize() function.
         http = httplib2.Http()
         http.disable_ssl_certificate_validation = True
         http = credentials.authorize(http)
 
-        # The apiclient.discovery.build() function returns an instance of an API service
-        # object can be used to make API calls. The object is constructed with
-        # methods specific to the blogger API. The arguments provided are:
+        # The apiclient.discovery.build() function returns an instance of an API
+        # service object can be used to make API calls. The object is
+        # constructed with methods specific to the blogger API. The arguments
+        # provided are:
         #   name of the API ('blogger')
         #   version of the API you are using ('v3')
         #   authorized httplib2.Http() object that can be used for API calls
@@ -144,7 +145,13 @@ class EasyBlogger(object):
         blog = request.execute()
         self.blogId = blog['id']
 
-    def getPosts(self, postId=None, query=None, labels="", url=None, maxResults=1):
+    def getPosts(
+        self,
+        postId=None,
+        query=None,
+        labels="",
+        url=None,
+     maxResults=1):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -174,15 +181,6 @@ class EasyBlogger(object):
             if he.resp.status == 404:
                 return {"items": []}
             raise
-
-    # def slugify(s):
-        #from text_unidecode import unidecode
-        #import re
-        #slug = unidecode(s)
-        #slug = slug.encode('ascii', 'ignore').lower()
-        #slug = re.sub(r'[^a-z0-9]+', '-', slug).strip('-')
-        #slug = re.sub(r'[-]+', '-', slug)
-        # return slug
 
     def _getMarkup(self, content, fmt, filters):
         raw = content
@@ -229,15 +227,24 @@ class EasyBlogger(object):
         # logger.debug("Converted text: %s", html)
         return html
 
-    def post(self, title, content, labels, filters=[], isDraft=True, fmt="html"):
+    def post(
+        self,
+        title,
+        content,
+        labels,
+        filters=[],
+        isDraft=True,
+     fmt="html"):
         self._setBlog()
-        #url = slugify(title) + ".html"
+        # url = slugify(title) + ".html"
         service = self._OAuth_Authenticate()
         markup = self._getMarkup(content, fmt, filters)
         blogPost = {"content": markup, "title": title}
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
-        req = service.posts().insert(blogId=self.blogId, body=blogPost, isDraft=isDraft)
+        req = service.posts().insert(blogId=self.blogId,
+                                     body=blogPost,
+                                     isDraft=isDraft)
         return req.execute()
 
     def deletePost(self, postId):
@@ -246,12 +253,10 @@ class EasyBlogger(object):
         req = service.posts().delete(blogId=self.blogId, postId=postId)
         return req.execute()
 
-    def updatePost(self, postId, title=None,
-                   content=None, labels=None, filters=[], isDraft=True, fmt="html"):
-        # Permalink cannot be updated...
-        #from datetime import date
-        #today = date.today()
-        #url = "/{}/{}/{}".format(today.year, today.month, slugify(title) + ".html")
+    def updatePost(self, postId, title=None, content=None, labels=None,
+                   filters=[],
+                   isDraft=True,
+                   fmt="html"):
         self._setBlog()
         service = self._OAuth_Authenticate()
         blogPost = {}
@@ -271,12 +276,13 @@ class EasyBlogger(object):
             view="AUTHOR",
             fields="status"
         ).execute()['status']
-        # print("poststatus:", postStatus)
-        # print("isdraft:", isDraft)
         mustRevert = postStatus != 'DRAFT' and isDraft
         mustPublish = postStatus == 'DRAFT' and not isDraft
-        # print("must revert (postStatus != 'DRAFT' and isDraft):", mustRevert)
-        # print("must publish (postStatus == 'DRAFT' and not isDraft):", mustPublish )
+        logger.debug("must revert (postStatus != 'DRAFT' and isDraft):",
+                     mustRevert)
+        logger.debug("must publish (postStatus == 'DRAFT' and not isDraft):",
+                     mustPublish)
+
         if postStatus == "DRAFT":
             service.posts().publish(blogId=self.blogId, postId=postId).execute()
         resp = service.posts().patch(
@@ -361,10 +367,6 @@ class ContentArgParser(object):
         if not hasattr(self, "content"):
             self.content = self.theFile.read()
         with self.open(self.theFile.name, "w") as f:
-            # logger.debug(
-                        #"updating file {} with postId {}",
-                        # self.theFile.name,
-                        # postId)
             content = ContentArgParser.rePostIdUpdate.sub(
                 'PostId: ' + postId,
                 self.content)
@@ -411,12 +413,13 @@ def parse_args(sysargv):
         "--fields",
         help="fields to output",
         default="id,title,url")
-    output_format.add_argument("-d", "--doc",
-                               help="Output as document - use one of the output formats supported by pandoc")
-    get_parser.add_argument("-w", "--write-files",
-                            dest='tofiles',
-                            help="write output files (only used with --doc). True if more than one post is retrieved",
-                            action="store_true")
+    output_format.add_argument(
+        "-d", "--doc",
+        help="Output as document - use one of the output formats supported by pandoc")
+    get_parser.add_argument(
+        "-w", "--write-files", dest='tofiles',
+        help="write output files (only used with --doc). True if more than one post is retrieved",
+        action="store_true")
     get_parser.add_argument(
         "-c",
         "--count",
@@ -581,7 +584,7 @@ def runner(args, blogger):
                     maxResults=args.count)
             elif args.u:
                 posts = blogger.getPosts(
-                    url = args.u)
+                    url=args.u)
             else:
                 posts = blogger.getPosts(
                     labels=args.labels,
