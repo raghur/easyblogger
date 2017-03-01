@@ -205,7 +205,14 @@ Getting posts
        # get a specific post by id
        easyblogger --blogid 7642453 get -p 3728334747597998671
 
-4. Control which fields are printed out.
+4. Get a specific post by its url
+
+   .. code:: bash
+
+       # get a specific post by url
+       easyblogger --blogid 7642453 get -u https://blog.rraghur.in/2015/06/js-development-2015.html
+
+5. Control which fields are printed out.
 
    .. code:: bash
 
@@ -213,7 +220,7 @@ Getting posts
        easyblogger  get -p 3728334747597998671 -f "id,title,url,labels"
        3728334747597998671,Rewriting history with Git,http://blog.rraghur.in/2012/12/rewriting-history-with-git.html,[u'git', u'HOWTO', u'Tips']
 
-5. Output in (lightweight) markup - very good for updates.
+6. Output in (lightweight) markup - very good for updates.
 
    -  If its a single post, then its printed to console.
 

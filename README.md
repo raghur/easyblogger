@@ -198,7 +198,14 @@ Usage
     easyblogger --blogid 7642453 get -p 3728334747597998671
     ```
 
-4.  Control which fields are printed out.
+4.  Get a specific post by its url
+
+    ``` {.sourceCode .bash}
+    # get a specific post by url
+    easyblogger --blogid 7642453 get -u https://blog.rraghur.in/2015/06/js-development-2015.html
+    ```
+
+5.  Control which fields are printed out.
 
     ``` {.sourceCode .bash}
     # output field control
