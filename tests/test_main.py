@@ -81,6 +81,14 @@ class MainTests(TestCase):
         blogger.runner(args, blogObj)
         blogObj.getPosts.assert_called_with(query="query", maxResults=10)
 
+    def test_should_invoke_get_by_url(self):
+        args = blogger.parse_args(['get', "-u", "https://some/url"])
+        blogObj = Mock()
+        blogObj.getPosts.return_value = MainTests.posts
+
+        blogger.runner(args, blogObj)
+        blogObj.getPosts.assert_called_with(url="https://some/url")
+
     def test_empty_results_in_get(self):
         args = blogger.parse_args(['get', "-q", "query"])
         blogObj = Mock()
