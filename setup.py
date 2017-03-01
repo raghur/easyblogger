@@ -28,7 +28,7 @@ setup(name="EasyBlogger",
       ],
       entry_points={
           'console_scripts': [
-              'easyblogger = blogger.blogger:main'
+              'easyblogger = blogger:main'
           ]
       },
       long_description=readme(),
