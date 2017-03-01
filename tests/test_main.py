@@ -1,6 +1,6 @@
 from unittest import TestCase
 from mock import Mock, call
-from blogger import parse_args, runner
+from blogger.main import parse_args, runner
 from oauth2client.client import AccessTokenRefreshError
 
 
