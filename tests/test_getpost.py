@@ -70,8 +70,26 @@ class GetPostsTests(TestCase):
         assert len(post["items"]) == 1
         assert post["items"][0] == item
 
-    def test_should_return_empty_array_when_id_not_found(self):
+    def test_should_get_blog_by_url(self):
+        posts = self.blogger.service \
+            .posts       \
+            .return_value
+        req = posts.getByPath.return_value
+        item = {"id": 23234}
+        req.execute.return_value = item
 
+        post = self \
+            .blogger \
+            .getPosts(url="https://somedomain.com/some/path.html")
+
+        posts.getByPath.assert_called_with(
+            blogId="1234", path="/some/path.html")
+        req.execute.assert_called()
+        assert "items" in post
+        assert len(post["items"]) == 1
+        assert post["items"][0] == item
+
+    def test_should_return_empty_array_when_id_not_found(self):
         posts = self.blogger.service \
             .posts       \
             .return_value
@@ -98,7 +116,7 @@ class GetPostsTests(TestCase):
         req.execute.side_effect = HttpError(resp, content)
 
         with self.assertRaises(HttpError):
-            post = self.blogger.getPosts(postId="234")
+            self.blogger.getPosts(postId="234")
 
         posts.get.assert_called_with(
             blogId="1234", postId="234", view="AUTHOR")

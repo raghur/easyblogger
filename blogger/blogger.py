@@ -144,7 +144,7 @@ class EasyBlogger(object):
         blog = request.execute()
         self.blogId = blog['id']
 
-    def getPosts(self, postId=None, query=None, labels="", maxResults=1):
+    def getPosts(self, postId=None, query=None, labels="", url=None, maxResults=1):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -155,6 +155,15 @@ class EasyBlogger(object):
                 return {"items": [post]}
             elif query:
                 request = service.posts().search(blogId=self.blogId, q=query)
+            elif url:
+                regex = re.compile(r"^https?://.*?/")
+                if url.find("http") == 0:
+                    url = "/" + regex.sub("", url)
+                logger.debug('getting post by url %s', url)
+                request = service.posts().getByPath(blogId=self.blogId,
+                                                    path=url)
+                post = request.execute()
+                return {"items": [post]}
             else:
                 request = service.posts().list(
                     blogId=self.blogId,
@@ -395,6 +404,7 @@ def parse_args(sysargv):
     group.add_argument("-p", "--postId", help="the post id")
     group.add_argument("-l", "--labels", help="comma separated list of labels")
     group.add_argument("-q", "--query", help="search term")
+    group.add_argument("-u", help="the full post url", metavar="URL")
     output_format = get_parser.add_mutually_exclusive_group()
     output_format.add_argument(
         "-f",
@@ -569,6 +579,9 @@ def runner(args, blogger):
                 posts = blogger.getPosts(
                     query=args.query,
                     maxResults=args.count)
+            elif args.u:
+                posts = blogger.getPosts(
+                    url = args.u)
             else:
                 posts = blogger.getPosts(
                     labels=args.labels,
