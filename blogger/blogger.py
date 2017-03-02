@@ -69,6 +69,9 @@ class EasyBlogger(object):
         self.blogId = blogId
         self.blogUrl = blogUrl
         self.converter = pypandoc
+        self.check_output = check_output
+        self.namedTemporaryFile = NamedTemporaryFile
+        self.open = open
 
     def _OAuth_Authenticate(self):
         """@todo: Docstring for OAuth_Authenticate
@@ -180,9 +183,14 @@ class EasyBlogger(object):
         if fmt != "html":
             if fmt == "asciidoc":
                 logger.debug("using asciidoc")
-                with NamedTemporaryFile(delete=False, suffix=".adoc") as fp:
-                    fp.write(bytes(raw, "utf8"))
+                with self.namedTemporaryFile(delete=False, suffix=".adoc") as fp:
+                    try:
+                        encodedBytes = bytes(raw, "utf8")
+                    except TypeError:
+                        encodedBytes = bytes(raw).encode("utf8")
+                    fp.write(encodedBytes)
                     fp.seek(0)
+                    print (fp.name)
                     logger.debug("temp file: %s", fp.name)
                     htmlfile, ext = os.path.splitext(fp.name)
                     htmlfile = htmlfile + ".html"
@@ -204,10 +212,11 @@ class EasyBlogger(object):
                            fp.name]
                     logger.debug("Running command: %s", " ".join(cmd))
                     if (os.name == "nt"):
-                        check_output(cmd, shell=True)
+                        self.check_output(cmd, shell=True)
                     else:
-                        check_output(cmd)
-                    html = open(htmlfile).read()
+                        self.check_output(cmd)
+                    html = self.open(htmlfile).read()
+                    print(html)
                 except Exception as e:
                     print(e)
                     raise e
