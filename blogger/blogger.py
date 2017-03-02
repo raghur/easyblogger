@@ -183,7 +183,8 @@ class EasyBlogger(object):
         if fmt != "html":
             if fmt == "asciidoc":
                 logger.debug("using asciidoc")
-                with self.namedTemporaryFile(delete=False, suffix=".adoc") as fp:
+                with self.namedTemporaryFile(delete=False,
+                                             suffix=".adoc") as fp:
                     try:
                         encodedBytes = bytes(raw, "utf8")
                     except TypeError:
@@ -195,7 +196,6 @@ class EasyBlogger(object):
                     htmlfile, ext = os.path.splitext(fp.name)
                     htmlfile = htmlfile + ".html"
                     logger.debug("Html file will be: %s", htmlfile)
-
                 try:
                     cmd = ["asciidoctor",
                            "-v",
@@ -216,7 +216,6 @@ class EasyBlogger(object):
                     else:
                         self.check_output(cmd)
                     html = self.open(htmlfile).read()
-                    print(html)
                 except Exception as e:
                     print(e)
                     raise e
