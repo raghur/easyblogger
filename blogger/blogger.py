@@ -139,12 +139,9 @@ class EasyBlogger(object):
         self.blogId = blog['id']
 
     def getPosts(
-        self,
-        postId=None,
-        query=None,
-        labels="",
-        url=None,
-     maxResults=1):
+        self, postId=None,
+        query=None, labels="",
+        url=None, maxResults=1):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -191,7 +188,7 @@ class EasyBlogger(object):
                         encodedBytes = bytes(raw).encode("utf8")
                     fp.write(encodedBytes)
                     fp.seek(0)
-                    print (fp.name)
+                    print(fp.name)
                     logger.debug("temp file: %s", fp.name)
                     htmlfile, ext = os.path.splitext(fp.name)
                     htmlfile = htmlfile + ".html"
@@ -232,7 +229,7 @@ class EasyBlogger(object):
         labels,
         filters=[],
         isDraft=True,
-     fmt="html"):
+        fmt="html"):
         self._setBlog()
         # url = slugify(title) + ".html"
         service = self._OAuth_Authenticate()
