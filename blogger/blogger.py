@@ -91,8 +91,8 @@ class EasyBlogger(object):
         # and credentials.
         flow = OAuth2WebServerFlow(self.clientId, self.clientSecret, scope)
         # Create a Storage object. This object holds the credentials that your
-        # application needs to authorize access to the user's data. The name
-        # of the credentials file is provided. If the file does not exist, it is
+        # application needs to authorize access to the user's data. The name of
+        # the credentials file is provided. If the file does not exist, it is
         # created. This object can only hold credentials for a single user, so
         # as-written, this script can only handle a single user.
         storage = Storage(os.path.expanduser('~/.easyblogger.credentials'))
@@ -102,14 +102,13 @@ class EasyBlogger(object):
         credentials = storage.get()
 
         # If no credentials are found or the credentials are invalid due to
-        # expiration, new credentials need to be obtained from the authorization
-        # server. The oauth2client.tools.run() function attempts to open an
-        # authorization server page in your default web browser. The server
-        # asks the user to grant your application access to the user's data.
-        # If the user grants access, the run() function returns new credentials.
-        # The new credentials are also stored in the supplied Storage object,
-        # which updates the credentials.dat file.
-
+        # expiration, new credentials need to be obtained from the
+        # authorization server. The oauth2client.tools.run() function attempts
+        # to open an authorization server page in your default web browser. The
+        # server asks the user to grant your application access to the user's
+        # data.  If the user grants access, the run() function returns new
+        # credentials.  The new credentials are also stored in the supplied
+        # Storage object, which updates the credentials.dat file.
         if credentials is None or credentials.invalid:
             flags = tools.argparser.parse_args(args=[])
             credentials = tools.run_flow(flow, storage, flags)
@@ -120,8 +119,8 @@ class EasyBlogger(object):
         http.disable_ssl_certificate_validation = True
         http = credentials.authorize(http)
 
-        # The apiclient.discovery.build() function returns an instance of an API
-        # service object can be used to make API calls. The object is
+        # The apiclient.discovery.build() function returns an instance of an
+        # API service object can be used to make API calls. The object is
         # constructed with methods specific to the blogger API. The arguments
         # provided are:
         #   name of the API ('blogger')
@@ -138,10 +137,8 @@ class EasyBlogger(object):
         blog = request.execute()
         self.blogId = blog['id']
 
-    def getPosts(
-        self, postId=None,
-        query=None, labels="",
-        url=None, maxResults=1):
+    def getPosts(self, postId=None, query=None, labels="", url=None,
+                 maxResults=1):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -222,14 +219,8 @@ class EasyBlogger(object):
         # logger.debug("Converted text: %s", html)
         return html
 
-    def post(
-        self,
-        title,
-        content,
-        labels,
-        filters=[],
-        isDraft=True,
-        fmt="html"):
+    def post(self, title, content, labels, filters=[], isDraft=True,
+             fmt="html"):
         self._setBlog()
         # url = slugify(title) + ".html"
         service = self._OAuth_Authenticate()
@@ -279,7 +270,8 @@ class EasyBlogger(object):
                      mustPublish)
 
         if postStatus == "DRAFT":
-            service.posts().publish(blogId=self.blogId, postId=postId).execute()
+            service.posts().publish(blogId=self.blogId,
+                                    postId=postId).execute()
         resp = service.posts().patch(
             blogId=self.blogId,
             postId=postId,
