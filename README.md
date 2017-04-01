@@ -82,7 +82,7 @@ OAuth2.
     # run through OAuth2 hoops... following needs to be run as root
     # First find your blog Id
 
-    sudo easyblogger --blogid <yourblogid> get
+    easyblogger --blogid <yourblogid> get
 
     # This will first open a browser and ask you to sign in and
     # approve access to your blog
@@ -92,15 +92,6 @@ OAuth2.
     be run as root - but you can ignore that. Once you authorize,
     `~/.easyblogger.credentials` is created with your OAuth2 token
 
-    Since the file is created as root, you will need to change ownership
-    of the `~/.easyblogger.credentials` file.
-
-    ``` {.sourceCode .bash}
-    # Change ownership
-    ```
-
-    > sudo chown &lt;youruser&gt;:&lt;youruser&gt;
-    > \~/.easyblogger.credentials
 
     **On Windows**
 
