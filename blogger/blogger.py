@@ -262,13 +262,12 @@ class EasyBlogger(object):
             view="AUTHOR",
             fields="status"
         ).execute()['status']
-        mustRevert = postStatus != 'DRAFT' and isDraft
         mustPublish = postStatus == 'DRAFT' and not isDraft
-        logger.debug("must revert (postStatus != 'DRAFT' and isDraft):",
-                     mustRevert)
-        logger.debug("must publish (postStatus == 'DRAFT' and not isDraft):",
-                     mustPublish)
+        logger.debug(
+            "must publish (postStatus(%s) == 'DRAFT' and not isDraft(%s)): %s"
+            % (postStatus, isDraft, mustPublish))
 
+        # publish the post since we cannot update a draft directly
         if postStatus == "DRAFT":
             service.posts().publish(blogId=self.blogId,
                                     postId=postId).execute()
@@ -276,7 +275,7 @@ class EasyBlogger(object):
             blogId=self.blogId,
             postId=postId,
             body=blogPost,
-            revert=mustRevert,
+            revert=isDraft,
             publish=mustPublish).execute()
         return resp
 
