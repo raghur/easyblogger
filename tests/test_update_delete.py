@@ -17,7 +17,7 @@ class UpdateDeleteTests(TestCase):
             assert body["title"] == "t"
             assert body["content"] == "c"
             assert body["labels"] == ["l"]
-            assert not revert
+            assert revert
             assert not publish
             return DEFAULT
 
