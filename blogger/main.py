@@ -27,7 +27,7 @@ else:
 
 
 def getFilenameFromPostUrl(url, format):
-    urlp = urlparse.urlparse(url)
+    urlp = urlparse(url)
     filename = os.path.basename(urlp.path)
     return os.path.splitext(filename)[0] + "." + format
 
@@ -63,7 +63,11 @@ Format      : {3}
                 filename = getFilenameFromPostUrl(item['url'], docFormat)
                 logger.info(filename)
                 with open(filename, "wb") as outputFile:
-                    outputFile.write(content)
+                    try:
+                        encodedBytes = bytes(content, "utf8")
+                    except TypeError:
+                        encodedBytes = bytes(content).encode("utf8")
+                    outputFile.write(encodedBytes)
             else:
                 print(content)
         return
