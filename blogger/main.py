@@ -4,6 +4,8 @@ import argparse
 import os
 import json
 import pypandoc
+import toml
+
 from oauth2client.client import AccessTokenRefreshError
 from .blogger import ContentArgParser, EasyBlogger, logger
 try:
@@ -33,14 +35,10 @@ def getFilenameFromPostUrl(url, format):
 
 
 def printPosts(posts, fields, docFormat=None, writeToFiles=False):
-    template = """<!--
-Title       : {0}
-PostId      : {1}
-Labels      : {2}
-Format      : {3}
--->
-
-{4}
+    template = """+++
+{0}
++++
+{1}
 """
     if "items" not in posts:
         return
@@ -53,12 +51,16 @@ Format      : {3}
                                        'ignore'),
                 docFormat,
                 format="html")
-            content = template.format(
-                item["title"],
-                item['id'],
-                ",".join(item["labels"]),
-                docFormat,
-                converted)
+            frontmatter = dict()
+            frontmatter["title"] = item["title"]
+            frontmatter["id"] = item["id"]
+            if "labels" in item:
+                frontmatter["tags"] = item["labels"]
+            frontmatter["aliases"] = [item["url"]]
+            frontmatter["publishdate"] = item["published"]
+            frontmatter["date"] = item["published"]
+            frontmatter["lastmod"] = item["updated"]
+            content = template.format(toml.dumps(frontmatter), converted)
             if writeToFiles:
                 filename = getFilenameFromPostUrl(item['url'], docFormat)
                 logger.info(filename)
@@ -128,8 +130,7 @@ def parse_args(sysargv):
         "-c",
         "--count",
         type=int,
-        help="count",
-        default=10)
+        help="count")
 
     post_parser = subparsers.add_parser("post", help="create a new post")
     post_parser.add_argument("-t", "--title", help="Post title")
@@ -316,6 +317,7 @@ def printJson(data):
                    indent=4,
                    separators=(',',
                                ': ')))
+
 
 if __name__ == '__main__':
     # print sys.argv

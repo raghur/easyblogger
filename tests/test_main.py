@@ -71,7 +71,7 @@ class MainTests(TestCase):
 
         runner(args, blogObj)
 
-        blogObj.getPosts.assert_called_with(labels=None, maxResults=10)
+        blogObj.getPosts.assert_called_with(labels=None, maxResults=None)
 
     def test_should_invoke_search(self):
         args = parse_args(['get', "-q", "query"])
@@ -79,7 +79,7 @@ class MainTests(TestCase):
         blogObj.getPosts.return_value = MainTests.posts
 
         runner(args, blogObj)
-        blogObj.getPosts.assert_called_with(query="query", maxResults=10)
+        blogObj.getPosts.assert_called_with(query="query", maxResults=None)
 
     def test_should_invoke_get_by_url(self):
         args = parse_args(['get', "-u", "https://some/url"])
@@ -95,7 +95,7 @@ class MainTests(TestCase):
         blogObj.getPosts.return_value = {}
 
         runner(args, blogObj)
-        blogObj.getPosts.assert_called_with(query="query", maxResults=10)
+        blogObj.getPosts.assert_called_with(query="query", maxResults=None)
 
     def test_handle_non_existent_keys_in_fields(self):
         args = parse_args(['get', "-q", "query", "-f", "id,b"])
@@ -103,4 +103,4 @@ class MainTests(TestCase):
         blogObj.getPosts.return_value = MainTests.posts
 
         runner(args, blogObj)
-        blogObj.getPosts.assert_called_with(query="query", maxResults=10)
+        blogObj.getPosts.assert_called_with(query="query", maxResults=None)

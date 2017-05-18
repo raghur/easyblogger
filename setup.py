@@ -24,7 +24,8 @@ setup(name="EasyBlogger",
           'pypandoc',
           'google-api-python-client',
           'python-gflags',
-          'httplib2'
+          'httplib2',
+          'toml'
       ],
       entry_points={
           'console_scripts': [

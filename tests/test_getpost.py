@@ -22,6 +22,9 @@ class GetPostsTests(TestCase):
     def test_should_get_blog_by_labels(self):
         # Arrange
         posts = self.blogger.service.posts.return_value
+        request = posts.list.return_value
+        request.execute.return_value = {"items": []}
+        posts.list_next.return_value = None
 
         # act
         self.blogger.getPosts(labels="abc", maxResults=4)
@@ -37,11 +40,15 @@ class GetPostsTests(TestCase):
             .posts       \
             .return_value
         req = posts.list.return_value
+        req.execute.return_value = {"items": []}
+        posts.list_next.return_value = None
+
         self.blogger.getPosts()
+
         posts.list.assert_called_with(
             blogId=self.blogger.blogId,
             labels="",
-            maxResults=1)
+            maxResults=None)
         req.execute.assert_called()
 
     def test_should_use_search_when_query_is_provided(self):
@@ -49,7 +56,11 @@ class GetPostsTests(TestCase):
             .posts       \
             .return_value
         req = posts.search.return_value
+        req.execute.return_value = {"items": []}
+        posts.list_next.return_value = None
+
         self.blogger.getPosts(query="test")
+
         posts.search.assert_called_with(blogId=self.blogger.blogId, q="test")
         req.execute.assert_called()
 

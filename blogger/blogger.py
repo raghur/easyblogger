@@ -138,7 +138,7 @@ class EasyBlogger(object):
         self.blogId = blog['id']
 
     def getPosts(self, postId=None, query=None, labels="", url=None,
-                 maxResults=1):
+                 maxResults=None):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -163,7 +163,19 @@ class EasyBlogger(object):
                     blogId=self.blogId,
                     labels=labels,
                     maxResults=maxResults)
-            return request.execute()
+            response = request.execute()
+            # print("response is:", response)
+            posts = {}
+            while request:
+                if "items" in posts:
+                    posts["items"] = posts["items"] + response["items"]
+                else:
+                    posts["items"] = response["items"]
+                request = service.posts().list_next(request, response)
+                if request:
+                    response = request.execute()
+                logger.info(len(response["items"]))
+            return posts
         except HttpError as he:
             if he.resp.status == 404:
                 return {"items": []}
