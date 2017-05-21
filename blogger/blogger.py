@@ -163,18 +163,15 @@ class EasyBlogger(object):
                     blogId=self.blogId,
                     labels=labels,
                     maxResults=maxResults)
-            response = request.execute()
-            # print("response is:", response)
-            posts = {}
+            posts = {"items": []}
+            count = 0
             while request:
-                if "items" in posts:
-                    posts["items"] = posts["items"] + response["items"]
-                else:
-                    posts["items"] = response["items"]
-                request = service.posts().list_next(request, response)
-                if request:
-                    response = request.execute()
+                response = request.execute()
                 logger.info(len(response["items"]))
+                posts["items"] = posts["items"] + response["items"]
+                if maxResults and len(posts["items"]) == maxResults:
+                    break
+                request = service.posts().list_next(request, response)
             return posts
         except HttpError as he:
             if he.resp.status == 404:

@@ -38,6 +38,7 @@ def printPosts(posts, fields, docFormat=None, writeToFiles=False):
     template = """+++
 {0}
 +++
+
 {1}
 """
     if "items" not in posts:
