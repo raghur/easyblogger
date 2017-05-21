@@ -34,6 +34,21 @@ def getFilenameFromPostUrl(url, format):
     return os.path.splitext(filename)[0] + "." + format
 
 
+def getFrontMatter(item, format="toml"):
+    frontmatter = dict()
+    frontmatter["title"] = item["title"]
+    frontmatter["id"] = item["id"]
+    if "labels" in item:
+        frontmatter["tags"] = item["labels"]
+    frontmatter["aliases"] = [item["url"]]
+    frontmatter["publishdate"] = item["published"]
+    frontmatter["draft"] = False
+    frontmatter["date"] = item["published"]
+    frontmatter["lastmod"] = item["updated"]
+    if format == "toml":
+        return toml.dumps(frontmatter)
+
+
 def printPosts(posts, fields, docFormat=None, writeToFiles=False):
     template = """+++
 {0}
@@ -52,16 +67,7 @@ def printPosts(posts, fields, docFormat=None, writeToFiles=False):
                                        'ignore'),
                 docFormat,
                 format="html")
-            frontmatter = dict()
-            frontmatter["title"] = item["title"]
-            frontmatter["id"] = item["id"]
-            if "labels" in item:
-                frontmatter["tags"] = item["labels"]
-            frontmatter["aliases"] = [item["url"]]
-            frontmatter["publishdate"] = item["published"]
-            frontmatter["date"] = item["published"]
-            frontmatter["lastmod"] = item["updated"]
-            content = template.format(toml.dumps(frontmatter), converted)
+            content = template.format(getFrontMatter(item), converted)
             if writeToFiles:
                 filename = getFilenameFromPostUrl(item['url'], docFormat)
                 logger.info(filename)
@@ -99,9 +105,10 @@ def parse_args(sysargv):
     parser.add_argument(
         "-v",
         "--verbose",
-        help="verbosity(log level) -vvvv = DEBUG, -v = CRITICAL",
-        action="count",
-        default=0)
+        help="verbosity(log level) - default CRITICAL",
+        choices=["INFO", "DEBUG", "WARNING", "ERROR", "CRITICAL"],
+        type=str.upper,
+        default="CRITICAL")
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--blogid", help="Your blog id")
     group.add_argument("--url", help="Your blog url")
@@ -230,14 +237,16 @@ def parse_args(sysargv):
     config = os.path.expanduser("~/.easyblogger")
     if (os.path.exists(config)):
         sysargv = ["@" + config] + sysargv
+    args = parser.parse_args(sysargv)
+    verbosity = logging.getLevelName(args.verbose)
+    if args.verbose != "CRITICAL":
+        logger.setLevel(logging.INFO)
+        logger.info("Setting log level to: %s ", args.verbose)
+    logger.setLevel(verbosity)
+
     logger.debug("Final args:")
     logger.debug(sysargv)
 
-    args = parser.parse_args(sysargv)
-    verbosity = 50 - args.verbose * 10
-    if args.verbose > 0:
-        print("Setting log level to %s" % logging.getLevelName(verbosity))
-    logger.setLevel(verbosity)
     return args
 
 
