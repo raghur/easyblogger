@@ -1,4 +1,4 @@
-appdirs==1.4.0
+appdirs==1.4.3
 coverage==4.3.4
 funcsigs==1.0.2
 google-api-python-client==1.6.1
