@@ -129,7 +129,8 @@ def parse_args(sysargv):
         default="id,title,url")
     output_format.add_argument(
         "-d", "--doc",
-        help="Output as document - use one of the output formats supported by pandoc")
+        help="""Output as document - use one of the output
+        formats supported by pandoc: """ + ", ".join(pypandoc.get_pandoc_formats()[1]))
     get_parser.add_argument(
         "-w", "--write-files", dest='tofiles',
         help="write output files (only used with --doc). True if more than one post is retrieved",
@@ -156,28 +157,7 @@ def parse_args(sysargv):
         "--file",
         type=argparse.FileType('r'),
         help="Post content - input file")
-    pandocInputFormats = ["commonmark",
-                          "docbook",
-                          "docx",
-                          "epub",
-                          "haddock",
-                          "html",
-                          "json",
-                          "latex",
-                          "markdown",
-                          "markdown_github",
-                          "markdown_mmd",
-                          "markdown_phpextra",
-                          "markdown_strict",
-                          "mediawiki",
-                          "native",
-                          "odt",
-                          "opml",
-                          "org",
-                          "rst",
-                          "t2t",
-                          "textile",
-                          "twiki"]
+    pandocInputFormats = pypandoc.get_pandoc_formats()[0]
     post_parser.add_argument(
         "--filters",
         nargs="+",
@@ -185,7 +165,7 @@ def parse_args(sysargv):
         help="pandoc filters")
     post_parser.add_argument(
         "--format",
-        help="Content format",
+        help="Content format: " + ", ".join(pandocInputFormats),
         choices=pandocInputFormats,
         default="html")
     delete_parser = subparsers.add_parser("delete", help="delete a post")
@@ -205,7 +185,7 @@ def parse_args(sysargv):
 
     update_parser.add_argument(
         "--format",
-        help="Content format",
+        help="Content format: " + ", ".join(pandocInputFormats),
         choices=pandocInputFormats,
         default="html")
 
