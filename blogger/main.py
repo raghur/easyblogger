@@ -88,6 +88,7 @@ def printPosts(posts, fields, docFormat=None, writeToFiles=False):
 
 
 def parse_args(sysargv):
+    pandocInputFormats, pandocOutputFormats = pypandoc.get_pandoc_formats()
     parser = argparse.ArgumentParser(
         prog='easyblogger',
         description="Easily manage posts on Blogger blogs",
@@ -130,7 +131,7 @@ def parse_args(sysargv):
     output_format.add_argument(
         "-d", "--doc",
         help="""Output as document - use one of the output
-        formats supported by pandoc: """ + ", ".join(pypandoc.get_pandoc_formats()[1]))
+        formats supported by pandoc: """ + ", ".join(pandocOutputFormats))
     get_parser.add_argument(
         "-w", "--write-files", dest='tofiles',
         help="write output files (only used with --doc). True if more than one post is retrieved",
@@ -157,7 +158,6 @@ def parse_args(sysargv):
         "--file",
         type=argparse.FileType('r'),
         help="Post content - input file")
-    pandocInputFormats = pypandoc.get_pandoc_formats()[0]
     post_parser.add_argument(
         "--filters",
         nargs="+",
