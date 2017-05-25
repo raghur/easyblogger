@@ -1,0 +1,47 @@
++++
+aliases = [ "http://niftybytes.blogspot.com/2015/06/neovim-on-windows-7.html",]
+date = "2015-06-04T20:45:00+05:30"
+tags = [ "vim",]
+title = "Neovim on Windows 7"
+draft = false
+publishdate = "2015-06-04T20:45:00+05:30"
+lastmod = "2015-06-04T20:45:39+05:30"
+id = "1501155548936656796"
+
++++
+
+<!--
+PostId   :
+Title    : Neovim on Windows 7
+Labels   : vim
+Format   : markdown
+-->
+<h3 id="neovim-on-windows">Neovim on Windows</h3>
+<p>For folks who dig vim as an editor, you have most likely heard of Neovim - a fork of the vim with the goal to modernize the codebase and add unit tests.</p>
+<p>In fact, on Linux, the editor's been functional for quite some time and I've replaced vim with neovim - and I've hardly ever come across a serious issue. My original <a href="https://github.com/raghur/vimfiles">dotvim</a> works flawlessly with all 54 plugins loaded and running!</p>
+<p>Unfortunately, Windows is a different story - as usual, things are more difficult. However, contributor <a href="https://github.com/equalsraf">equalsraf</a> has been stellar work on the Windows port. There's a CI build as well at Appveyor - however, on Windows since the native tui doesn't work, you need a UI plugin.</p>
+<p>A few days ago, I stopped again to check where things were and with a little wrangling, got Neovim on Windows! So I posted on Reddit, then found a few issues, and /u/equalsraf got them fixed and we went back and forth! So folks, if you'd like to see Neovim on Windows, you can try it out and report issues and bugs which will definitely help the effort.</p>
+<p>Here's how it works - Electron (on which Github's atom editor is built ) is used as the UI and it drives the neovim executable on windows</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">
+<span class="co"># install electron prebuilt  and grunt systemwide using node js</span>
+<span class="kw">npm</span> install -g electron-prebuilt grunt-cli
+
+<span class="co"># clone this repo</span>
+<span class="kw">git</span> clone https://github.com/coolwanglu/neovim-e
+
+<span class="co"># inside the repo, install dependencies</span>
+<span class="kw">cd</span> neovim-e <span class="kw">&amp;&amp;</span> <span class="kw">apm</span> install <span class="kw">&amp;&amp;</span> <span class="kw">grunt</span>
+
+<span class="co"># grab the neovim from appveyor https://ci.appveyor.com/project/equalsraf/neovim</span>
+<span class="co"># unzip it to someplace on your path.</span>
+
+<span class="co"># Launch - from inside the folder where you cloned neovim-e</span>
+<span class="kw">Electron</span> .
+
+<span class="co"># init files</span>
+<span class="co"># copy ~/.vim to ~/.neovim</span>
+<span class="co"># copy ~/.vimrc to ~/.neovimrc</span></code></pre>
+<p>You can also create a shortcut to neovim - just create a batch file in the folder to launch <code>electron .</code> and add a shortcut to the batch file.</p>
+<p>One important tweak - getting functional copy/paste - Grab paste.zip from <a href="http://www.c3scripts.com/tutorials/msdos/paste.zip">here</a>. Unzip and rename it to <code>pbpaste.exe</code>. Also get <code>clip.exe</code> - should be on your <code>system32</code> folder and put it somewhere on your path as <code>pbclip.exe</code></p>
+<p>Given that it's pre-alpha and not even an official build, just the fact that it launches and is usable to this extent is promising. Unite, Ctrlp and the most majority of my plugins work. There's an outstanding issue with quoting and escaping shell executable arguments - and that means that python plugins don't work yet (for ex: barfs if I enable Ultisnips - so I've disabled it for now)</p>
+<p>Other than that, it's pretty good - and any bug you run into will only help make it better for everyone!</p>

@@ -12,7 +12,7 @@ def readme():
 
 
 setup(name="EasyBlogger",
-      version="1.2.8",
+      version="1.3.0",
       author="Raghu Rajagopalan",
       author_email="raghu.nospam@gmail.com",
       description=("A (very) easy CLI interface to Blogger blogs"),
@@ -25,7 +25,8 @@ setup(name="EasyBlogger",
           'google-api-python-client',
           'python-gflags',
           'httplib2',
-          'toml'
+          'toml',
+          'gevent'
       ],
       entry_points={
           'console_scripts': [

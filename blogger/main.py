@@ -5,9 +5,13 @@ import os
 import json
 import pypandoc
 import toml
+import gevent
 
+
+from gevent import monkey
 from oauth2client.client import AccessTokenRefreshError
 from .blogger import ContentArgParser, EasyBlogger, logger
+from io import open
 try:
     from urllib.parse import urlparse
 except ImportError:
@@ -27,6 +31,7 @@ else:
     bytes = str
     basestring = basestring
 
+monkey.patch_all()
 
 def getFilenameFromPostUrl(url, format):
     urlp = urlparse(url)
@@ -49,40 +54,35 @@ def getFrontMatter(item, format="toml"):
         return toml.dumps(frontmatter)
 
 
-def printPosts(posts, fields, docFormat=None, writeToFiles=False):
+def printPosts(item, fields, docFormat=None, writeToFiles=False):
     template = """+++
 {0}
 +++
 
 {1}
 """
-    if "items" not in posts:
-        return
     if docFormat:
-        if len(posts["items"]) > 1:
-            writeToFiles = True
-        for item in posts["items"]:
-            converted = pypandoc.convert(
-                item["content"].encode('utf-8',
-                                       'ignore'),
+        logger.info("Starting to print %s", item['id'])
+        filename = None
+        content = item["content"].encode('utf-8', "ignore")
+        if writeToFiles:
+            filename = getFilenameFromPostUrl(item['url'], docFormat)
+            logger.info(filename)
+            with open(filename, "wb") as outputFile:
+                outputFile.write(content)
+            converted = pypandoc.convert_file(
+                filename,
                 docFormat,
                 format="html")
-            content = template.format(getFrontMatter(item), converted)
-            if writeToFiles:
-                filename = getFilenameFromPostUrl(item['url'], docFormat)
-                logger.info(filename)
-                with open(filename, "wb") as outputFile:
-                    try:
-                        encodedBytes = bytes(content, "utf8")
-                    except TypeError:
-                        encodedBytes = bytes(content).encode("utf8")
-                    outputFile.write(encodedBytes)
-            else:
-                print(content)
-        return
-    if isinstance(fields, basestring):
+            content = template.format(getFrontMatter(item),
+                                      converted)
+            with open(filename, "w", newline="\n") as outputFile:
+                outputFile.write(content)
+        else:
+            print(content)
+        logger.info("Finished print %s", item['id'])
+    elif isinstance(fields, basestring):
         fields = fields.split(",")
-    for item in posts['items']:
         line = [str(item[k]) for k in fields if k in item]
         print(",".join(line))
 
@@ -285,7 +285,9 @@ def runner(args, blogger):
                     labels=args.labels,
                     maxResults=args.count)
             printJson(posts)
-            printPosts(posts, args.fields, args.doc, args.tofiles)
+            jobs = [gevent.spawn(printPosts,
+                                 item, args.fields, args.doc, args.tofiles) for item in posts["items"]]
+            gevent.wait(jobs)
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
