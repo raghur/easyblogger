@@ -33,6 +33,7 @@ else:
 
 monkey.patch_all()
 
+
 def getFilenameFromPostUrl(url, format):
     urlp = urlparse(url)
     filename = os.path.basename(urlp.path)
@@ -134,7 +135,8 @@ def parse_args(sysargv):
         formats supported by pandoc: """ + ", ".join(pandocOutputFormats))
     get_parser.add_argument(
         "-w", "--write-files", dest='tofiles',
-        help="write output files (only used with --doc). True if more than one post is retrieved",
+        help="write output files (only used with --doc). " +
+        "True if more than one post is retrieved",
         action="store_true")
     get_parser.add_argument(
         "-c",
@@ -286,7 +288,8 @@ def runner(args, blogger):
                     maxResults=args.count)
             printJson(posts)
             jobs = [gevent.spawn(printPosts,
-                                 item, args.fields, args.doc, args.tofiles) for item in posts["items"]]
+                                 item, args.fields, args.doc, args.tofiles)
+                    for item in posts["items"]]
             gevent.wait(jobs)
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
