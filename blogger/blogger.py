@@ -146,7 +146,8 @@ class EasyBlogger(object):
                 request = service.posts().get(
                     blogId=self.blogId, postId=postId, view="AUTHOR")
                 post = request.execute()
-                return {"items": [post]}
+                yield post
+                return
             elif query:
                 request = service.posts().search(blogId=self.blogId, q=query)
             elif url:
@@ -157,25 +158,26 @@ class EasyBlogger(object):
                 request = service.posts().getByPath(blogId=self.blogId,
                                                     path=url)
                 post = request.execute()
-                return {"items": [post]}
+                yield post
+                return
             else:
                 request = service.posts().list(
                     blogId=self.blogId,
                     labels=labels,
                     maxResults=maxResults)
-            posts = {"items": []}
             count = 0
             while request:
                 response = request.execute()
-                logger.info(len(response["items"]))
-                posts["items"] = posts["items"] + response["items"]
-                if maxResults and len(posts["items"]) == maxResults:
+                logger.debug("Got %s items", len(response["items"]))
+                count += len(response["items"])
+                for it in response["items"]:
+                    yield it
+                if maxResults and count == maxResults:
                     break
                 request = service.posts().list_next(request, response)
-            return posts
         except HttpError as he:
             if he.resp.status == 404:
-                return {"items": []}
+                return
             raise
 
     def _getMarkup(self, content, fmt, filters):

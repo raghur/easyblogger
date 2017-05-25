@@ -62,13 +62,16 @@ def printPosts(item, fields, docFormat=None, writeToFiles=False):
 
 {1}
 """
+    logger.debug(json.dumps(item,
+                            sort_keys=True,
+                            indent=2,
+                            separators=(',', ': ')))
     if docFormat:
-        logger.info("Starting to print %s", item['id'])
+        logger.debug("Starting to print %s", item['id'])
         filename = None
         content = item["content"].encode('utf-8', "ignore")
         if writeToFiles:
             filename = getFilenameFromPostUrl(item['url'], docFormat)
-            logger.info(filename)
             with open(filename, "wb") as outputFile:
                 outputFile.write(content)
             converted = pypandoc.convert_file(
@@ -76,12 +79,13 @@ def printPosts(item, fields, docFormat=None, writeToFiles=False):
                 docFormat,
                 format="html")
             content = template.format(getFrontMatter(item),
-                                      converted)
-            with open(filename, "w", newline="\n") as outputFile:
-                outputFile.write(content)
+                                      converted).encode('utf-8',
+                                                        'ignore')
+            with open(filename, "wb") as outputfile:
+                outputfile.write(content)
         else:
             print(content)
-        logger.info("Finished print %s", item['id'])
+        logger.info("Finished print %s: %s", item['id'], filename)
     elif isinstance(fields, basestring):
         fields = fields.split(",")
         line = [str(item[k]) for k in fields if k in item]
@@ -286,10 +290,9 @@ def runner(args, blogger):
                 posts = blogger.getPosts(
                     labels=args.labels,
                     maxResults=args.count)
-            printJson(posts)
             jobs = [gevent.spawn(printPosts,
                                  item, args.fields, args.doc, args.tofiles)
-                    for item in posts["items"]]
+                    for item in posts]
             gevent.wait(jobs)
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
@@ -298,20 +301,6 @@ def runner(args, blogger):
               'the application to re-authorize')
         return -1
     return 0
-
-
-def printJson(data):
-    """@todo: Docstring for printJson
-
-    :data: @todo
-    :returns: @todo
-    """
-    logger.debug(
-        json.dumps(data,
-                   sort_keys=True,
-                   indent=4,
-                   separators=(',',
-                               ': ')))
 
 
 if __name__ == '__main__':
