@@ -8,6 +8,7 @@ import pypandoc
 import toml
 import gevent
 import copy
+import glob
 
 
 from gevent import monkey
@@ -309,7 +310,11 @@ def processItem(args, contentArgs=None):
 def runner(args):
     if args.command == "file":
         jobs = []
-        for f in args.file:
+        files = frozenset()
+        for fn in args.file:
+            files = files.union(glob.iglob(fn))
+        logger.info("Processing files: %s", files)
+        for f in files:
             argsCopy = copy.deepcopy(args)
             with open(f, "r", newline="\n") as fh:
                 argsCopy.file = fh
