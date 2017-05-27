@@ -127,7 +127,7 @@ class EasyBlogger(object):
         #   name of the API ('blogger')
         #   version of the API you are using ('v3')
         #   authorized httplib2.Http() object that can be used for API calls
-        self.service = build('blogger', 'v3', http=http)
+        self.service = build('blogger', 'v3', http=http, cache_discovery=False)
         return self.service
 
     def _setBlog(self):
