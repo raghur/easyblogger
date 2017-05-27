@@ -45,6 +45,27 @@ class ContentArgParserTests(TestCase):
         assert args.command == "post"
         assert args.publish
 
+    def test_should_infer_args_from_toml_header(self):
+        theFile = Mock()
+        theFile.read.return_value = """
++++
+title= "t"
+id= "1234"
+tags= ["l", "a", "c"]
++++
+
+this is the post
+        """
+        parser = blogger.ContentArgParser(theFile)
+        args = Mock()
+        parser.updateArgs(args)
+
+        assert args.title == "t"
+        assert args.labels == ["l", "a", "c"]
+        assert args.format == "asciidoc"
+        assert args.command == "update"
+        assert not args.publish
+
     def test_should_infer_args_for_post2(self):
         theFile = Mock()
         theFile.read.return_value = """

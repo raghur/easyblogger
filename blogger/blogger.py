@@ -313,14 +313,17 @@ class ContentArgParser(object):
     def _inferArgsFromContent(self):
         fileContent = self.theFile.read()
 
-        if ContentArgParser.reToml.match(fileContent):
-            matches = ContentArgParser.reToml.findall(fileContent)
+        matches = ContentArgParser.reToml.findall(fileContent)
+        if matches:
             frontmatter = toml.loads(matches[0][0])
+            print(frontmatter)
             logger.debug("Found toml frontmatter %s", frontmatter)
             if 'id' in frontmatter:
                 self.postId = frontmatter["id"]
             if 'tags' in frontmatter:
                 self.labels = frontmatter["tags"]
+            else:
+                self.labels = ["untagged"]
             if 'title' in frontmatter:
                 self.title = frontmatter["title"]
             if 'format' in frontmatter:
@@ -329,6 +332,8 @@ class ContentArgParser(object):
                 self.format = 'asciidoc'
             if 'draft' in frontmatter:
                 self.publishStatus = not frontmatter['draft']
+            else:
+                self.publishStatus = False
             self.filters = []
             if 'filters' in frontmatter:
                 self.filters = frontmatter['filters']
