@@ -80,6 +80,8 @@ class EasyBlogger(object):
         :returns: service object
 
         """
+        logging.getLogger('googleapiclient.discovery').setLevel(
+            logging.CRITICAL)
         if self.service:
             return self.service
         # The scope URL for read/write access to a user's blogger data
@@ -167,6 +169,8 @@ class EasyBlogger(object):
             count = 0
             while request:
                 response = request.execute()
+                if not "items" in response:
+                    break
                 logger.debug("Got %s items", len(response["items"]))
                 count += len(response["items"])
                 for it in response["items"]:
