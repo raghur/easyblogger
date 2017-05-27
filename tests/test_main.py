@@ -1,5 +1,5 @@
 from unittest import TestCase
-from mock import Mock, call, patch
+from mock import Mock, call, patch, mock_open, DEFAULT
 from blogger.main import parse_args, runner
 from oauth2client.client import AccessTokenRefreshError
 
@@ -15,6 +15,64 @@ class MainTests(TestCase):
             }
     ]
     }
+
+    def test_should_process_files_for_update(self, pypandocMock, blogObjClass):
+        mo = mock_open(read_data = """
++++
+title= "t"
+id= "1234"
+tags= ["l", "a", "c"]
++++
+
+this is the post """)
+
+        def processItemSideEffect(*positionalArgs, **kwargs):
+            args = positionalArgs[0]
+            assert args.title == "t"
+            assert args.postId == "1234"
+            assert args.labels == ["l", "a", "c"]
+            assert args.command == "update"
+            assert args.format == "asciidoc"
+            assert args.publish == False
+            return DEFAULT
+
+        blogObj = blogObjClass.return_value
+        with patch('blogger.main.open', mo) as openmock, \
+            patch('blogger.main.processItem') as mockProcessItem, \
+            patch('blogger.main.glob') as glob:
+            glob.iglob.return_value = iter(["file1.asciidoc"])
+            pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
+            args = parse_args(['file', "file1.asciidoc"])
+            mockProcessItem.side_effect = processItemSideEffect
+            exitStatus = runner(args)
+
+    def test_should_process_files_for_create(self, pypandocMock, blogObjClass):
+        mo = mock_open(read_data = """
++++
+title= "t"
+tags= ["l", "a", "c"]
++++
+
+this is the post """)
+
+        def processItemSideEffect(*positionalArgs, **kwargs):
+            args = positionalArgs[0]
+            assert args.title == "t"
+            assert args.labels == ["l", "a", "c"]
+            assert args.command == "post"
+            assert args.format == "asciidoc"
+            assert args.publish == False
+            return DEFAULT
+
+        blogObj = blogObjClass.return_value
+        with patch('blogger.main.open', mo) as openmock, \
+            patch('blogger.main.processItem') as mockProcessItem, \
+            patch('blogger.main.glob') as glob:
+            glob.iglob.return_value = iter(["file1.asciidoc"])
+            pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
+            args = parse_args(['file', "file1.asciidoc"])
+            mockProcessItem.side_effect = processItemSideEffect
+            exitStatus = runner(args)
 
     def test_should_invoke_post(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]

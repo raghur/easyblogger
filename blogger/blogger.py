@@ -318,12 +318,14 @@ class ContentArgParser(object):
             frontmatter = toml.loads(matches[0][0])
             print(frontmatter)
             logger.debug("Found toml frontmatter %s", frontmatter)
+            self.postId = None
             if 'id' in frontmatter:
                 self.postId = frontmatter["id"]
+
+            self.labels = ["untagged"]
             if 'tags' in frontmatter:
                 self.labels = frontmatter["tags"]
-            else:
-                self.labels = ["untagged"]
+
             if 'title' in frontmatter:
                 self.title = frontmatter["title"]
             if 'format' in frontmatter:
