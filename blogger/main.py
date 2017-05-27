@@ -1,16 +1,18 @@
 import sys
 import logging
+import coloredlogs
 import argparse
 import os
 import json
 import pypandoc
 import toml
 import gevent
+import copy
 
 
 from gevent import monkey
 from oauth2client.client import AccessTokenRefreshError
-from .blogger import ContentArgParser, EasyBlogger, logger
+from .blogger import ContentArgParser, EasyBlogger
 from io import open
 try:
     from urllib.parse import urlparse
@@ -32,6 +34,8 @@ else:
     basestring = basestring
 
 monkey.patch_all()
+logging.basicConfig()
+logger = logging.getLogger(__name__)
 
 
 def getFilenameFromPostUrl(url, format):
@@ -215,9 +219,7 @@ def parse_args(sysargv):
         help="Figure out what to do from the input file")
     file_parser.add_argument(
         "file",
-        type=argparse.FileType('r'),
-        nargs="?",
-        default=sys.stdin,
+        nargs="+",
         help="Post content - input file")
 
     config = os.path.expanduser("~/.easyblogger")
@@ -225,9 +227,11 @@ def parse_args(sysargv):
         sysargv = ["@" + config] + sysargv
     args = parser.parse_args(sysargv)
     verbosity = logging.getLevelName(args.verbose)
-    if args.verbose != "CRITICAL":
+    # print(verbosity, logging.getLevelName(verbosity))
+    coloredlogs.install(verbosity)
+    if args.verbose != "critical":
         logger.setLevel(logging.INFO)
-        logger.info("Setting log level to: %s ", args.verbose)
+        logger.info("setting log level to: %s ", args.verbose)
     logger.setLevel(verbosity)
 
     logger.debug("Final args:")
@@ -238,17 +242,13 @@ def parse_args(sysargv):
 
 def main(sysargv=sys.argv):
     args = parse_args(sysargv[1:])
-    blogger = EasyBlogger(args.clientid, args.secret, args.blogid, args.url)
-    return runner(args, blogger)
+    return runner(args)
 
 
-def runner(args, blogger):
+def processItem(args, contentArgs=None):
+    blogger = EasyBlogger(args.clientid, args.secret, args.blogid,
+                          args.url)
     try:
-        contentArgs = None
-        if args.command == "file":
-            contentArgs = ContentArgParser(args.file)
-            contentArgs.updateArgs(args)
-
         if args.command == "post":
             newPost = blogger.post(args.title,
                                    args.content or args.file,
@@ -257,15 +257,18 @@ def runner(args, blogger):
                                    isDraft=not args.publish,
                                    fmt=args.format)
             postId = newPost['id']
+            logger.debug("Created post: %s", postId)
             if contentArgs:
                 contentArgs.updateFileWithPostId(postId)
             print(newPost['url'])
 
         if args.command == 'delete':
+            logger.debug("Deleting post: %s", args.postIds)
             for postId in args.postIds:
                 blogger.deletePost(postId)
 
         if args.command == 'update':
+            logger.debug("Updating post: %s", args.postId)
             updated = blogger.updatePost(
                 args.postId,
                 args.title,
@@ -298,9 +301,26 @@ def runner(args, blogger):
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
         print('The credentials have been revoked or expired, please re-run'
-              'the application to re-authorize')
+              ' the application to re-authorize')
         return -1
     return 0
+
+
+def runner(args):
+    if args.command == "file":
+        jobs = []
+        for f in args.file:
+            argsCopy = copy.deepcopy(args)
+            with open(f, "r", newline="\n") as fh:
+                argsCopy.file = fh
+                contentArgs = ContentArgParser(fh)
+                contentArgs.updateArgs(argsCopy)
+                logger.debug("Updated args: %s", argsCopy)
+                jobs.append(gevent.spawn(processItem, argsCopy, contentArgs))
+        gevent.wait(jobs)
+        return 0
+    else:
+        return processItem(args)
 
 
 if __name__ == '__main__':

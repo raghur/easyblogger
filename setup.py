@@ -26,7 +26,8 @@ setup(name="EasyBlogger",
           'python-gflags',
           'httplib2',
           'toml',
-          'gevent'
+          'gevent',
+          'coloredlogs'
       ],
       entry_points={
           'console_scripts': [

@@ -19,6 +19,7 @@ import os
 import os.path
 import re
 import sys
+import toml
 from subprocess import check_output
 from tempfile import NamedTemporaryFile
 import httplib2
@@ -42,8 +43,7 @@ else:
     unicode = unicode
     bytes = str
     basestring = basestring
-logger = logging.getLogger()
-logging.basicConfig()
+logger = logging.getLogger(__name__)
 
 
 class EasyBlogger(object):
@@ -52,7 +52,6 @@ class EasyBlogger(object):
     def _parseLabels(labels):
         if not labels:
             return None
-
         if isinstance(labels, basestring):
             if labels.strip() == "":
                 return None
@@ -292,6 +291,8 @@ class EasyBlogger(object):
 
 
 class ContentArgParser(object):
+    reToml = re.compile(r"^\+\+\+\s*$(.*?)^\+\+\+\s*$(.*)",
+                        re.MULTILINE | re.DOTALL)
     rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I | re.M)
     reLabels = re.compile("^\s*labels\s*:(.*)$", re.I | re.M)
     reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
@@ -308,39 +309,59 @@ class ContentArgParser(object):
     def _inferArgsFromContent(self):
         fileContent = self.theFile.read()
 
-        self.postId = ContentArgParser.rePostId.search(fileContent)
-        if self.postId:
-            self.postId = self.postId.group(1).strip()
-
-        self.labels = ContentArgParser.reLabels.search(fileContent)
-        if self.labels:
-            self.labels = self.labels.group(1).strip()
-
-        self.title = ContentArgParser.reTitle.search(fileContent)
-        if self.title:
-            self.title = self.title.group(1).strip()
-
-        self.format = ContentArgParser.reFormat.search(fileContent)
-        if self.format:
-            self.format = self.format.group(1).strip()
+        if ContentArgParser.reToml.match(fileContent):
+            matches = ContentArgParser.reToml.findall(fileContent)
+            frontmatter = toml.loads(matches[0][0])
+            logger.debug("Found toml frontmatter %s", frontmatter)
+            if 'id' in frontmatter:
+                self.postId = frontmatter["id"]
+            if 'tags' in frontmatter:
+                self.labels = frontmatter["tags"]
+            if 'title' in frontmatter:
+                self.title = frontmatter["title"]
+            if 'format' in frontmatter:
+                self.format = frontmatter["format"]
+            else:
+                self.format = 'asciidoc'
+            if 'draft' in frontmatter:
+                self.publishStatus = not frontmatter['draft']
+            self.filters = []
+            if 'filters' in frontmatter:
+                self.filters = frontmatter['filters']
+            self.content = matches[0][1]
         else:
-            self.format = "markdown"
+            self.postId = ContentArgParser.rePostId.search(fileContent)
+            if self.postId:
+                self.postId = self.postId.group(1).strip()
 
-        self.publishStatus = ContentArgParser.rePublishStatus.search(
-            fileContent)
-        if self.publishStatus:
-            self.publishStatus = self \
-                                    .publishStatus \
-                                    .group(1) \
-                                    .strip().lower() == "true"
-        else:
-            self.publishStatus = False
+            self.labels = ContentArgParser.reLabels.search(fileContent)
+            if self.labels:
+                self.labels = self.labels.group(1).strip()
 
-        self.filters = ContentArgParser.reFilters.search(fileContent)
-        if self.filters:
-            self.filters = self.filters.group(1).strip().split(",")
+            self.title = ContentArgParser.reTitle.search(fileContent)
+            if self.title:
+                self.title = self.title.group(1).strip()
 
-        self.content = fileContent
+            self.format = ContentArgParser.reFormat.search(fileContent)
+            if self.format:
+                self.format = self.format.group(1).strip()
+            else:
+                self.format = "markdown"
+
+            self.publishStatus = ContentArgParser.rePublishStatus.search(
+                fileContent)
+            if self.publishStatus:
+                self.publishStatus = self \
+                                        .publishStatus \
+                                        .group(1) \
+                                        .strip().lower() == "true"
+            else:
+                self.publishStatus = False
+
+            self.filters = ContentArgParser.reFilters.search(fileContent)
+            if self.filters:
+                self.filters = self.filters.group(1).strip().split(",")
+            self.content = fileContent
 
     def updateArgs(self, args):
         self._inferArgsFromContent()
@@ -355,8 +376,7 @@ class ContentArgParser(object):
             args.command = "post"
         args.publish = self.publishStatus
         args.filters = self.filters
-        logger.debug("args after updateArgs labels=%s, filters=%s",
-                     args.labels, args.filters)
+        logger.debug("Updated args %s", args)
 
     def updateFileWithPostId(self, postId):
         if self.theFile == sys.stdin:

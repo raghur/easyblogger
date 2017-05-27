@@ -4,6 +4,7 @@ from blogger.main import parse_args, runner
 from oauth2client.client import AccessTokenRefreshError
 
 
+@patch('blogger.main.EasyBlogger')
 @patch('blogger.main.pypandoc')
 class MainTests(TestCase):
     posts = {"items": [
@@ -15,103 +16,106 @@ class MainTests(TestCase):
     ]
     }
 
-    def test_should_invoke_post(self, pypandocMock):
+    def test_should_invoke_post(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['post', "-t", "t", "-c", "content"])
         print(args)
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.post.return_value = {"id": "100", "url": "someurl"}
 
-        exitStatus = runner(args, blogObj)
+        exitStatus = runner(args)
 
         blogObj.post.assert_called_with(
             "t", "content", None, [], isDraft=True, fmt="html")
         assert exitStatus == 0
 
-    def test_should_invoke_delete(self, pypandocMock):
+    def test_should_invoke_delete(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['delete', '100', "200"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
 
-        runner(args, blogObj)
+        runner(args)
 
         assert blogObj.deletePost.call_count == 2
         expected = [call.deletePost('100'), call.deletePost('200')]
         assert blogObj.mock_calls == expected
 
-    def test_should_invoke_update(self, pypandocMock):
+    def test_should_invoke_update(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(
             ['update', "-t", "t", "-c", "content", "100"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.updatePost.return_value = {"id": "100", "url": "someurl"}
 
-        runner(args, blogObj)
+        runner(args)
 
         blogObj.updatePost.assert_called_with(
             "100", "t", "content", None, [], isDraft=True, fmt="html")
 
-    def test_should_invoke_getbyid(self, pypandocMock):
+    def test_should_invoke_getbyid(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get', "-p", "100"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.return_value = MainTests.posts
 
-        runner(args, blogObj)
+        runner(args)
 
         blogObj.getPosts.assert_called_with(postId="100")
 
-    def test_should_return_error_exit_code_on_exception(self, pypandocMock):
+    def test_should_return_error_exit_code_on_exception(self,
+                                                        pypandocMock,
+                                                        blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get', "-p", "100"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.side_effect = AccessTokenRefreshError
 
-        rval = runner(args, blogObj)
+        rval = runner(args)
         assert rval == -1
 
-    def test_should_invoke_bylabel_bydefault(self, pypandocMock):
+    def test_should_invoke_bylabel_bydefault(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get'])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.return_value = MainTests.posts
 
-        runner(args, blogObj)
+        runner(args)
 
         blogObj.getPosts.assert_called_with(labels=None, maxResults=None)
 
-    def test_should_invoke_search(self, pypandocMock):
+    def test_should_invoke_search(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get', "-q", "query"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.return_value = MainTests.posts
 
-        runner(args, blogObj)
+        runner(args)
         blogObj.getPosts.assert_called_with(query="query", maxResults=None)
 
-    def test_should_invoke_get_by_url(self, pypandocMock):
+    def test_should_invoke_get_by_url(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get', "-u", "https://some/url"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.return_value = MainTests.posts
 
-        runner(args, blogObj)
+        runner(args)
         blogObj.getPosts.assert_called_with(url="https://some/url")
 
-    def test_empty_results_in_get(self, pypandocMock):
+    def test_empty_results_in_get(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get', "-q", "query"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.return_value = {"items": []}
 
-        runner(args, blogObj)
+        runner(args)
         blogObj.getPosts.assert_called_with(query="query", maxResults=None)
 
-    def test_handle_non_existent_keys_in_fields(self, pypandocMock):
+    def test_handle_non_existent_keys_in_fields(self, pypandocMock,
+                                                blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(['get', "-q", "query", "-f", "id,b"])
-        blogObj = Mock()
+        blogObj = blogObjClass.return_value
         blogObj.getPosts.return_value = MainTests.posts
 
-        runner(args, blogObj)
+        runner(args)
         blogObj.getPosts.assert_called_with(query="query", maxResults=None)
