@@ -1,7 +1,9 @@
 from unittest import TestCase
 from mock import Mock, call, patch, mock_open, DEFAULT
-from blogger.main import parse_args, runner
+from blogger.main import parse_args, runner, getFrontMatter
 from oauth2client.client import AccessTokenRefreshError
+from datetime import datetime
+import toml
 
 
 @patch('blogger.main.EasyBlogger')
@@ -11,10 +13,20 @@ class MainTests(TestCase):
             {
                 "id": "100",
                 "title": "title",
-                "url": "url"
+                "url": "url",
+                "published" :datetime.today(),
+                "updated" :datetime.today()
             }
     ]
     }
+
+    def test_should_generate_toml_frontmatter(self, pypandocMock, blogObjClass):
+        item = MainTests.posts["items"][0]
+        fm = getFrontMatter(item)
+        fmObj = toml.loads(fm)
+        assert fmObj["title"] == 'title'
+        assert fmObj["id"] == '100'
+        assert fmObj["aliases"][0] == 'url'
 
     def test_should_process_files_for_update(self, pypandocMock, blogObjClass):
         mo = mock_open(read_data = """
