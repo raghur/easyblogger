@@ -14,8 +14,8 @@ class MainTests(TestCase):
                 "id": "100",
                 "title": "title",
                 "url": "url",
-                "published" :datetime.today(),
-                "updated" :datetime.today()
+                "published": datetime.today(),
+                "updated": datetime.today()
             }
     ]
     }
@@ -29,7 +29,7 @@ class MainTests(TestCase):
         assert fmObj["aliases"][0] == 'url'
 
     def test_should_process_files_for_update(self, pypandocMock, blogObjClass):
-        mo = mock_open(read_data = """
+        mo = mock_open(read_data="""
 +++
 title= "t"
 id= "1234"
@@ -50,8 +50,8 @@ this is the post """)
 
         blogObj = blogObjClass.return_value
         with patch('blogger.main.open', mo) as openmock, \
-            patch('blogger.main.processItem') as mockProcessItem, \
-            patch('blogger.main.glob') as glob:
+                patch('blogger.main.processItem') as mockProcessItem, \
+                patch('blogger.main.glob') as glob:
             glob.iglob.return_value = iter(["file1.asciidoc"])
             pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
             args = parse_args(['file', "file1.asciidoc"])
@@ -59,7 +59,7 @@ this is the post """)
             exitStatus = runner(args)
 
     def test_should_process_files_for_create(self, pypandocMock, blogObjClass):
-        mo = mock_open(read_data = """
+        mo = mock_open(read_data="""
 +++
 title= "t"
 tags= ["l", "a", "c"]
@@ -78,8 +78,8 @@ this is the post """)
 
         blogObj = blogObjClass.return_value
         with patch('blogger.main.open', mo) as openmock, \
-            patch('blogger.main.processItem') as mockProcessItem, \
-            patch('blogger.main.glob') as glob:
+                patch('blogger.main.processItem') as mockProcessItem, \
+                patch('blogger.main.glob') as glob:
             glob.iglob.return_value = iter(["file1.asciidoc"])
             pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
             args = parse_args(['file', "file1.asciidoc"])

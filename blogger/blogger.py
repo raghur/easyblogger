@@ -363,9 +363,9 @@ class ContentArgParser(object):
                 fileContent)
             if self.publishStatus:
                 self.publishStatus = self \
-                                        .publishStatus \
-                                        .group(1) \
-                                        .strip().lower() == "true"
+                    .publishStatus \
+                    .group(1) \
+                    .strip().lower() == "true"
             else:
                 self.publishStatus = False
 
