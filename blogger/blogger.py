@@ -80,8 +80,6 @@ class EasyBlogger(object):
         :returns: service object
 
         """
-        logging.getLogger('googleapiclient.discovery').setLevel(
-            logging.CRITICAL)
         if self.service:
             return self.service
         # The scope URL for read/write access to a user's blogger data
