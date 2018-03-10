@@ -61,7 +61,7 @@ def getFrontMatter(item, format="toml"):
 
 
 def printPosts(item, fields, docFormat=None, writeToFiles=False):
-    template = """+++
+    template = u"""+++
 {0}
 +++
 
@@ -85,7 +85,7 @@ def printPosts(item, fields, docFormat=None, writeToFiles=False):
                 format="html")
             content = template.format(getFrontMatter(item),
                                       converted).encode('utf-8',
-                                                        'ignore')
+                                                        errors='replace')
             with open(filename, "wb") as outputfile:
                 outputfile.write(content)
         else:
