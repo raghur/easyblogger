@@ -9,7 +9,7 @@ import toml
 import gevent
 import copy
 import glob
-
+import chardet
 
 from gevent import monkey
 from oauth2client.client import AccessTokenRefreshError
@@ -22,6 +22,7 @@ except ImportError:
 try:
     unicode = unicode
 except NameError:
+    py2 = False
     # 'unicode' is undefined, must be Python 3
     str = str
     unicode = str
@@ -29,6 +30,7 @@ except NameError:
     basestring = (str, bytes)
 else:
     # 'unicode' exists, must be Python 2
+    py2 = True
     str = str
     unicode = unicode
     bytes = str
@@ -37,6 +39,14 @@ else:
 monkey.patch_all()
 logging.basicConfig()
 logger = logging.getLogger(__name__)
+
+
+def toUnicode(s):
+    if py2:
+        enc = chardet.detect(s)['encoding']
+        return s.decode(enc).encode('utf8')
+    else:
+        return s
 
 
 def getFilenameFromPostUrl(url, format):
@@ -129,9 +139,11 @@ def parse_args(sysargv):
     get_parser = subparsers.add_parser("get", help="list posts")
     group = get_parser.add_mutually_exclusive_group()
     group.add_argument("-p", "--postId", help="the post id")
-    group.add_argument("-l", "--labels", help="comma separated list of labels")
-    group.add_argument("-q", "--query", help="search term")
-    group.add_argument("-u", help="the full post url", metavar="URL")
+    group.add_argument("-l", "--labels", help="comma separated list of labels",
+                       type=toUnicode)
+    group.add_argument("-q", "--query", help="search term", type=toUnicode)
+    group.add_argument("-u", help="the full post url", metavar="URL",
+                       type=toUnicode)
     output_format = get_parser.add_mutually_exclusive_group()
     output_format.add_argument(
         "-f",
@@ -154,16 +166,18 @@ def parse_args(sysargv):
         help="count")
 
     post_parser = subparsers.add_parser("post", help="create a new post")
-    post_parser.add_argument("-t", "--title", help="Post title")
+    post_parser.add_argument("-t", "--title", help="Post title",
+                             type=toUnicode)
     post_parser.add_argument(
         "-l",
         "--labels",
-        help="comma separated list of labels")
+        help="comma separated list of labels", type=toUnicode)
     post_parser.add_argument(
         "--publish", action="store_true",
         help="Publish to the blog [default: false]")
     post_input = post_parser.add_mutually_exclusive_group(required=True)
-    post_input.add_argument("-c", "--content", help="Post content")
+    post_input.add_argument("-c", "--content", help="Post content",
+                            type=toUnicode)
     post_input.add_argument(
         "-f",
         "--file",
@@ -203,7 +217,7 @@ def parse_args(sysargv):
     update_parser.add_argument(
         "-l",
         "--labels",
-        help="comma separated list of labels")
+        help="comma separated list of labels", type=toUnicode)
 
     update_parser.add_argument(
         "--publish", action="store_true",
@@ -249,6 +263,7 @@ def main(sysargv=sys.argv):
 def processItem(args, contentArgs=None):
     blogger = EasyBlogger(args.clientid, args.secret, args.blogid,
                           args.url)
+    print("In processItem")
     try:
         if args.command == "post":
             newPost = blogger.post(args.title,

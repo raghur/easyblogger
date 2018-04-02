@@ -7,5 +7,6 @@ nose2==0.7.4
 packaging==17.1
 pypandoc==1.4
 python-gflags==3.1.2
+chardet==3.0.4
 toml==0.9.4
 tox==2.9.1
