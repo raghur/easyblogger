@@ -10,3 +10,4 @@ dist/
 .noseids
 assets/img/*
 tags
+build/
