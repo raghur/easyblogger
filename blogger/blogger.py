@@ -191,11 +191,12 @@ class EasyBlogger(object):
                 logger.debug("using asciidoc")
                 with self.namedTemporaryFile(delete=False,
                                              suffix=".adoc") as fp:
-                    if bytes != str:
-                        # py3 - decode unicode to byte array
-                        encodedBytes = bytes(raw, "utf8")
+                    # print(type(raw))
+                    if bytes == str:
+                        # py2 - decode unicode to byte array
+                        encodedBytes = raw.encode('utf8')
                     else:
-                        encodedBytes = raw
+                        encodedBytes = bytes(raw, 'utf8')
                     fp.write(encodedBytes)
                     fp.seek(0)
                     print(fp.name)
@@ -397,5 +398,8 @@ class ContentArgParser(object):
             content = ContentArgParser.rePostIdUpdate.sub(
                 'PostId: ' + postId,
                 self.content)
+            # print(type(content))
+            if bytes == str and type(content) == unicode:
+                content = content.encode('utf8')
             f.write(content)
             f.flush()
