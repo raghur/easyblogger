@@ -6,6 +6,7 @@ import os
 import json
 import pypandoc
 import toml
+import yaml
 import gevent
 import copy
 import glob
@@ -55,22 +56,34 @@ def getFilenameFromPostUrl(url, format):
     return os.path.splitext(filename)[0] + "." + format
 
 
-def getFrontMatter(item, format="toml"):
+def getFrontMatter(item, format="toml", legacy=False):
     frontmatter = dict()
-    frontmatter["title"] = item["title"]
-    frontmatter["id"] = item["id"]
-    if "labels" in item:
-        frontmatter["tags"] = item["labels"]
-    frontmatter["aliases"] = [item["url"]]
-    frontmatter["publishdate"] = item["published"]
-    frontmatter["draft"] = False
-    frontmatter["date"] = item["published"]
-    frontmatter["lastmod"] = item["updated"]
+    if legacy:
+        frontmatter["Title"] = item["title"]
+        frontmatter["PostId"] = item["id"]
+        if "labels" in item:
+            frontmatter["Labels"] = item["labels"]
+        frontmatter["Published"] = item["published"]
+    else:
+        frontmatter = dict()
+        frontmatter["title"] = item["title"]
+        frontmatter["id"] = item["id"]
+        if "labels" in item:
+            frontmatter["tags"] = item["labels"]
+        frontmatter["aliases"] = [item["url"]]
+        frontmatter["publishdate"] = item["published"]
+        frontmatter["draft"] = False
+        frontmatter["date"] = item["published"]
+        frontmatter["lastmod"] = item["updated"]
     if format == "toml":
         return toml.dumps(frontmatter)
+    elif format == 'yaml':
+        # legacy header
+        return yaml.dump(frontmatter)
 
 
-def printPosts(item, fields, docFormat=None, writeToFiles=False):
+def printPosts(item, fields, docFormat=None, writeToFiles=False,
+               legacyFrontmatter=False):
     template = u"""+++
 {0}
 +++

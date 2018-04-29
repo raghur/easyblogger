@@ -28,6 +28,7 @@ setup(name="EasyBlogger",
           'toml',
           'gevent',
           'coloredlogs',
+          'pyyaml',
           'chardet'
       ],
       entry_points={
