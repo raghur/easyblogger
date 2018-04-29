@@ -191,10 +191,11 @@ class EasyBlogger(object):
                 logger.debug("using asciidoc")
                 with self.namedTemporaryFile(delete=False,
                                              suffix=".adoc") as fp:
-                    try:
+                    if bytes != str:
+                        # py3 - decode unicode to byte array
                         encodedBytes = bytes(raw, "utf8")
-                    except TypeError:
-                        encodedBytes = bytes(raw).encode("utf8")
+                    else:
+                        encodedBytes = raw
                     fp.write(encodedBytes)
                     fp.seek(0)
                     print(fp.name)
