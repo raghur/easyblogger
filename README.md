@@ -3,6 +3,9 @@ EasyBlogger
 
 [![Build Status](https://travis-ci.org/raghur/easyblogger.svg?branch=master)](https://travis-ci.org/raghur/easyblogger)
 [![Coverage Status](https://coveralls.io/repos/github/raghur/easyblogger/badge.svg?branch=master)](https://coveralls.io/github/raghur/easyblogger?branch=master)
+[![PyPI](https://img.shields.io/pypi/v/easyblogger.svg)](https://pypi.python.org/pypi/easyblogger)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/Easyblogger.svg)](https://pypi.python.org/pypi/easyblogger)
+[![Updates](https://pyup.io/repos/github/raghur/easyblogger/shield.svg)](https://pyup.io/account/repos/github/raghur/easyblogger/)
 
 Blog to blogger from the command line.
 
@@ -488,4 +491,6 @@ Dev Guide
 
 1.  Exit out of any virtualenvs
 2.  Run `tox`
+
+
 
