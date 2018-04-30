@@ -11,7 +11,7 @@ class ContentArgParserTests(TestCase):
             <!--
             Title: t
             Labels: l
-            PostId: 234
+            PostId: "234"
             Published: false
             -->
         """
@@ -20,7 +20,7 @@ class ContentArgParserTests(TestCase):
         parser.updateArgs(args)
 
         assert args.title == "t"
-        assert args.labels == "l"
+        assert args.labels == ["l"]
         assert args.postId == "234"
         assert args.format == "markdown"
         assert args.command == "update"
@@ -40,7 +40,7 @@ class ContentArgParserTests(TestCase):
         parser.updateArgs(args)
 
         assert args.title == "t"
-        assert args.labels == "l"
+        assert args.labels == ["l"]
         assert args.format == "markdown"
         assert args.command == "post"
         assert args.publish
@@ -80,10 +80,11 @@ this is the post
         parser.updateArgs(args)
 
         assert args.title == "t"
-        assert args.labels == "l, a, c"
+        print(args.labels)
+        assert args.labels == ["l", "a", "c"]
         assert args.format == "markdown"
         assert args.command == "post"
-        assert args.publish == False
+        assert not args.publish
 
     def test_should_infer_args_for_post3(self):
         theFile = Mock()
@@ -99,7 +100,7 @@ this is the post
         parser.updateArgs(args)
 
         assert args.title == "t"
-        assert args.labels == ""
+        assert args.labels == ["untagged"]
         assert args.format == "markdown"
         assert args.command == "post"
         assert not args.publish
@@ -109,44 +110,43 @@ this is the post
         fileContent = """
             <!--
             -->
-        """
+abc"""
         theFile.read.return_value = fileContent
         parser = blogger.ContentArgParser(theFile)
         args = Mock()
         parser.updateArgs(args)
 
         assert args.title is None
-        assert args.labels is None
+        assert args.labels == ["untagged"]
         assert args.format == "markdown"
         assert args.command == "post"
-        assert args.content == fileContent
+        assert args.content == "\nabc"
         assert not args.publish
 
     def test_should_allow_format_to_be_specified(self):
         theFile = Mock()
-        fileContent = """
-            <!--
-            format : markdown_strict
+        fileContent = """<!--
+            Format : markdown_strict
 
             -->
-        """
+abc"""
         theFile.read.return_value = fileContent
         parser = blogger.ContentArgParser(theFile)
         args = Mock()
         parser.updateArgs(args)
 
         assert args.title is None
-        assert args.labels is None
+        assert args.labels == ['untagged']
         assert args.format == "markdown_strict"
         assert "\n" not in args.format
         assert args.command == "post"
-        assert args.content == fileContent
+        assert args.content == "\nabc"
         assert not args.publish
 
     def test_should_update_doc_with_postid(self):
         def validateFileContent(content):
-            print(content)
-            assert blogger.ContentArgParser.rePostId.search(content)
+            # print(content)
+            assert content.index("1000") > 0
             return DEFAULT
 
         fileContent = """
@@ -171,6 +171,8 @@ this is the post
         fileHandle.write.side_effect = validateFileContent
 
         parser = blogger.ContentArgParser(theFile, open=mock_open)
+        args = Mock()
+        parser.updateArgs(args)
         parser.updateFileWithPostId("1000")
 
         mock_open.assert_called_with(theFile.name, "w")

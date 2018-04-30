@@ -20,6 +20,7 @@ import os.path
 import re
 import sys
 import toml
+import yaml
 from subprocess import check_output
 from tempfile import NamedTemporaryFile
 import httplib2
@@ -297,32 +298,79 @@ class EasyBlogger(object):
 class ContentArgParser(object):
     reToml = re.compile(r"^\+\+\+\s*$(.*?)^\+\+\+\s*$(.*)",
                         re.MULTILINE | re.DOTALL)
-    rePostId = re.compile("^\s*postId\s*:\s*(\d+)\s*$", re.I | re.M)
-    reLabels = re.compile("^\s*labels\s*:(.*)$", re.I | re.M)
-    reTitle = re.compile("^\s*title\s*:\s*(.+)\s*$", re.I | re.M)
-    reFormat = re.compile("^\s*format\s*:\s*(.+)\s*$", re.I | re.M)
-    rePublishStatus = re.compile(
-        "^\s*published\s*:\s*(true|false)\s*$", re.I | re.M)
-    reFilters = re.compile("^\s*filters\s*:(.*)$", re.I | re.M)
-    rePostIdUpdate = re.compile("^(\s*postId\s*:)", re.I | re.M)
+    reYaml = re.compile(r"^\s*((<!--)|(////))\s*$(.*?)^\s*((-->)|(////))\s*$(.*)",
+                        re.MULTILINE | re.DOTALL)
 
     def __init__(self, theFile, open=open):
         self.theFile = theFile
         self.open = open
+        self.frontmatterFormat = ''
+        self.legacyKeys = True
+        self.frontMatter = None
+        self.useHtmlComment = False
+        self.postId = None
+        self.filters = []
+        self.title = None
+        self.labels = ["untagged"]
 
     def _inferArgsFromContent(self):
         fileContent = self.theFile.read()
 
-        matches = ContentArgParser.reToml.findall(fileContent)
-        if matches:
-            frontmatter = toml.loads(matches[0][0])
+        isToml = ContentArgParser.reToml.findall(fileContent)
+        isYaml = ContentArgParser.reYaml.findall(fileContent)
+        frontmatter = {}
+        if isToml:
+            frontmatter = toml.loads(isToml[0][0])
             print(frontmatter)
             logger.debug("Found toml frontmatter %s", frontmatter)
-            self.postId = None
+            self.content = isToml[0][-1]
+            self.frontmatterFormat = 'toml'
+        elif isYaml:
+            frontmatter = yaml.load(isYaml[0][3])
+            self.useHtmlComment = isYaml[0][0] == '<!--'
+            self.content = isYaml[0][-1]
+            self.frontmatterFormat = 'yaml'
+            self.format = "markdown"
+            if not frontmatter:
+                frontmatter = {}
+        else:
+            raise Exception('Unknown frontmatter format %s' % fileContent)
+        self.frontMatter = frontmatter
+
+        # Legacy header detection
+        if 'PostId' in frontmatter or \
+            'Title' in frontmatter or \
+            'Format' in frontmatter or \
+            'Published' in frontmatter or \
+                'Labels' in frontmatter or \
+                self.frontmatterFormat == 'yaml':
+            self.legacyKeys = True
+            if 'PostId' in frontmatter:
+                self.postId = frontmatter['PostId']
+            if 'Labels' in frontmatter:
+                if isinstance(frontmatter['Labels'], list):
+                    self.labels = frontmatter['Labels']
+                elif frontmatter['Labels'] is not None:
+                    self.labels = [l.strip() for l in
+                                   frontmatter['Labels'].split(",")]
+            if 'Title' in frontmatter:
+                self.title = frontmatter['Title']
+            if 'Format' in frontmatter:
+                self.format = frontmatter['Format']
+            else:
+                self.format = 'markdown'
+            if 'Published' in frontmatter:
+                self.publishStatus = frontmatter['Published']
+            else:
+                self.publishStatus = False
+            if 'filters' in frontmatter:
+                self.filters = frontmatter['filters']
+
+        else:
+            # Hugo compliant new frontmatter format keys
             if 'id' in frontmatter:
                 self.postId = frontmatter["id"]
 
-            self.labels = ["untagged"]
             if 'tags' in frontmatter:
                 self.labels = frontmatter["tags"]
 
@@ -336,43 +384,8 @@ class ContentArgParser(object):
                 self.publishStatus = not frontmatter['draft']
             else:
                 self.publishStatus = False
-            self.filters = []
             if 'filters' in frontmatter:
                 self.filters = frontmatter['filters']
-            self.content = matches[0][1]
-        else:
-            self.postId = ContentArgParser.rePostId.search(fileContent)
-            if self.postId:
-                self.postId = self.postId.group(1).strip()
-
-            self.labels = ContentArgParser.reLabels.search(fileContent)
-            if self.labels:
-                self.labels = self.labels.group(1).strip()
-
-            self.title = ContentArgParser.reTitle.search(fileContent)
-            if self.title:
-                self.title = self.title.group(1).strip()
-
-            self.format = ContentArgParser.reFormat.search(fileContent)
-            if self.format:
-                self.format = self.format.group(1).strip()
-            else:
-                self.format = "markdown"
-
-            self.publishStatus = ContentArgParser.rePublishStatus.search(
-                fileContent)
-            if self.publishStatus:
-                self.publishStatus = self \
-                    .publishStatus \
-                    .group(1) \
-                    .strip().lower() == "true"
-            else:
-                self.publishStatus = False
-
-            self.filters = ContentArgParser.reFilters.search(fileContent)
-            if self.filters:
-                self.filters = self.filters.group(1).strip().split(",")
-            self.content = fileContent
 
     def updateArgs(self, args):
         self._inferArgsFromContent()
@@ -394,12 +407,28 @@ class ContentArgParser(object):
             return
         if not hasattr(self, "content"):
             self.content = self.theFile.read()
+        if self.legacyKeys:
+            self.frontMatter['PostId'] = postId
+        else:
+            self.frontMatter['id'] = postId
+
         with self.open(self.theFile.name, "w") as f:
-            content = ContentArgParser.rePostIdUpdate.sub(
-                'PostId: ' + postId,
-                self.content)
-            # print(type(content))
-            if bytes == str and type(content) == unicode:
-                content = content.encode('utf8')
-            f.write(content)
+            if self.frontmatterFormat == 'toml':
+                f.write("""+++
+%s
++++
+%s
+""" % (toml.dump(self.frontMatter), self.content))
+            elif self.useHtmlComment:
+                f.write("""<!--
+%s
+-->
+%s
+""" % (yaml.dump(self.frontMatter), self.content))
+            else:
+                f.write("""////
+%s
+////
+%s
+""" % (yaml.dump(self.frontMatter), self.content))
             f.flush()
