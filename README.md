@@ -126,8 +126,28 @@ func! BlogSave(file)
 endfunction
 command! BlogSave call BlogSave(expand("%:p"))
 ```
-1. Start writing a post - create a markdown file (.md) with a comment header
+
+1. Start writing a post - create a markdown file (.md) with frontmatter in a comment
 ```markdown
+<!--
+id:
+title    : title
+labels   : [any, comma, separated, labels]
+format	 : markdown
+published: true
+filters: <path to your filter>
+-->
+```
+Note that as of Easyblogger 3.0, the preferred frontmatter format is borrowed from Hugo.
+The original frontmatter header in earlier versions is deprecated. However, if `easyblogger`
+finds header using the older keys, then it will use them.
+While there should be no reason to prefer the old format, if you need that for whatever
+reason, you must specify `--legacy-frontmatter` flag in the `get` subcommand. For more
+details, refer to the Frontmatter section
+
+*LEGACY FRONTMATTER FORMAT*
+__still supported but you're encouraged to use the new format__
+```
 <!--
 PostId:
 Title    : title
@@ -140,6 +160,18 @@ filters: <path to your filter>
 
 2. If you prefer using `asciidoc`, then use the following comment header:
 ```asciidoc
++++
+id:
+title    : title
+labels   : [any, comma, separated, labels]
+format	 : asciidoc
+published: true
++++
+```
+
+*LEGACY FRONTMATTER FORMAT*
+__still supported but you're encouraged to use the new format__
+```asciidoc
 ////
 PostId:
 Title    : title
@@ -151,6 +183,7 @@ Published: true
 
 Asciidoc does not require filters - it has a better system of plugins. Just
 ensure that you have installed `asciidoctor` and `asciidoctor-diagram` gems
+
 1. When done, call `:BlogSave` and your blog will be published
 
 Usage
@@ -341,6 +374,8 @@ filters: <path to your installed filter>
 -->
 # This is my content
 ```
+The example above uses legacy frontmatter format. You're encouraged to use the new
+format which allows for additional metadata.
 
 And post it to your blog like so:
 
@@ -359,6 +394,59 @@ To delete posts, you need to specify the post id
 ``` {.sourceCode .bash}
 easyblogger delete 234546720561632959
 ```
+
+Frontmatter
+==============
+
+As you've seen, easyblogger relies on a comment header with specific keys for
+metadata about the post as well as to drive the behavior of the program.
+When `EasyBlogger` started, I had come up with my own set of (minimal) keys.
+Somewhere in the 2.x days, I built support for the frontmatter format as defined
+in Hugo project(along with some specific keys used for Blogger) - this is especially
+useful if you want to migrate off Blogger to Hugo.
+
+The header format can be either TOML or YAML. The new frontmatter keys are the default both for input and output.
+
+Output Rules
+--------------
+When writing to output files with `get`, easyblogger will write the header in
+1. Document format - asciidoc: Header in TOML enclosed by `+++`
+2. Legacy header keys - only if the command line specifies the `--legacy-frontmatter` flag
+
+Input Rules
+-------------
+1. Header enclosed with `+++` - parse as TOML
+2. Header encosed with HTML comment or `////` - parse as YAML
+3. If doc is TOML, then default format is supposed to be 'asciidoc' if not specified.
+4. If doc is YAML, then default format is supposed to be 'markdown' if not specified.
+
+If any of the legacy frontmatter keys (`Title`, `PostId` etc) are present, then the legacy keys
+are expected. Otherwise the new style Hugo compliant headers are expected.
+
+### Frontmatter keys
+
+* New style (Hugo)
+    ```toml
+    +++
+    title = "Proxy PAC file for work"
+    id = "293493242234"
+    tags = [ "Rants", "Tips", "Utilities",]
+    aliases = [ "http://niftybytes.blogspot.com/2018/04/proxy-pac-file-for-work_30.html",]
+    publishdate = "2018-04-30T12:42:00+05:30"
+    draft = false
+    date = "2018-04-30T12:42:00+05:30"
+    lastmod = "2018-04-30T12:47:37+05:30"
+    +++
+    ```
+* Old style (Easyblogger)
+    ```
+    <!--
+    Labels: [Rants, Tips, Utilities]
+    PostId: '8010087245053438499'
+    Published: true
+    Title: Proxy PAC file for work
+    -->
+    ```
 
 Using EasyBlogger as a library
 ==============================

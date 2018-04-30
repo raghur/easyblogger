@@ -80,12 +80,11 @@ def getFrontMatter(item, docFormat, legacy=False, bare=False):
             return toml.dumps(frontmatter)
         else:
             return yaml.dump(frontmatter)
-    if format == "asciidoc":
+    if docFormat == "asciidoc":
         return u"""+++
 %s
 +++""" % toml.dumps(frontmatter)
     else:
-        # legacy header
         return u"""<!--
 %s
 -->""" % yaml.dump(frontmatter)

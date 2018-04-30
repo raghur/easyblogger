@@ -8,12 +8,12 @@ Blog to blogger from the command line.
 Why not googlecl?
 -----------------
 
-I tried. Didn't work. ``googlecl`` is just too rough and isn't easy to
+I tried. Didn’t work. ``googlecl`` is just too rough and isn’t easy to
 script. For ex:
 
 1. No way to update a post
-2. Doesn't work with blog and post ids.
-3. and others...
+2. Doesn’t work with blog and post ids.
+3. and others…
 
 So what does this do?
 ---------------------
@@ -33,7 +33,7 @@ So what does this do?
    markup format like markdown etc as individual files. Then edit them
    in a real editor, and publish them back! All pandoc output formats!
 7. Understands specially marked comments - so you can just hand it a
-   file and it'll figure out what to do - great for posting from vim
+   file and it’ll figure out what to do - great for posting from vim
    etc.
 
 Installation, Configuration and Usage
@@ -54,7 +54,7 @@ Pandoc
 ~~~~~~
 
 Install `pandoc <http://johnmacfarlane.net/pandoc/installing.html>`__ If
-you're on cygwin, you can just install the windows dl and put
+you’re on cygwin, you can just install the windows dl and put
 ``pandoc.exe`` somewhere on path
 
 OAuth2 API Authentication and Authorization
@@ -88,10 +88,9 @@ OAuth2.
        # This will first open a browser and ask you to sign in and
        # approve access to your blog
 
-   This will open a browser. You may see a chrome warning that it can't
+   This will open a browser. You may see a chrome warning that it can’t
    be run as root - but you can ignore that. Once you authorize,
    ``~/.easyblogger.credentials`` is created with your OAuth2 token
-
 
    **On Windows**
 
@@ -103,7 +102,7 @@ OAuth2.
 
 3. All set!
 
-   That's it - you're all set!
+   That’s it - you’re all set!
 
    You will need to repeat the OAuth2 authorization process if you ever
    change the blog, or revoke permissions or if the auth token expires.
@@ -128,37 +127,73 @@ VIM Configuration
        endfunction
        command! BlogSave call BlogSave(expand("%:p"))
 
-2. Start writing a post - create a markdown file (.md) with a comment
-   header
+2. Start writing a post - create a markdown file (.md) with frontmatter
+   in a comment
 
    .. code:: markdown
 
        <!--
-       PostId:
-       Title    : title
-       Labels   : any, comma, separated, labels
-       Format   : markdown
-       Published: true
+       id:
+       title    : title
+       labels   : [any, comma, separated, labels]
+       format   : markdown
+       published: true
        filters: <path to your filter>
        -->
 
-3. If you prefer using ``asciidoc``, then use the following comment
+   Note that as of Easyblogger 3.0, the preferred frontmatter format is
+   borrowed from Hugo. The original frontmatter header in earlier
+   versions is deprecated. However, if ``easyblogger`` finds header
+   using the older keys, then it will use them. While there should be no
+   reason to prefer the old format, if you need that for whatever
+   reason, you must specify ``--legacy-frontmatter`` flag in the ``get``
+   subcommand. For more details, refer to the Frontmatter section
+
+*LEGACY FRONTMATTER FORMAT* **still supported but you’re encouraged to
+use the new format**
+
+::
+
+    <!--
+    PostId:
+    Title    : title
+    Labels   : any, comma, separated, labels
+    Format   : markdown
+    Published: true
+    filters: <path to your filter>
+    -->
+
+2. If you prefer using ``asciidoc``, then use the following comment
    header:
 
    .. code:: asciidoc
 
-       ////
-       PostId:
-       Title    : title
-       Labels   : any, comma, separated, labels
-       Format   : asciidoc
-       Published: true
-       ////
+       +++
+       id:
+       title    : title
+       labels   : [any, comma, separated, labels]
+       format   : asciidoc
+       published: true
+       +++
+
+*LEGACY FRONTMATTER FORMAT* **still supported but you’re encouraged to
+use the new format**
+
+.. code:: asciidoc
+
+    ////
+    PostId:
+    Title    : title
+    Labels   : any, comma, separated, labels
+    Format   : asciidoc
+    Published: true
+    ////
 
 Asciidoc does not require filters - it has a better system of plugins.
 Just ensure that you have installed ``asciidoctor`` and
-``asciidoctor-diagram`` gems 1. When done, call ``:BlogSave`` and your
-blog will be published
+``asciidoctor-diagram`` gems
+
+1. When done, call ``:BlogSave`` and your blog will be published
 
 Usage
 -----
@@ -230,7 +265,7 @@ Getting posts
 
           easyblogger --blogid 7642453 get -l vim -d markdown
 
-   -  If you'd like to get a single post as a file, specific ``-w`` or
+   -  If you’d like to get a single post as a file, specific ``-w`` or
       ``--write-files``
 
       .. code:: bash
@@ -250,7 +285,7 @@ Getting posts
 Default Args file
 ~~~~~~~~~~~~~~~~~
 
-Specifying --blogid each time is just painful. You can set a default
+Specifying –blogid each time is just painful. You can set a default
 blogId by creating a default args file ``~/.easyblogger`` as follows:
 
 .. code:: bash
@@ -272,8 +307,8 @@ Create a new blog post
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Note: [STRIKEOUT:Blogger API v3 does not support/expose API for creating
-posts as drafts. Please ask for this feature on Google's blogger dev
-group - I'll add that capability once/if it becomes available.]
+posts as drafts. Please ask for this feature on Google’s blogger dev
+group - I’ll add that capability once/if it becomes available.]
 
 Blogs are created as drafts by default now. You can override this with
 the ``--publish`` flag which will post the blog directly (current
@@ -296,7 +331,7 @@ Pipe out from any HTML generation mechanism
 
     3295765957555899963
 
-Or just tell easyblogger to convert from ``markdown`` with the --format
+Or just tell easyblogger to convert from ``markdown`` with the –format
 arg
 
 .. code:: bash
@@ -316,8 +351,8 @@ Update posts
 
 Update works with a patch request - only specify what you need changed
 Blogger API does not allow the blog permalink to be updated - so in case
-you want to change that you'll need to delete and create another post
-(though you will probably lose comments etc - so only viable if you've
+you want to change that you’ll need to delete and create another post
+(though you will probably lose comments etc - so only viable if you’ve
 just published it)
 
 .. code:: bash
@@ -358,6 +393,9 @@ So, you can author a post like so:
     -->
     # This is my content
 
+The example above uses legacy frontmatter format. You’re encouraged to
+use the new format which allows for additional metadata.
+
 And post it to your blog like so:
 
 .. code:: bash
@@ -377,6 +415,71 @@ To delete posts, you need to specify the post id
 
     easyblogger delete 234546720561632959
 
+Frontmatter
+===========
+
+As you’ve seen, easyblogger relies on a comment header with specific
+keys for metadata about the post as well as to drive the behavior of the
+program. When ``EasyBlogger`` started, I had come up with my own set of
+(minimal) keys. Somewhere in the 2.x days, I built support for the
+frontmatter format as defined in Hugo project(along with some specific
+keys used for Blogger) - this is especially useful if you want to
+migrate off Blogger to Hugo.
+
+The header format can be either TOML or YAML. The new frontmatter keys
+are the default both for input and output.
+
+Output Rules
+------------
+
+When writing to output files with ``get``, easyblogger will write the
+header in 1. Document format - asciidoc: Header in TOML enclosed by
+``+++`` 2. Legacy header keys - only if the command line specifies the
+``--legacy-frontmatter`` flag
+
+Input Rules
+-----------
+
+1. Header enclosed with ``+++`` - parse as TOML
+2. Header encosed with HTML comment or ``////`` - parse as YAML
+3. If doc is TOML, then default format is supposed to be ‘asciidoc’ if
+   not specified.
+4. If doc is YAML, then default format is supposed to be ‘markdown’ if
+   not specified.
+
+If any of the legacy frontmatter keys (``Title``, ``PostId`` etc) are
+present, then the legacy keys are expected. Otherwise the new style Hugo
+compliant headers are expected.
+
+Frontmatter keys
+~~~~~~~~~~~~~~~~
+
+-  New style (Hugo)
+
+   .. code:: toml
+
+       +++
+       title = "Proxy PAC file for work"
+       id = "293493242234"
+       tags = [ "Rants", "Tips", "Utilities",]
+       aliases = [ "http://niftybytes.blogspot.com/2018/04/proxy-pac-file-for-work_30.html",]
+       publishdate = "2018-04-30T12:42:00+05:30"
+       draft = false
+       date = "2018-04-30T12:42:00+05:30"
+       lastmod = "2018-04-30T12:47:37+05:30"
+       +++
+
+-  Old style (Easyblogger)
+
+   ::
+
+       <!--
+           Labels: [Rants, Tips, Utilities]
+           PostId: '8010087245053438499'
+           Published: true
+           Title: Proxy PAC file for work
+           -->
+
 Using EasyBlogger as a library
 ==============================
 
@@ -393,15 +496,15 @@ else. Just remember:
 Client API ids
 ~~~~~~~~~~~~~~
 
-If you're using EasyBlogger class in your tool/utility, please then
-register for API access at `Google's API
+If you’re using EasyBlogger class in your tool/utility, please then
+register for API access at `Google’s API
 console <https://code.google.com/apis/console>`__. Create a client id
 and secret key at the API access page and request for Blogger API
-access. Once you have API access authorized, you're good to get started.
+access. Once you have API access authorized, you’re good to get started.
 Just create the ``EasyBlogger`` constructor with your client id and
 secret
 
-If you're integrating by shelling out, then stick the API key and client
+If you’re integrating by shelling out, then stick the API key and client
 id in the command line with ``--clientid`` and ``--secret`` args. You
 can also stick them in the ``~/.easyblogger`` file to avoid specifying
 them each time
