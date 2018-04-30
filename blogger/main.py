@@ -56,7 +56,7 @@ def getFilenameFromPostUrl(url, format):
     return os.path.splitext(filename)[0] + "." + format
 
 
-def getFrontMatter(item, format="toml", legacy=False):
+def getFrontMatter(item, docFormat, legacy=False):
     frontmatter = dict()
     if legacy:
         frontmatter["Title"] = item["title"]
@@ -75,19 +75,21 @@ def getFrontMatter(item, format="toml", legacy=False):
         frontmatter["draft"] = False
         frontmatter["date"] = item["published"]
         frontmatter["lastmod"] = item["updated"]
-    if format == "toml":
-        return toml.dumps(frontmatter)
-    elif format == 'yaml':
+    if format == "asciidoc":
+        return u"""+++
+%s
++++""" % toml.dumps(frontmatter)
+    else:
         # legacy header
-        return yaml.dump(frontmatter)
+        return u"""<!--
+%s
+-->""" % yaml.dump(frontmatter)
 
 
 def printPosts(item, fields, docFormat=None, writeToFiles=False,
                legacyFrontmatter=False):
-    template = u"""+++
+    template = u"""
 {0}
-+++
-
 {1}
 """
     logger.debug(json.dumps(item,
@@ -106,7 +108,7 @@ def printPosts(item, fields, docFormat=None, writeToFiles=False,
                 filename,
                 docFormat,
                 format="html")
-            content = template.format(getFrontMatter(item),
+            content = template.format(getFrontMatter(item, docFormat, legacyFrontmatter),
                                       converted).encode('utf-8',
                                                         errors='replace')
             with open(filename, "wb") as outputfile:
@@ -171,6 +173,10 @@ def parse_args(sysargv):
         "-w", "--write-files", dest='tofiles',
         help="write output files (only used with --doc). " +
         "True if more than one post is retrieved",
+        action="store_true")
+    get_parser.add_argument(
+        "--legacy-frontmatter", dest='legacyFrontmatter',
+        help="use legacy front matter format (deprecated)",
         action="store_true")
     get_parser.add_argument(
         "-c",
@@ -276,7 +282,7 @@ def main(sysargv=sys.argv):
 def processItem(args, contentArgs=None):
     blogger = EasyBlogger(args.clientid, args.secret, args.blogid,
                           args.url)
-    print("In processItem")
+    # print("In processItem")
     try:
         if args.command == "post":
             newPost = blogger.post(args.title,
@@ -323,7 +329,8 @@ def processItem(args, contentArgs=None):
                     labels=args.labels,
                     maxResults=args.count)
             jobs = [gevent.spawn(printPosts,
-                                 item, args.fields, args.doc, args.tofiles)
+                                 item, args.fields, args.doc, args.tofiles,
+                                 args.legacyFrontmatter)
                     for item in posts]
             gevent.wait(jobs)
     except AccessTokenRefreshError:
