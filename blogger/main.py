@@ -56,14 +56,14 @@ def getFilenameFromPostUrl(url, format):
     return os.path.splitext(filename)[0] + "." + format
 
 
-def getFrontMatter(item, docFormat, legacy=False):
+def getFrontMatter(item, docFormat, legacy=False, bare=False):
     frontmatter = dict()
     if legacy:
         frontmatter["Title"] = item["title"]
         frontmatter["PostId"] = item["id"]
         if "labels" in item:
             frontmatter["Labels"] = item["labels"]
-        frontmatter["Published"] = item["published"]
+        frontmatter["Published"] = item["status"] == "LIVE"
     else:
         frontmatter = dict()
         frontmatter["title"] = item["title"]
@@ -72,9 +72,14 @@ def getFrontMatter(item, docFormat, legacy=False):
             frontmatter["tags"] = item["labels"]
         frontmatter["aliases"] = [item["url"]]
         frontmatter["publishdate"] = item["published"]
-        frontmatter["draft"] = False
+        frontmatter["draft"] = item["status"] == 'DRAFT'
         frontmatter["date"] = item["published"]
         frontmatter["lastmod"] = item["updated"]
+    if bare:
+        if docFormat == "asciidoc":
+            return toml.dumps(frontmatter)
+        else:
+            return yaml.dump(frontmatter)
     if format == "asciidoc":
         return u"""+++
 %s

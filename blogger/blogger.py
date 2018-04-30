@@ -164,6 +164,7 @@ class EasyBlogger(object):
                 request = service.posts().list(
                     blogId=self.blogId,
                     labels=labels,
+                    view="AUTHOR",
                     maxResults=maxResults)
             count = 0
             while request:

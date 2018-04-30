@@ -4,6 +4,7 @@ from blogger.main import parse_args, runner, getFrontMatter
 from oauth2client.client import AccessTokenRefreshError
 from datetime import datetime
 import toml
+import yaml
 
 
 @patch('blogger.main.EasyBlogger')
@@ -14,19 +15,51 @@ class MainTests(TestCase):
                 "id": "100",
                 "title": "title",
                 "url": "url",
-                "published": datetime.today(),
-                "updated": datetime.today()
+                "published": "2018-04-30T14:59:13",
+                "status": "LIVE",
+                "updated": "2018-04-30T14:59:13"
             }
     ]
     }
 
-    def test_should_generate_toml_frontmatter(self, pypandocMock, blogObjClass):
+    def test_should_generate_yaml_frontmatter_for_markdown(self,
+                                                           pypandocMock,
+                                                           blogObjClass):
         item = MainTests.posts["items"][0]
-        fm = getFrontMatter(item)
+        fm = getFrontMatter(item, "markdown", legacy=False, bare=True)
+        fmObj = yaml.load(fm)
+        assert fmObj["title"] == 'title'
+        assert fmObj["id"] == '100'
+        assert fmObj["aliases"][0] == 'url'
+
+    def test_should_generate_toml_frontmatter_for_asciidoc(self,
+                                                           pypandocMock,
+                                                           blogObjClass):
+        item = MainTests.posts["items"][0]
+        fm = getFrontMatter(item, "asciidoc", legacy=False, bare=True)
         fmObj = toml.loads(fm)
         assert fmObj["title"] == 'title'
         assert fmObj["id"] == '100'
         assert fmObj["aliases"][0] == 'url'
+
+    def test_should_generate_legacy_toml_frontmatter(self,
+                                                     pypandocMock,
+                                                     blogObjClass):
+        item = MainTests.posts["items"][0]
+        fm = getFrontMatter(item, "asciidoc", legacy=True, bare=True)
+        print(fm)
+        fmObj = toml.loads(fm)
+        assert fmObj["Title"] == 'title'
+        assert fmObj["PostId"] == '100'
+
+    def test_should_generate_legacy_yaml_frontmatter(self,
+                                                     pypandocMock,
+                                                     blogObjClass):
+        item = MainTests.posts["items"][0]
+        fm = getFrontMatter(item, "markdown", legacy=True, bare=True)
+        fmObj = yaml.load(fm)
+        assert fmObj["Title"] == 'title'
+        assert fmObj["PostId"] == '100'
 
     def test_should_process_files_for_update(self, pypandocMock, blogObjClass):
         mo = mock_open(read_data="""
@@ -45,7 +78,7 @@ this is the post """)
             assert args.labels == ["l", "a", "c"]
             assert args.command == "update"
             assert args.format == "asciidoc"
-            assert args.publish == False
+            assert not args.publish
             return DEFAULT
 
         blogObj = blogObjClass.return_value
@@ -73,7 +106,7 @@ this is the post """)
             assert args.labels == ["l", "a", "c"]
             assert args.command == "post"
             assert args.format == "asciidoc"
-            assert args.publish == False
+            assert not args.publish
             return DEFAULT
 
         blogObj = blogObjClass.return_value

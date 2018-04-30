@@ -33,7 +33,8 @@ class GetPostsTests(TestCase):
         self.posts.list.assert_called_with(
             blogId="1234",
             labels="abc",
-            maxResults=4)
+            maxResults=4,
+            view="AUTHOR")
 
     def test_should_default_search_by_labels(self):
         req = self.posts.list.return_value
@@ -46,7 +47,8 @@ class GetPostsTests(TestCase):
         self.posts.list.assert_called_with(
             blogId=self.blogger.blogId,
             labels="",
-            maxResults=None)
+            maxResults=None,
+            view="AUTHOR")
         req.execute.assert_called()
 
     def test_should_use_search_when_query_is_provided(self):
