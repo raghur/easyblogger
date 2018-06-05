@@ -23,6 +23,7 @@ setup(name="EasyBlogger",
       install_requires=[
           'pypandoc',
           'google-api-python-client',
+          'oauth2client',
           'python-gflags',
           'httplib2',
           'toml',
