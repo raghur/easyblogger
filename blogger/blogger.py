@@ -236,12 +236,14 @@ class EasyBlogger(object):
         return html
 
     def post(self, title, content, labels, filters=[], isDraft=True,
-             fmt="html"):
+             fmt="html", publishDate=None):
         self._setBlog()
         # url = slugify(title) + ".html"
         service = self._OAuth_Authenticate()
         markup = self._getMarkup(content, fmt, filters)
         blogPost = {"content": markup, "title": title}
+        if publishDate:
+            blogPost["published"] = publishDate
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
         req = service.posts().insert(blogId=self.blogId,
@@ -258,7 +260,7 @@ class EasyBlogger(object):
     def updatePost(self, postId, title=None, content=None, labels=None,
                    filters=[],
                    isDraft=True,
-                   fmt="html"):
+                   fmt="html", publishDate=None):
         self._setBlog()
         service = self._OAuth_Authenticate()
         blogPost = {}
@@ -269,6 +271,8 @@ class EasyBlogger(object):
             blogPost['title'] = title
         if content:
             blogPost['content'] = self._getMarkup(content, fmt, filters)
+        if publishDate:
+            blogPost['published'] = publishDate
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
         logger.debug("blogpost %s", labels)
@@ -313,6 +317,7 @@ class ContentArgParser(object):
         self.filters = []
         self.title = None
         self.labels = ["untagged"]
+        self.publishDate = None
 
     def _inferArgsFromContent(self):
         fileContent = self.theFile.read()
@@ -360,6 +365,8 @@ class ContentArgParser(object):
                 self.format = frontmatter['Format']
             else:
                 self.format = 'markdown'
+            if 'PublishDate' in frontmatter:
+                self.publishDate = frontmatter['PublishDate']
             if 'Published' in frontmatter:
                 self.publishStatus = frontmatter['Published']
             else:
@@ -385,6 +392,8 @@ class ContentArgParser(object):
                 self.publishStatus = not frontmatter['draft']
             else:
                 self.publishStatus = False
+            if 'publishdate' in frontmatter:
+                self.publishDate = frontmatter['publishdate']
             if 'filters' in frontmatter:
                 self.filters = frontmatter['filters']
 
@@ -400,6 +409,8 @@ class ContentArgParser(object):
         else:
             args.command = "post"
         args.publish = self.publishStatus
+        if self.publishDate:
+            args.publishDate = self.publishDate
         args.filters = self.filters
         logger.debug("Updated args %s", args)
 

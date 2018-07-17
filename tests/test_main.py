@@ -67,6 +67,7 @@ class MainTests(TestCase):
 title= "t"
 id= "1234"
 tags= ["l", "a", "c"]
+publishdate=2018-01-01T10:00:00
 +++
 
 this is the post """)
@@ -77,6 +78,7 @@ this is the post """)
             assert args.postId == "1234"
             assert args.labels == ["l", "a", "c"]
             assert args.command == "update"
+            assert args.publishDate.isoformat() == "2018-01-01T10:00:00"
             assert args.format == "asciidoc"
             assert not args.publish
             return DEFAULT
@@ -96,6 +98,7 @@ this is the post """)
 +++
 title= "t"
 tags= ["l", "a", "c"]
+publishdate=2018-01-01T10:00:00
 +++
 
 this is the post """)
@@ -106,6 +109,8 @@ this is the post """)
             assert args.labels == ["l", "a", "c"]
             assert args.command == "post"
             assert args.format == "asciidoc"
+            print(args.publishDate.isoformat())
+            assert args.publishDate.isoformat() == "2018-01-01T10:00:00"
             assert not args.publish
             return DEFAULT
 
@@ -121,7 +126,8 @@ this is the post """)
 
     def test_should_invoke_post(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
-        args = parse_args(['post', "-t", "t", "-c", "content"])
+        args = parse_args(['post', "-t", "t", "-c", "content", '--date',
+                           '2018-01-01'])
         print(args)
         blogObj = blogObjClass.return_value
         blogObj.post.return_value = {"id": "100", "url": "someurl"}
@@ -129,7 +135,8 @@ this is the post """)
         exitStatus = runner(args)
 
         blogObj.post.assert_called_with(
-            "t", "content", None, [], isDraft=True, fmt="html")
+            "t", "content", None, [], isDraft=True, fmt="html",
+            publishDate='2018-01-01')
         assert exitStatus == 0
 
     def test_should_invoke_delete(self, pypandocMock, blogObjClass):
@@ -146,14 +153,16 @@ this is the post """)
     def test_should_invoke_update(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]
         args = parse_args(
-            ['update', "-t", "t", "-c", "content", "100"])
+            ['update', "-t", "t", "-c", "content", "100", '--date',
+             '2018-01-01'])
         blogObj = blogObjClass.return_value
         blogObj.updatePost.return_value = {"id": "100", "url": "someurl"}
 
         runner(args)
 
         blogObj.updatePost.assert_called_with(
-            "100", "t", "content", None, [], isDraft=True, fmt="html")
+            "100", "t", "content", None, [], isDraft=True, fmt="html",
+            publishDate='2018-01-01')
 
     def test_should_invoke_getbyid(self, pypandocMock, blogObjClass):
         pypandocMock.get_pandoc_formats.return_value = [['a'], ['b']]

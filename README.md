@@ -305,7 +305,7 @@ which will post the blog directly (current behavior)
 # create a post from stdin with title and labels
 
 
-easyblogger post -t "Hello World" -l "python,hello" -c "Hello world!!!"
+easyblogger post -t "Hello World" -l "python,hello" -c "Hello world!!!" --date 2018-01-01T10:00:00
 ```
 
 Pipe out from any HTML generation mechanism
@@ -342,7 +342,7 @@ you want to change that you'll need to delete and create another post
 just published it)
 
 ``` {.sourceCode .bash}
-easyblogger update -t 'A new title' -l "new,labels" 3295765957555899963
+easyblogger update -t 'A new title' -l "new,labels" 3295765957555899963 --date 2018-01-01T10:00:00
 ```
 
 You can also update the contents by passing in the `--file` argument.
@@ -373,6 +373,7 @@ PostId:
 Labels: a,b,c
 format: markdown
 published: false
+PublishDate: 2018-01-01T10:00:00
 filters: <path to your installed filter>
 -->
 # This is my content
@@ -435,10 +436,10 @@ are expected. Otherwise the new style Hugo compliant headers are expected.
     id = "293493242234"
     tags = [ "Rants", "Tips", "Utilities",]
     aliases = [ "http://niftybytes.blogspot.com/2018/04/proxy-pac-file-for-work_30.html",]
-    publishdate = "2018-04-30T12:42:00+05:30"
+    publishdate = 2018-04-30T12:42:00+05:30
     draft = false
-    date = "2018-04-30T12:42:00+05:30"
-    lastmod = "2018-04-30T12:47:37+05:30"
+    date = 2018-04-30T12:42:00+05:30
+    lastmod = 2018-04-30T12:47:37+05:30
     +++
     ```
 * Old style (Easyblogger)
@@ -447,6 +448,7 @@ are expected. Otherwise the new style Hugo compliant headers are expected.
     Labels: [Rants, Tips, Utilities]
     PostId: '8010087245053438499'
     Published: true
+    PublishDate: 2018-04-30T12:42:00
     Title: Proxy PAC file for work
     -->
     ```
