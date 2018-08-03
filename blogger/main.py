@@ -198,6 +198,12 @@ def parse_args(sysargv):
     post_parser.add_argument(
         "--publish", action="store_true",
         help="Publish to the blog [default: false]")
+    post_parser.add_argument(
+        "--date",
+        dest='publishDate',
+        help="Publish date (ISO8601) of the post - ex:" +
+        "2018-01-01T10:00:00+05:30"
+    )
     post_input = post_parser.add_mutually_exclusive_group(required=True)
     post_input.add_argument("-c", "--content", help="Post content",
                             type=toUnicode)
@@ -222,7 +228,9 @@ def parse_args(sysargv):
     update_parser = subparsers.add_parser("update", help="update a post")
     update_parser.add_argument("postId", help="the post to update")
     update_parser.add_argument("-t", "--title", help="Post title")
-
+    update_parser.add_argument("--date", dest='publishDate',
+                               help="Publish date (ISO8601) of the post - ex:" +
+                               "2018-01-01T10:00:00+05:30")
     update_input = update_parser.add_mutually_exclusive_group()
     update_input.add_argument("-c", "--content", help="Post content")
     update_input.add_argument(
@@ -294,7 +302,8 @@ def processItem(args, contentArgs=None):
                                    args.labels,
                                    args.filters,
                                    isDraft=not args.publish,
-                                   fmt=args.format)
+                                   fmt=args.format,
+                                   publishDate=args.publishDate)
             postId = newPost['id']
             logger.debug("Created post: %s", postId)
             if contentArgs:
@@ -315,7 +324,8 @@ def processItem(args, contentArgs=None):
                 args.labels,
                 args.filters,
                 isDraft=not args.publish,
-                fmt=args.format)
+                fmt=args.format,
+                publishDate=args.publishDate)
             print(updated['url'])
 
         if args.command == "get":

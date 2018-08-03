@@ -13,6 +13,7 @@ class ContentArgParserTests(TestCase):
             Labels: l
             PostId: "234"
             Published: false
+            PublishDate: 2018-01-01T10:00:00
             -->
         """
         parser = blogger.ContentArgParser(theFile)
@@ -24,6 +25,7 @@ class ContentArgParserTests(TestCase):
         assert args.postId == "234"
         assert args.format == "markdown"
         assert args.command == "update"
+        assert args.publishDate.isoformat() == "2018-01-01T10:00:00"
         assert args.publish == False
 
     def test_should_infer_args_for_post(self):
@@ -33,12 +35,14 @@ class ContentArgParserTests(TestCase):
             Title: t
             Labels: l
             Published: true
+            PublishDate: 2018-01-01T10:00:00
             -->
         """
         parser = blogger.ContentArgParser(theFile)
         args = Mock()
         parser.updateArgs(args)
 
+        assert args.publishDate.isoformat() == "2018-01-01T10:00:00"
         assert args.title == "t"
         assert args.labels == ["l"]
         assert args.format == "markdown"
@@ -52,6 +56,7 @@ class ContentArgParserTests(TestCase):
 title= "t"
 id= "1234"
 tags= ["l", "a", "c"]
+publishdate=2018-01-01T10:00:00
 +++
 
 this is the post
@@ -64,6 +69,7 @@ this is the post
         assert args.labels == ["l", "a", "c"]
         assert args.format == "asciidoc"
         assert args.command == "update"
+        assert args.publishDate.isoformat() == "2018-01-01T10:00:00"
         assert not args.publish
 
     def test_should_infer_args_for_post2(self):
@@ -103,6 +109,7 @@ this is the post
         assert args.labels == ["untagged"]
         assert args.format == "markdown"
         assert args.command == "post"
+        assert not parser.publishDate
         assert not args.publish
 
     def test_should_handle_empty_file(self):
@@ -121,6 +128,7 @@ abc"""
         assert args.format == "markdown"
         assert args.command == "post"
         assert args.content == "\nabc"
+        assert not parser.publishDate
         assert not args.publish
 
     def test_should_allow_format_to_be_specified(self):
