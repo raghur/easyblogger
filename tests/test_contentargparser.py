@@ -125,7 +125,7 @@ abc"""
 
         assert args.title is None
         assert args.labels == ["untagged"]
-        assert args.format == "markdown"
+        assert args.format == "asciidoc"
         assert args.command == "post"
         assert args.content == "\nabc"
         assert not parser.publishDate

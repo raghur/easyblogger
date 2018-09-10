@@ -21,6 +21,8 @@ class UpdateDeleteTests(TestCase):
             assert not publish
             return DEFAULT
 
+        publishReq = self.posts.publish.return_value
+        publishReq.execute.return_value = {"status": "LIVE"}
         self.posts.patch.side_effect = validateBody
         getreq = self.posts.get.return_value
         getreq.execute.return_value = {"status": "DRAFT"}
@@ -38,6 +40,8 @@ class UpdateDeleteTests(TestCase):
             assert publish
             return DEFAULT
 
+        publishReq = self.posts.publish.return_value
+        publishReq.execute.return_value = {"status": "LIVE"}
         self.posts.patch.side_effect = validateBody
         getreq = self.posts.get.return_value
         getreq.execute.return_value = {"status": "DRAFT"}
