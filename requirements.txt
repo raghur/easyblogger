@@ -8,7 +8,7 @@ packaging==17.1
 pypandoc==1.4
 python-gflags==3.1.2
 chardet==3.0.4
-toml==0.9.4
+toml==0.9.6
 tox==3.2.1
 pyyaml==3.13
 oauth2client==4.1.2
