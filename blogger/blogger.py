@@ -243,7 +243,7 @@ class EasyBlogger(object):
         markup = self._getMarkup(content, fmt, filters)
         blogPost = {"content": markup, "title": title}
         if publishDate:
-            blogPost["published"] = publishDate
+            blogPost["published"] = publishDate.isoformat()
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
         req = service.posts().insert(blogId=self.blogId,
@@ -272,7 +272,7 @@ class EasyBlogger(object):
         if content:
             blogPost['content'] = self._getMarkup(content, fmt, filters)
         if publishDate:
-            blogPost['published'] = publishDate
+            blogPost['published'] = publishDate.isoformat()
         blogPost['labels'] = EasyBlogger._parseLabels(labels)
 
         logger.debug("blogpost %s", labels)
@@ -409,6 +409,7 @@ class ContentArgParser(object):
         else:
             args.command = "post"
         args.publish = self.publishStatus
+        args.publishDate = None
         if self.publishDate:
             args.publishDate = self.publishDate
         args.filters = self.filters
