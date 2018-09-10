@@ -310,7 +310,7 @@ class ContentArgParser(object):
         self.theFile = theFile
         self.open = open
         self.frontmatterFormat = ''
-        self.legacyKeys = True
+        self.legacyKeys = False
         self.frontMatter = None
         self.useHtmlComment = False
         self.postId = None
@@ -343,13 +343,14 @@ class ContentArgParser(object):
             raise Exception('Unknown frontmatter format %s' % fileContent)
         self.frontMatter = frontmatter
 
+        logger.debug("Parsed frontmatter: %s", self.frontMatter)
         # Legacy header detection
         if 'PostId' in frontmatter or \
             'Title' in frontmatter or \
             'Format' in frontmatter or \
             'Published' in frontmatter or \
-                'Labels' in frontmatter or \
-                self.frontmatterFormat == 'yaml':
+                'Labels' in frontmatter:
+            logger.debug("Setting legacyKeys to true")
             self.legacyKeys = True
             if 'PostId' in frontmatter:
                 self.postId = frontmatter['PostId']
@@ -359,6 +360,7 @@ class ContentArgParser(object):
                 elif frontmatter['Labels'] is not None:
                     self.labels = [l.strip() for l in
                                    frontmatter['Labels'].split(",")]
+                logger.debug("found labels: %s", self.labels)
             if 'Title' in frontmatter:
                 self.title = frontmatter['Title']
             if 'Format' in frontmatter:
