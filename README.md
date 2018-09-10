@@ -135,7 +135,7 @@ command! BlogSave call BlogSave(expand("%:p"))
 <!--
 id:
 title    : title
-labels   : [any, comma, separated, labels]
+tags   : [any, comma, separated, labels]
 format	 : markdown
 published: true
 filters: <path to your filter>
@@ -166,7 +166,7 @@ filters: <path to your filter>
 +++
 id:
 title    : title
-labels   : [any, comma, separated, labels]
+tags   : [any, comma, separated, labels]
 format	 : asciidoc
 published: true
 +++
