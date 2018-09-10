@@ -288,16 +288,25 @@ class EasyBlogger(object):
             % (postStatus, isDraft, mustPublish))
 
         # publish the post since we cannot update a draft directly
+        newStatus=""
         if postStatus == "DRAFT":
-            service.posts().publish(blogId=self.blogId,
-                                    postId=postId).execute()
-        resp = service.posts().patch(
-            blogId=self.blogId,
-            postId=postId,
-            body=blogPost,
-            revert=isDraft,
-            publish=mustPublish).execute()
-        return resp
+            newStatus = service.posts().publish(blogId=self.blogId,
+                                                postId=postId, fields="status").execute()['status']
+            logger.debug("newStatus: %s", newStatus)
+        if postStatus == 'LIVE' or newStatus == 'LIVE':
+            resp = service.posts().patch(
+                blogId=self.blogId,
+                postId=postId,
+                body=blogPost,
+                revert=isDraft,
+                publish=mustPublish).execute()
+            return resp
+        elif postStatus == 'SCHEDULED' or newStatus == 'SCHEDULED':
+            resp = service.posts().update(
+                blogId=self.blogId,
+                postId=postId,
+                body=blogPost).execute()
+            return resp
 
 
 class ContentArgParser(object):
