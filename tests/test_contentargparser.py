@@ -183,6 +183,6 @@ abc"""
         parser.updateArgs(args)
         parser.updateFileWithPostId("1000")
 
-        mock_open.assert_called_with(theFile.name, "w")
+        mock_open.assert_called_with(theFile.name, "w", encoding='utf-8')
         fileHandle.flush.assert_called()
         fileHandle.write.assert_called()
