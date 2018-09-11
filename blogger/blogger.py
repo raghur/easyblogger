@@ -288,7 +288,7 @@ class EasyBlogger(object):
             % (postStatus, isDraft, mustPublish))
 
         # publish the post since we cannot update a draft directly
-        newStatus=""
+        newStatus = ""
         if postStatus == "DRAFT":
             newStatus = service.posts().publish(blogId=self.blogId,
                                                 postId=postId, fields="status").execute()['status']
@@ -436,23 +436,23 @@ class ContentArgParser(object):
         else:
             self.frontMatter['id'] = postId
 
-        with self.open(self.theFile.name, "w") as f:
+        with self.open(self.theFile.name, "w", encoding='utf-8') as f:
             if self.frontmatterFormat == 'toml':
                 f.write("""+++
 %s
 +++
 %s
-""" % (toml.dump(self.frontMatter), self.content))
+""" % (toml.dumps(self.frontMatter), self.content))
             elif self.useHtmlComment:
                 f.write("""<!--
 %s
 -->
 %s
-""" % (yaml.dump(self.frontMatter), self.content))
+""" % (yaml.dump(self.frontMatter, allow_unicode=True), self.content))
             else:
                 f.write("""////
 %s
 ////
 %s
-""" % (yaml.dump(self.frontMatter), self.content))
+""" % (yaml.dump(self.frontMatter, allow_unicode=True), self.content))
             f.flush()

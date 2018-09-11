@@ -365,7 +365,8 @@ def runner(args):
         logger.info("Processing files: %s", files)
         for f in files:
             argsCopy = copy.deepcopy(args)
-            with open(f, "r", newline="\n") as fh:
+            with open(f, "r", newline="\n", encoding='utf-8') as fh:
+                logger.info("filehandle: %s", fh)
                 argsCopy.file = fh
                 contentArgs = ContentArgParser(fh)
                 contentArgs.updateArgs(argsCopy)
