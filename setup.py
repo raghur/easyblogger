@@ -12,7 +12,7 @@ def readme():
 
 
 setup(name="EasyBlogger",
-      version="3.1.2",
+      version="3.1.3",
       author="Raghu Rajagopalan",
       author_email="raghu.nospam@gmail.com",
       description=("A (very) easy CLI interface to Blogger blogs"),
@@ -43,7 +43,7 @@ setup(name="EasyBlogger",
           "Topic :: Utilities",
           "Topic :: Internet :: WWW/HTTP :: Site Management",
           "License :: OSI Approved :: BSD License",
-          "Programming Language :: Python :: 2.7",
+          "Programming Language :: Python :: 3",
           "Programming Language :: Python :: 3.5",
           "Programming Language :: Python :: 3.6"
       ],
