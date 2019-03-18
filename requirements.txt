@@ -3,7 +3,7 @@ coloredlogs==10.0
 google-api-python-client==1.7.8
 gevent==1.4.0
 mock==2.0.0
-nose2==0.8.0
+nose2==0.9.0
 packaging==19.0
 pypandoc==1.4
 python-gflags==3.1.2
