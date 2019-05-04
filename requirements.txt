@@ -2,7 +2,7 @@ appdirs==1.4.3
 coloredlogs==10.0
 google-api-python-client==1.7.8
 gevent==1.4.0
-mock==2.0.0
+mock==3.0.4
 nose2==0.9.1
 packaging==19.0
 pypandoc==1.4
