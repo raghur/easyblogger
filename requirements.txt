@@ -10,5 +10,5 @@ python-gflags==3.1.2
 chardet==3.0.4
 toml==0.10.0
 tox==3.14.0
-pyyaml==5.1.1
+pyyaml==5.3
 oauth2client==4.1.3
