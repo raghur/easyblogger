@@ -1,4 +1,4 @@
-appdirs==1.4.3
+appdirs==1.4.4
 coloredlogs==14.0
 google-api-python-client==1.8.2
 gevent==20.4.0
