@@ -1,5 +1,5 @@
 appdirs==1.4.4
-coloredlogs==14.0
+coloredlogs==14.2
 google-api-python-client==1.12.5
 gevent==20.4.0
 mock==4.0.2
