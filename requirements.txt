@@ -4,7 +4,7 @@ google-api-python-client==1.12.5
 gevent==21.1.2
 mock==4.0.3
 nose2==0.10.0
-packaging==20.4
+packaging==21.0
 pypandoc==1.6.3
 python-gflags==3.1.2
 chardet==4.0.0
