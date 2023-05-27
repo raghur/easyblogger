@@ -138,7 +138,7 @@ class EasyBlogger(object):
         self.blogId = blog['id']
 
     def getPosts(self, postId=None, query=None, labels="", url=None,
-                 maxResults=None):
+                 fetchBodies=True, maxResults=None):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -149,7 +149,9 @@ class EasyBlogger(object):
                 yield post
                 return
             elif query:
-                request = service.posts().search(blogId=self.blogId, q=query)
+                request = service.posts().search(blogId=self.blogId,
+                                                 q=query,
+                                                 fetchBodies=fetchBodies)
             elif url:
                 regex = re.compile(r"^https?://.*?/")
                 if url.find("http") == 0:
@@ -165,6 +167,7 @@ class EasyBlogger(object):
                     blogId=self.blogId,
                     labels=labels,
                     view="AUTHOR",
+                    fetchBodies=fetchBodies,
                     maxResults=maxResults)
             count = 0
             while request:
