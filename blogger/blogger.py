@@ -137,6 +137,15 @@ class EasyBlogger(object):
         blog = request.execute()
         self.blogId = blog['id']
 
+    def getListOfBlogs(self, fields):
+        service = self._OAuth_Authenticate()
+        request = service.blogs().listByUser(userId="self")
+        blogList = request.execute()
+        fields = fields.split(",")
+        for blogItem in blogList["items"]:
+            line = [str(blogItem[k]).replace("&amp;", "&") for k in fields if k in blogItem]
+            print(",".join(line))
+
     def getPosts(self, postId=None, query=None, labels="", url=None,
                  fetchBodies=True, maxResults=None):
         self._setBlog()

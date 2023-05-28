@@ -155,6 +155,13 @@ def parse_args(sysargv):
 
     subparsers = parser.add_subparsers(help="sub-command help", dest="command")
 
+    listblogs_parser = subparsers.add_parser("listblogs", help="list blogs")
+    listblogs_parser.add_argument(
+        "-f",
+        "--fields",
+        help="fields to output (default: id,name,url)",
+        default="id,name,url")
+
     get_parser = subparsers.add_parser("get", help="list posts")
     get_parser.add_argument(
         "-n", "--no-content", dest='nocontent',
@@ -354,6 +361,10 @@ def processItem(args, contentArgs=None):
                                  args.legacyFrontmatter)
                     for item in posts]
             gevent.wait(jobs)
+
+        if args.command == "listblogs":
+            blogger.getListOfBlogs(args.fields)
+
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
