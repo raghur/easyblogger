@@ -242,7 +242,7 @@ class EasyBlogger(object):
                     print(e)
                     raise e
             else:
-                html = self.converter.convert(
+                html = self.converter.convert_text(
                     raw, 'html', format=fmt, filters=filters)
         # logger.debug("Converted text: %s", html)
         return html
@@ -353,7 +353,7 @@ class ContentArgParser(object):
             self.content = isToml[0][-1]
             self.frontmatterFormat = 'toml'
         elif isYaml:
-            frontmatter = yaml.load(isYaml[0][3])
+            frontmatter = yaml.load(isYaml[0][3], Loader=yaml.FullLoader)
             self.useHtmlComment = isYaml[0][0] == '<!--'
             self.content = isYaml[0][-1]
             self.frontmatterFormat = 'yaml'
