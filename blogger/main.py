@@ -155,7 +155,18 @@ def parse_args(sysargv):
 
     subparsers = parser.add_subparsers(help="sub-command help", dest="command")
 
+    listblogs_parser = subparsers.add_parser("listblogs", help="list blogs")
+    listblogs_parser.add_argument(
+        "-f",
+        "--fields",
+        help="fields to output (default: id,name,url)",
+        default="id,name,url")
+
     get_parser = subparsers.add_parser("get", help="list posts")
+    get_parser.add_argument(
+        "-n", "--no-content", dest='nocontent',
+        help="The body content of posts will not be included. Use it when the post bodies are not required, to help minimize traffic.",
+        action="store_true")
     group = get_parser.add_mutually_exclusive_group()
     group.add_argument("-p", "--postId", help="the post id")
     group.add_argument("-l", "--labels", help="comma separated list of labels",
@@ -329,11 +340,13 @@ def processItem(args, contentArgs=None):
             print(updated['url'])
 
         if args.command == "get":
+            fetchBodies = not args.nocontent
             if args.postId:
                 posts = blogger.getPosts(postId=args.postId)
             elif args.query:
                 posts = blogger.getPosts(
                     query=args.query,
+                    fetchBodies=fetchBodies,
                     maxResults=args.count)
             elif args.u:
                 posts = blogger.getPosts(
@@ -341,12 +354,17 @@ def processItem(args, contentArgs=None):
             else:
                 posts = blogger.getPosts(
                     labels=args.labels,
+                    fetchBodies=fetchBodies,
                     maxResults=args.count)
             jobs = [gevent.spawn(printPosts,
                                  item, args.fields, args.doc, args.tofiles,
                                  args.legacyFrontmatter)
                     for item in posts]
             gevent.wait(jobs)
+
+        if args.command == "listblogs":
+            blogger.getListOfBlogs(args.fields)
+
     except AccessTokenRefreshError:
         # The AccessTokenRefreshError exception is raised if the credentials
         # have been revoked by the user or they have expired.
