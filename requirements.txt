@@ -5,7 +5,7 @@ gevent==22.10.2
 mock==5.0.0
 nose2==0.12.0
 packaging==23.0
-pypandoc==1.10
+pypandoc==1.11
 python-gflags==3.1.2
 chardet==5.1.0
 toml==0.10.2
