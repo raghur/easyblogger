@@ -137,8 +137,17 @@ class EasyBlogger(object):
         blog = request.execute()
         self.blogId = blog['id']
 
+    def getListOfBlogs(self, fields):
+        service = self._OAuth_Authenticate()
+        request = service.blogs().listByUser(userId="self")
+        blogList = request.execute()
+        fields = fields.split(",")
+        for blogItem in blogList["items"]:
+            line = [str(blogItem[k]).replace("&amp;", "&") for k in fields if k in blogItem]
+            print(",".join(line))
+
     def getPosts(self, postId=None, query=None, labels="", url=None,
-                 maxResults=None):
+                 fetchBodies=True, maxResults=None):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -149,7 +158,9 @@ class EasyBlogger(object):
                 yield post
                 return
             elif query:
-                request = service.posts().search(blogId=self.blogId, q=query)
+                request = service.posts().search(blogId=self.blogId,
+                                                 q=query,
+                                                 fetchBodies=fetchBodies)
             elif url:
                 regex = re.compile(r"^https?://.*?/")
                 if url.find("http") == 0:
@@ -165,6 +176,7 @@ class EasyBlogger(object):
                     blogId=self.blogId,
                     labels=labels,
                     view="AUTHOR",
+                    fetchBodies=fetchBodies,
                     maxResults=maxResults)
             count = 0
             while request:
