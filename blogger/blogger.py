@@ -137,8 +137,17 @@ class EasyBlogger(object):
         blog = request.execute()
         self.blogId = blog['id']
 
+    def getListOfBlogs(self, fields):
+        service = self._OAuth_Authenticate()
+        request = service.blogs().listByUser(userId="self")
+        blogList = request.execute()
+        fields = fields.split(",")
+        for blogItem in blogList["items"]:
+            line = [str(blogItem[k]).replace("&amp;", "&") for k in fields if k in blogItem]
+            print(",".join(line))
+
     def getPosts(self, postId=None, query=None, labels="", url=None,
-                 maxResults=None):
+                 fetchBodies=True, maxResults=None):
         self._setBlog()
         try:
             service = self._OAuth_Authenticate()
@@ -149,7 +158,9 @@ class EasyBlogger(object):
                 yield post
                 return
             elif query:
-                request = service.posts().search(blogId=self.blogId, q=query)
+                request = service.posts().search(blogId=self.blogId,
+                                                 q=query,
+                                                 fetchBodies=fetchBodies)
             elif url:
                 regex = re.compile(r"^https?://.*?/")
                 if url.find("http") == 0:
@@ -165,6 +176,7 @@ class EasyBlogger(object):
                     blogId=self.blogId,
                     labels=labels,
                     view="AUTHOR",
+                    fetchBodies=fetchBodies,
                     maxResults=maxResults)
             count = 0
             while request:
@@ -230,7 +242,7 @@ class EasyBlogger(object):
                     print(e)
                     raise e
             else:
-                html = self.converter.convert(
+                html = self.converter.convert_text(
                     raw, 'html', format=fmt, filters=filters)
         # logger.debug("Converted text: %s", html)
         return html
@@ -341,7 +353,7 @@ class ContentArgParser(object):
             self.content = isToml[0][-1]
             self.frontmatterFormat = 'toml'
         elif isYaml:
-            frontmatter = yaml.load(isYaml[0][3])
+            frontmatter = yaml.load(isYaml[0][3], Loader=yaml.FullLoader)
             self.useHtmlComment = isYaml[0][0] == '<!--'
             self.content = isYaml[0][-1]
             self.frontmatterFormat = 'yaml'

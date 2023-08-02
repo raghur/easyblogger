@@ -11,3 +11,5 @@ dist/
 assets/img/*
 tags
 build/
+venv/*
+.idea/*
