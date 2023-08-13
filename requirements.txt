@@ -9,6 +9,6 @@ pypandoc==1.11
 python-gflags==3.1.2
 chardet==5.2.0
 toml==0.10.2
-tox==4.6.4
+tox==4.8.0
 pyyaml==6.0.1
 oauth2client==4.1.3
